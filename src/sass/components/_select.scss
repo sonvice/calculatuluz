@@ -1,0 +1,13 @@
+.select{
+    &, &::picker(select) {
+        appearance: base-select;    
+      }
+      option {
+        display: grid;
+        gap: 1rem;
+        font-size: 1rem;
+        align-items: center;
+      }
+
+      
+}

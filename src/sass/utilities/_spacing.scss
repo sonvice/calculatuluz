@@ -1,0 +1,61 @@
+@use "../abstracts/map-tokens" as MapTokens;
+
+// Generación de clases de utilidad para márgenes y padding
+@each $class-name, $value in MapTokens.$map-spacing {
+  // Usamos el string `$class-name` directamente como el nombre de la variable CSS
+  $variable-name: var(--#{$class-name});
+
+  // Margin
+  .m-#{$class-name} {
+    margin: #{$variable-name};
+  }
+  .mt-#{$class-name} {
+    margin-top: #{$variable-name};
+  }
+  .mr-#{$class-name} {
+    margin-right: #{$variable-name};
+  }
+  .mb-#{$class-name} {
+    margin-bottom: #{$variable-name};
+  }
+  .ml-#{$class-name} {
+    margin-left: #{$variable-name};
+  }
+
+  // Margin en bloque
+  .my-#{$class-name} {
+    margin-block: #{$variable-name};
+  }
+
+  // Margin en línea
+  .mx-#{$class-name} {
+    margin-inline: #{$variable-name};
+  }
+
+  // Padding
+  .p-#{$class-name} {
+    padding: #{$variable-name};
+  }
+  .pt-#{$class-name} {
+    padding-top: #{$variable-name};
+  }
+  .pr-#{$class-name} {
+    padding-right: #{$variable-name};
+  }
+  .pb-#{$class-name} {
+    padding-bottom: #{$variable-name};
+  }
+  .pl-#{$class-name} {
+    padding-left: #{$variable-name};
+  }
+
+  // Padding en bloque
+  .py-#{$class-name} {
+    padding-block: #{$variable-name};
+  }
+
+  // Padding en línea
+  .px-#{$class-name} {
+    padding-inline: #{$variable-name};
+  }
+}

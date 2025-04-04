@@ -1,0 +1,36 @@
+body {
+    font-family: var(--ff-base);
+    font-size: var(--size-0);
+    background-color: var(--primary-800);
+    color: var(--neutral-900);
+    overflow-x: hidden;
+  }
+  
+  h1,
+  h2,
+  h3 {
+    line-height: 1.2;
+    font-weight: var(--fw-bold);
+    text-transform: capitalize;
+  }
+  
+  h1 {
+    font-size: var(--size-3);
+    max-width: 28ch;
+  }
+  h1,
+  h2 {
+    font-family: var(--ff-accent);
+  }
+  h2 {
+    font-size: var(--size-2);
+  }
+  h3{
+    font-size: var(--size-2);
+  }
+  a:hover {
+    text-decoration: currentColor;
+  }
+  p{
+  max-width: 70ch;
+}

@@ -1,0 +1,14 @@
+@use "sass:string" as str;
+@use "../abstracts/map-tokens" as MapTokens;
+
+@each $ff-key, $ff-value in MapTokens.$map-fonts {
+  .#{$ff-key} {
+    font-family: #{$ff-value};
+  }
+}
+
+@each $fw-key, $fw-value in MapTokens.$map-font-weights {
+  .text-#{$fw-key} {
+    font-variation-settings: 'wght' #{$fw-value};
+  }
+}

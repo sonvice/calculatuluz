@@ -1,0 +1,130 @@
+---
+const posts = [
+  {
+    slug: 'guia-etiqueta-energetica',
+    title: 'Guía: Cómo leer la etiqueta energética de tus electrodomésticos',
+    date: '2024-03-15',
+    excerpt: 'Aprende a descifrar la eficiencia energética de tus aparatos eléctricos',
+    content: `
+      ## Entendiendo las clases energéticas
+      
+      Las etiquetas energéticas actuales (desde 2021) usan una escala de **A a G**:
+      
+      <div class="energy-scale">
+        ${['A', 'B', 'C', 'D', 'E', 'F', 'G'].map(letter => `
+          <div class="energy-class ${letter}">${letter}</div>
+        `).join('')}
+      </div>
+      
+      ### Elementos clave:
+      1. Consumo anual estimado (kWh)
+      2. Escala de eficiencia
+      3. Nivel de ruido
+      4. Capacidad (según electrodoméstico)
+    `,
+    related: ['ahorro-energetico', 'comparativa-electrodomesticos']
+  },
+  // ... otros posts
+];
+
+const { slug } = Astro.params;
+const post = posts.find(p => p.slug === slug);
+
+if (!post) return Astro.redirect('/404');
+---
+
+<html lang="es">
+<head>
+  <title>{post.title} | TuMarca</title>
+  <meta name="description" content={post.excerpt}>
+  <meta name="keywords" content="energía, eficiencia, electrodomésticos, etiqueta energética">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content={post.title}>
+  <meta property="og:image" content="/images/guia-etiqueta-energetica.jpg">
+  
+  <!-- Schema.org -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "${post.title}",
+    "description": "${post.excerpt}",
+    "datePublished": "${post.date}",
+    "image": "/images/guia-etiqueta-energetica.jpg"
+  }
+  </script>
+</head>
+
+<body>
+  <article class="blog-post">
+    <header>
+      <h1>{post.title}</h1>
+      <time datetime={post.date}>{new Date(post.date).toLocaleDateString('es-ES')}</time>
+    </header>
+    
+    <section class="post-content">
+      {@html post.content}
+    </section>
+    
+    <div class="cta-calculadora">
+      <h3>¿Quieres calcular el consumo de tus electrodomésticos?</h3>
+      <a href="/calculadora" class="button">Usar Calculadora →</a>
+    </div>
+    
+    <footer class="post-footer">
+      <h4>Artículos relacionados:</h4>
+      <ul>
+        {post.related.map(relatedSlug => {
+          const relatedPost = posts.find(p => p.slug === relatedSlug);
+          return relatedPost && `
+            <li>
+              <a href="/blog/${relatedPost.slug}">${relatedPost.title}</a>
+            </li>
+          `;
+        })}
+      </ul>
+    </footer>
+  </article>
+</body>
+</html>
+
+<style>
+  .blog-post {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+
+  .energy-scale {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+    margin: 2rem 0;
+  }
+
+  .energy-class {
+    padding: 1rem;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    border-radius: 4px;
+  }
+
+  .energy-class.A { background: #00a651; }
+  .energy-class.B { background: #8cc63f; }
+  .energy-class.C { background: #fff200; color: #333; }
+  .energy-class.D { background: #f7941d; }
+  .energy-class.E { background: #ed1c24; }
+  .energy-class.F { background: #c1272d; }
+  .energy-class.G { background: #662d91; }
+
+  .cta-calculadora {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+  }
+</style>

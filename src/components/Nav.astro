@@ -1,0 +1,18 @@
+---
+import { navigation } from "../constant";
+---
+
+<header>
+    <div class="container">
+        <div class="nav d-flex text-primary-100">
+            <h1 class="text-size-2">Logo</h1>
+            <nav class="d-flex">
+                {navigation.map((item)=>{
+            return(
+            <a href={item.url}>{item.title}</a>
+        )
+    })}
+        </nav>
+    </div>
+    </div>
+  </header>

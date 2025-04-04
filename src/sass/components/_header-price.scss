@@ -1,0 +1,12 @@
+.header-price{
+    --horizontal-alignment:center;
+    --gutter:var(--space-3xs);
+    &__price{
+       color: var(--accent-500);
+    }
+    &__currency{
+        font-size: 1rem;
+        font-weight: normal;
+       
+    }
+}

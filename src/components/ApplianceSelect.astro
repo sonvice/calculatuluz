@@ -1,0 +1,153 @@
+---
+// src/components/ApplianceSelect.astro
+
+interface Props {
+  label?: string;
+  class?: string;
+}
+
+const { label = "Selecciona un electrodoméstico:", class: className } = Astro.props;
+---
+
+<div class={`input-group ${className}`}>
+  <label for="applianceSelect">Selecciona un electrodoméstico:</label>
+  <select id="applianceSelect" class="full-width custom-select">
+    <button>
+      <div>
+        <selectedcontent>-- Elegir de la lista --</selectedcontent>
+        <svg width="24" height="24" viewBox="0 0 24 24">
+          <path fill="currentColor" d="m7 10l5 5l5-5z"/>
+        </svg>
+      </div>
+    </button>
+    <div class="scrollable">
+      <option value="">
+        <div class="custom-option placeholder">
+          <img src="/icons/icon-question.svg" alt="Seleccionar" class="appliance-icon" width="24" height="24"/>
+          <span class="option-text">-- Elegir de la lista --</span>
+        </div>
+      </option>
+
+      <div role="group">
+        <label>Electrodomésticos comunes</label>
+        <option value="50">
+          <div class="custom-option">
+            <img src="/icons/icon-bombilla.svg" alt="Bombilla LED" class="appliance-icon" width="24" height="24"/>
+            <div class="option-details">
+              <span class="name">Bombilla LED</span>
+              <span class="wattage">50W</span>
+            </div>
+          </div>
+        </option>
+        <option value="150">
+          <div class="custom-option">
+            <img src="/icons/icon-laptop.svg" alt="Portátil" class="appliance-icon" width="24" height="24"/>
+            <div class="option-details">
+              <span class="name">Portátil</span>
+              <span class="wattage">150W</span>
+            </div>
+          </div>
+        </option>
+        <option value="300">
+          <div class="custom-option">
+            <img src="/icons/icon-tv.svg" alt="Televisor" class="appliance-icon" width="24" height="24"/>
+            <div class="option-details">
+              <span class="name">Televisor 50"</span>
+              <span class="wattage">300W</span>
+            </div>
+          </div>
+        </option>
+      </div>
+
+      <div role="group">
+        <label>Electrodomésticos de cocina</label>
+        <option value="800">
+          <div class="custom-option">
+            <img src="/icons/icon-microondas.svg" alt="Microondas" class="appliance-icon" width="24" height="24"/>
+            <div class="option-details">
+              <span class="name">Microondas</span>
+              <span class="wattage">800W</span>
+            </div>
+          </div>
+        </option>
+        <option value="2000">
+          <div class="custom-option">
+            <img src="/icons/icon-lavadora.svg" alt="Lavadora" class="appliance-icon" width="24" height="24"/>
+            <div class="option-details">
+              <span class="name">Lavadora</span>
+              <span class="wattage">2000W</span>
+            </div>
+          </div>
+        </option>
+      </div>
+
+      <div role="group">
+        <label>Otros dispositivos</label>
+        <option value="1200">
+          <div class="custom-option">
+            <img src="/icons/icon-secador.svg" alt="Secador pelo" class="appliance-icon" width="24" height="24"/>
+            <div class="option-details">
+              <span class="name">Secador pelo</span>
+              <span class="wattage">1200W</span>
+            </div>
+          </div>
+        </option>
+        <option value="custom">
+          <div class="custom-option custom-option-highlight">
+            <img src="/icons/icon-custom.svg" alt="Personalizado" class="appliance-icon" width="24" height="24"/>
+            <div class="option-details">
+              <span class="name">Personalizado</span>
+              <span class="wattage">Especificar potencia</span>
+            </div>
+          </div>
+        </option>
+      </div>
+    </div>
+  </select>
+</div>
+
+<style>
+  .custom-select {
+    > button {
+      .appliance-icon {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+        margin-right: 12px;
+      }
+    }
+    
+    .custom-option {
+      .appliance-icon {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+        margin-right: 10px;
+      }
+    }
+  }
+
+  .custom-option-highlight {
+    .appliance-icon {
+      filter: drop-shadow(0 2px 4px oklch(var(--brand)/0.4);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .custom-select {
+      > button {
+        .appliance-icon {
+          width: 20px;
+          height: 20px;
+        }
+      }
+      
+      .custom-option {
+        .appliance-icon {
+          width: 28px;
+          height: 28px;
+        }
+      }
+    }
+  }
+</style>
