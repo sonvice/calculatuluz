@@ -105,11 +105,16 @@
       </div>
     </div>
   </div>
+  <div class="chart-wrapper">
+      <PriceChart v-if="priceData.prices.length" :prices="priceData.prices" :last-updated="priceData.lastUpdated"
+      :current-price="priceData.currentPrice" />
+      <div v-else>Cargando gráfico...</div>
+    </div>
 </template>
 
 <script setup>
   import { ref, computed, watch, onMounted } from 'vue';
-
+import PriceChart from './PriceChart.vue'; 
   const priceData = ref({
     currentPrice: null,
     lastUpdated: null,
