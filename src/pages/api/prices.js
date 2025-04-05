@@ -3,7 +3,7 @@ import { getCachedData, updateCache } from '../../lib/cache';
 // Configuración principal
 const CACHE_TTL = 3600; // Tiempo de vida de la caché en segundos (1 hora)
 const STALE_TTL = 300; // Tiempo de gracia para datos obsoletos (5 minutos)
-const INDICATOR_ID = 1013; // ID del indicador ESIOS
+const INDICATOR_ID = 1001; // ID del indicador ESIOS
 const FALLBACK_PRICE = 0.15; // Precio por defecto para fallbacks
 
 // Helper para convertir fechas a formato ISO UTC
