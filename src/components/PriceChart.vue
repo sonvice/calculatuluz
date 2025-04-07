@@ -1,21 +1,17 @@
 <script setup>
-import { BarChart  } from 'vue-chart-3'
+import { ref, computed } from 'vue'
+import { BarChart } from 'vue-chart-3'
 import { Chart, registerables } from 'chart.js'
-import { computed,ref } from 'vue'
+import { usePriceData } from './composables/usePriceData.js'
 
 Chart.register(...registerables)
 
-const props = defineProps({
-    prices: {
-    type: Array,
-    required: true
-  },
-  lastUpdated: String,
-  currentPrice: Number
-})
-// Formatear fecha de actualización
+// Utilizar el composable para obtener los datos de precios
+const { priceData } = usePriceData()
+
+// Computed para formatear la fecha de actualización
 const formattedDate = computed(() => {
-  if (!props.lastUpdated) return 'Cargando...';
+  if (!priceData.value.lastUpdated) return 'Cargando...'
   
   const options = {
     weekday: 'long',
@@ -25,13 +21,16 @@ const formattedDate = computed(() => {
     hour: '2-digit',
     minute: '2-digit',
     timeZoneName: 'short'
-  };
+  }
   
-  return new Date(props.lastUpdated)
+  return new Date(priceData.value.lastUpdated)
     .toLocaleDateString('es-ES', options)
-    .replace(/^\w/, (c) => c.toUpperCase());
-});
-const hiddenCategories = ref([]);
+    .replace(/^\w/, (c) => c.toUpperCase())
+})
+
+// Estado para controlar las categorías ocultas en la leyenda
+const hiddenCategories = ref([])
+
 // Configuración de colores por categoría
 const categoryColors = {
   'Muy bajo': '#4CAF50',  // Verde
@@ -40,11 +39,12 @@ const categoryColors = {
   'Alto': '#F44336'       // Rojo
 }
 
-// Datos filtrados
+// Filtrar los precios según las categorías ocultas
 const filteredPrices = computed(() => 
-  props.prices.filter(p => !hiddenCategories.value.includes(p.category))
-);
+  priceData.value.prices.filter(p => !hiddenCategories.value.includes(p.category))
+)
 
+// Datos del gráfico
 const chartData = computed(() => ({
   labels: filteredPrices.value.map(p => p.hour.split(' - ')[0]),
   datasets: [{
@@ -56,8 +56,9 @@ const chartData = computed(() => ({
     barPercentage: 0.9,
     categoryPercentage: 0.9
   }]
-}));
+}))
 
+// Opciones del gráfico
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
@@ -81,12 +82,11 @@ const chartOptions = computed(() => ({
     }
   },
   plugins: {
-        // TÍTULO Y SUBTÍTULO NUEVOS
-        title: {
+    title: {
       display: true,
       text: [
-        'Evolución de Precios Horarios de Electricidad', 
-        `Última actualización: ${formattedDate.value} `
+        'Evolución de Precios Horarios de Electricidad',
+        `Última actualización: ${formattedDate.value}`
       ],
       padding: 10,
       font: {
@@ -98,9 +98,9 @@ const chartOptions = computed(() => ({
     },
     tooltip: {
       callbacks: {
-        title: (context) => props.prices[context[0].dataIndex].hour,
+        title: (context) => priceData.value.prices[context[0].dataIndex].hour,
         label: (context) => {
-          const price = props.prices[context.dataIndex]
+          const price = priceData.value.prices[context.dataIndex]
           return [
             `Precio: ${price.price.toFixed(4)} €/kWh`,
             `Categoría: ${price.category}`
@@ -119,23 +119,22 @@ const chartOptions = computed(() => ({
           weight: '500'
         },
         usePointStyle: true,
-        generateLabels: (chart) => {
-          const categories = [...new Set(props.prices.map(p => p.category))];
+        generateLabels: () => {
+          const categories = [...new Set(priceData.value.prices.map(p => p.category))]
           return categories.map(category => ({
             text: hiddenCategories.value.includes(category) ? `(${category})` : category,
             fillStyle: categoryColors[category],
             strokeStyle: 'transparent',
             hidden: hiddenCategories.value.includes(category),
-            extra: category // Guardamos la categoría como propiedad extra
-          }));
+            extra: category // Se guarda la categoría para el callback onClick
+          }))
         }
       },
-      onClick: (e, legendItem, legend) => {
-        const category = legendItem.extra;
-        
+      onClick: (e, legendItem) => {
+        const category = legendItem.extra
         hiddenCategories.value = hiddenCategories.value.includes(category)
-          ? hiddenCategories.value.filter(c => c !== category) // Mostrar
-          : [...hiddenCategories.value, category]; // Ocultar
+          ? hiddenCategories.value.filter(c => c !== category)
+          : [...hiddenCategories.value, category]
       }
     },
   }
@@ -144,10 +143,15 @@ const chartOptions = computed(() => ({
 
 <template>
   <div class="chart-container">
-    <BarChart 
-      :chart-data="chartData"
-      :options="chartOptions"
-    />
+    <div v-if="priceData.prices.length">
+      <BarChart 
+        :chart-data="chartData"
+        :options="chartOptions"
+      />
+    </div>
+    <div v-else>
+      Cargando gráfico...
+    </div>
   </div>
 </template>
 

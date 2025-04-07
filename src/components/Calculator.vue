@@ -47,19 +47,14 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import CustomSelect from './CustomSelect.vue';
 import InputField from './InputField.vue';
 import ResultsDisplay from './ResultsDisplay.vue';
 import PriceChart from './PriceChart.vue';
+import { usePriceData } from './composables/usePriceData.js';
 
-const priceData = ref({
-  currentPrice: null,
-  lastUpdated: null,
-  prices: [],
-  minPrice: null,
-  maxPrice: null,
-});
+const { priceData } = usePriceData();
 
 const selectedAppliance = ref('');
 const power = ref('');
@@ -72,51 +67,15 @@ const results = ref({
 });
 
 const appliances = [
-  {
-    value: 50,
-    label: 'Bombilla LED',
-    watts: '50W',
-    image: '/images/bombilla.jpg',
-  },
-  {
-    value: 150,
-    label: 'Portátil',
-    watts: '150W',
-    image: '/images/laptop.jpg',
-  },
-  {
-    value: 300,
-    label: 'Televisor 50"',
-    watts: '300W',
-    image: '/images/tv.jpg',
-  },
-  {
-    value: 800,
-    label: 'Microondas',
-    watts: '800W',
-    image: '/images/microwave.jpg',
-  },
-  {
-    value: 1200,
-    label: 'Secador de pelo',
-    watts: '1200W',
-    image: '/images/hair-dryer.jpg',
-  },
-  {
-    value: 2000,
-    label: 'Lavadora',
-    watts: '2000W',
-    image: '/images/washing-machine.jpg',
-  },
-  {
-    value: 'custom',
-    label: 'Personalizado',
-    watts: '',
-    image: '/images/personalizado.jpg',
-  },
+  { value: 50, label: 'Bombilla LED', watts: '50W', image: '/images/bombilla.jpg' },
+  { value: 150, label: 'Portátil', watts: '150W', image: '/images/laptop.jpg' },
+  { value: 300, label: 'Televisor 50"', watts: '300W', image: '/images/tv.jpg' },
+  { value: 800, label: 'Microondas', watts: '800W', image: '/images/microwave.jpg' },
+  { value: 1200, label: 'Secador de pelo', watts: '1200W', image: '/images/hair-dryer.jpg' },
+  { value: 2000, label: 'Lavadora', watts: '2000W', image: '/images/washing-machine.jpg' },
+  { value: 'custom', label: 'Personalizado', watts: '', image: '/images/personalizado.jpg' },
 ];
 
-// Watchers
 watch(selectedAppliance, (newVal) => {
   if (newVal && newVal !== 'custom') {
     power.value = newVal;
@@ -131,31 +90,6 @@ watch(() => priceData.value.currentPrice, () => {
   calculateConsumption();
 });
 
-// Llamada a la API para obtener los precios
-onMounted(async () => {
-  try {
-    const apiUrl = new URL('/api/prices', window.location.origin);
-    const response = await fetch(apiUrl, {
-      headers: { Accept: 'application/json' },
-    });
-
-    if (!response.ok) throw new Error(`Error ${response.status}`);
-
-    const data = await response.json();
-    priceData.value = {
-      currentPrice: data.currentPrice,
-      lastUpdated: new Date().toISOString(),
-      prices: data.prices,
-      minPrice: data.minPrice,
-      maxPrice: data.maxPrice,
-    };
-  } catch (error) {
-    console.error('Error fetching prices:', error);
-    alert('⚠️ No se pudieron cargar los precios actuales');
-  }
-});
-
-// Funciones
 const handleCalculate = () => {
   if (!power.value || !hours.value) {
     alert('⚠️ Debes completar todos los campos requeridos');
@@ -170,18 +104,14 @@ const handleCalculate = () => {
 
 const calculateConsumption = () => {
   if (!priceData.value.currentPrice) return;
-
   const powerValue = parseFloat(power.value) || 0;
   const hoursValue = parseFloat(hours.value) || 0;
-
   if (powerValue <= 0 || hoursValue <= 0) {
     resetResults();
     return;
   }
-
   const kwh = (powerValue * hoursValue) / 1000;
   const dailyCost = kwh * priceData.value.currentPrice;
-
   results.value = {
     dailyKwh: kwh.toFixed(4),
     dailyCost: dailyCost.toFixed(3),
@@ -206,6 +136,7 @@ const resetForm = () => {
   resetResults();
 };
 </script>
+
 
 <style scoped>
 .form-calulator {
