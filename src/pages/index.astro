@@ -2,18 +2,19 @@
 
 import Layout from '../layouts/Layout.astro';
 import CalculatorSinAnt from '../components/CalculatorSinAnt.vue';
+import Calculator from '../components/Calculator.vue';
 ---
 <Layout title="Calculadora de Consumo Eléctrico" description="Calcula el consumo eléctrico de tus electrodomésticos y su coste asociado.">
   <div class="text-primary-100 mt-space-2xl">
-    <h1 class="fw-700">Calculadora de Consumo Eléctrico</h1>
+    <h1 class="fw-700 text-neutral-50">Calculadora de Consumo Eléctrico</h1>
     <p class="mt-space-s">
       Descubre el consumo energético de tus electrodomésticos introduciendo
       los datos necesarios en el formulario. La calculadora te mostrará
       instantáneamente el coste asociado.
     </p>
     <div class="bg-primary-900 p-space-l mt-space-s">
-      <CalculatorSinAnt client:only /> 
-      
+   <!--    <CalculatorSinAnt client:only />  -->
+      <Calculator client:only />
     </div>
   </div>
 </Layout>

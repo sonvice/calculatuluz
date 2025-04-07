@@ -1,71 +1,120 @@
 <template>
-  <div class="container">
-    <CalculatorForm
-      v-model:selectedAppliance="selectedAppliance"
-      v-model:power="power"
-      v-model:hours="hours"
-      :appliances="appliances"
-      @calculate="handleCalculate"
-      @reset="resetForm"
-    />
-    
-    <ConsumptionResults
+  <div>
+    <div class="form-calulator">
+      <div>
+        <p class="text-size--1 mb-space-3xs">Selecciona un electrodoméstico</p>
+        <CustomSelect :appliances="appliances" v-model="selectedAppliance" />
+      </div>
+      <div class="wrapper-inputs">
+        <InputField
+          label="Potencia Eléctrica"
+          suffix="W"
+          placeholder="Ej: 1500"
+          v-model="power"
+          min="0"
+          max="3500"
+          step="50"
+          note="Máx. Recomendado: 3500W" />
+        <InputField
+          label="Horas de uso Diario"
+          placeholder="Ej: 2.5"
+          v-model="hours"
+          min="0.5"
+          max="24"
+          step="0.5"
+          note="Usa punto decimal (ej: 1.5)" />
+      </div>
+      <div class="button-group d-flex">
+        <button class="btn" data-type="accent" @click="handleCalculate">
+          Calcular consumo
+        </button>
+        <button class="btn" @click="resetForm">Reiniciar</button>
+      </div>
+    </div>
+    <ResultsDisplay
       :results="results"
-      :price-data="priceData"
-      :formatted-date="formattedDate"
-    />
+      :lastUpdated="priceData.lastUpdated"
+      :currentPrice="priceData.currentPrice" />
+    <div class="chart-wrapper">
+      <PriceChart
+        v-if="priceData.prices.length"
+        :prices="priceData.prices"
+        :last-updated="priceData.lastUpdated"
+        :current-price="priceData.currentPrice" />
+      <div v-else>Cargando gráfico...</div>
+    </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
-import CalculatorForm from './CalculatorForm/CalculatorForm.vue';
-import ConsumptionResults from './ConsumptionResults/ConsumptionResults.vue';
+<script setup>
+import { ref, watch, onMounted } from 'vue';
+import CustomSelect from './CustomSelect.vue';
+import InputField from './InputField.vue';
+import ResultsDisplay from './ResultsDisplay.vue';
+import PriceChart from './PriceChart.vue';
 
-interface PriceData {
-  currentPrice: number | null;
-  lastUpdated: Date | null;
-  prices: number[];
-  minPrice: number | null;
-  maxPrice: number | null;
-}
-
-interface Appliance {
-  value: string | number;
-  label: string;
-  watts: string;
-  image: string;
-}
-
-// Estado reactivo
-const priceData = ref<PriceData>({
+const priceData = ref({
   currentPrice: null,
   lastUpdated: null,
   prices: [],
   minPrice: null,
-  maxPrice: null
+  maxPrice: null,
 });
 
-const selectedAppliance = ref<string | number>('');
-const power = ref<string | number>('');
-const hours = ref<string | number>('');
-
+const selectedAppliance = ref('');
+const power = ref('');
+const hours = ref('');
 const results = ref({
   dailyKwh: '0.0000',
   dailyCost: '0.000',
   monthlyCost: '0.000',
-  annualCost: '0.000'
+  annualCost: '0.000',
 });
 
-
-// Computed
-const formattedDate = computed(() => {
-  if (!priceData.value.lastUpdated) return '';
-  return new Intl.DateTimeFormat('es-ES', {
-    dateStyle: 'short',
-    timeStyle: 'short'
-  }).format(new Date(priceData.value.lastUpdated));
-});
+const appliances = [
+  {
+    value: 50,
+    label: 'Bombilla LED',
+    watts: '50W',
+    image: '/images/bombilla.jpg',
+  },
+  {
+    value: 150,
+    label: 'Portátil',
+    watts: '150W',
+    image: '/images/laptop.jpg',
+  },
+  {
+    value: 300,
+    label: 'Televisor 50"',
+    watts: '300W',
+    image: '/images/tv.jpg',
+  },
+  {
+    value: 800,
+    label: 'Microondas',
+    watts: '800W',
+    image: '/images/microwave.jpg',
+  },
+  {
+    value: 1200,
+    label: 'Secador de pelo',
+    watts: '1200W',
+    image: '/images/hair-dryer.jpg',
+  },
+  {
+    value: 2000,
+    label: 'Lavadora',
+    watts: '2000W',
+    image: '/images/washing-machine.jpg',
+  },
+  {
+    value: 'custom',
+    label: 'Personalizado',
+    watts: '',
+    image: '/images/personalizado.jpg',
+  },
+];
 
 // Watchers
 watch(selectedAppliance, (newVal) => {
@@ -74,103 +123,121 @@ watch(selectedAppliance, (newVal) => {
   }
 });
 
-// Métodos
+watch([power, hours], () => {
+  calculateConsumption();
+});
+
+watch(() => priceData.value.currentPrice, () => {
+  calculateConsumption();
+});
+
+// Llamada a la API para obtener los precios
+onMounted(async () => {
+  try {
+    const apiUrl = new URL('/api/prices', window.location.origin);
+    const response = await fetch(apiUrl, {
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!response.ok) throw new Error(`Error ${response.status}`);
+
+    const data = await response.json();
+    priceData.value = {
+      currentPrice: data.currentPrice,
+      lastUpdated: new Date().toISOString(),
+      prices: data.prices,
+      minPrice: data.minPrice,
+      maxPrice: data.maxPrice,
+    };
+  } catch (error) {
+    console.error('Error fetching prices:', error);
+    alert('⚠️ No se pudieron cargar los precios actuales');
+  }
+});
+
+// Funciones
 const handleCalculate = () => {
-  if (!validateForm()) return;
+  if (!power.value || !hours.value) {
+    alert('⚠️ Debes completar todos los campos requeridos');
+    return;
+  }
+  if (isNaN(power.value) || isNaN(hours.value)) {
+    alert('⚠️ Los valores deben ser numéricos');
+    return;
+  }
   calculateConsumption();
 };
 
-const resetResults = () => {
-    results.value = {
-      dailyKwh: '0.000',
-      dailyCost: '0.000',
-      monthlyCost: '0.000',
-      annualCost: '0.000'
-    };
-  };
-
-const validateForm = (): boolean => {
-  if (!power.value || !hours.value) {
-    alert('⚠️ Debes completar todos los campos requeridos');
-    return false;
-  }
-  
-  if (isNaN(Number(power.value)) || isNaN(Number(hours.value))) {
-    alert('⚠️ Los valores deben ser numéricos');
-    return false;
-  }
-  
-  return true;
-};
-
 const calculateConsumption = () => {
+  if (!priceData.value.currentPrice) return;
 
- 
-if (!priceData.value.currentPrice) return;
+  const powerValue = parseFloat(power.value) || 0;
+  const hoursValue = parseFloat(hours.value) || 0;
 
-const powerValue = parseFloat(power.value) || 0;
-const hoursValue = parseFloat(hours.value) || 0;
+  if (powerValue <= 0 || hoursValue <= 0) {
+    resetResults();
+    return;
+  }
 
+  const kwh = (powerValue * hoursValue) / 1000;
+  const dailyCost = kwh * priceData.value.currentPrice;
 
-if (powerValue <= 0 || hoursValue <= 0) {
-  resetResults();
-  return;
-}
-
-const kwh = (powerValue * hoursValue) / 1000;
-const dailyCost = kwh * priceData.value.currentPrice;
-
-results.value = {
-  dailyKwh: kwh.toFixed(4),
-  dailyCost: dailyCost.toFixed(3),
-  monthlyCost: (dailyCost * 30).toFixed(3),
-  annualCost: (dailyCost * 365).toFixed(3)
+  results.value = {
+    dailyKwh: kwh.toFixed(4),
+    dailyCost: dailyCost.toFixed(3),
+    monthlyCost: (dailyCost * 30).toFixed(3),
+    annualCost: (dailyCost * 365).toFixed(3),
+  };
 };
+
+const resetResults = () => {
+  results.value = {
+    dailyKwh: '0.000',
+    dailyCost: '0.000',
+    monthlyCost: '0.000',
+    annualCost: '0.000',
+  };
 };
 
 const resetForm = () => {
   selectedAppliance.value = '';
   power.value = '';
   hours.value = '';
-  results.value = {
-    dailyKwh: '0.000',
-    dailyCost: '0.000',
-    monthlyCost: '0.000',
-    annualCost: '0.000'
-  };
+  resetResults();
 };
-
-// Lifecycle hooks
-  // API Call
-  onMounted(async () => {
-    try {
-      const apiUrl = new URL('/api/prices', window.location.origin);
-      const response = await fetch(apiUrl, {
-        headers: { Accept: 'application/json' },
-      });
-  
-      if (!response.ok) throw new Error(`Error ${response.status}`);
-  
-      const data = await response.json();
-      priceData.value = {
-        currentPrice: data.currentPrice,
-        lastUpdated: data.lastUpdated,
-        prices: data.prices,
-        minPrice: data.minPrice,
-        maxPrice: data.maxPrice
-      };
-      
-    } catch (error) {
-      console.error('Error fetching prices:', error);
-      alert('⚠️ No se pudieron cargar los precios actuales');
-    }
-  });
 </script>
 
-<style>
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
+<style scoped>
+.form-calulator {
+  display: grid;
+  gap: var(--space-m);
+}
+@media (min-width: 64em) {
+  .form-calulator {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (min-width: 90em) {
+  .form-calulator {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+.button-group {
+  margin-top: var(--space-m);
+}
+.button-group .btn {
+  flex-grow: 1;
+  justify-content: center;
+}
+.wrapper-inputs {
+  display: grid;
+  gap: var(--space-l);
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .wrapper-inputs {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-s);
+  }
 }
 </style>
