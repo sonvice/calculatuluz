@@ -35,14 +35,7 @@
       :results="results"
       :lastUpdated="priceData.lastUpdated"
       :currentPrice="priceData.currentPrice" />
-    <div class="chart-wrapper">
-      <PriceChart
-        v-if="priceData.prices.length"
-        :prices="priceData.prices"
-        :last-updated="priceData.lastUpdated"
-        :current-price="priceData.currentPrice" />
-      <div v-else>Cargando gráfico...</div>
-    </div>
+
   </div>
 </template>
 

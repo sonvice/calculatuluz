@@ -22,12 +22,12 @@
               <div class="price-stat min-price">
                 <span class="fw-500">Mín: </span>
                 <span class="stat-value">{{ formattedMinPrice }}</span>
-                <span class="time-range">({{ priceData.minPrice.timeRange }})</span>
+                <span class="time-range">({{ priceData.minPrice?.timeRange || '' }})</span>
               </div>
               <div class="price-stat max-price">
                 <span class="fw-500">Máx: </span>
                 <span class="stat-value">{{ formattedMaxPrice }}</span>
-                <span class="time-range">({{ priceData.maxPrice.timeRange }})</span>
+                <span class="time-range">({{ priceData.maxPrice?.timeRange || '' }})</span>
               </div>
             </div>
             <div class="last-updated fw-500">
@@ -41,15 +41,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { computed } from 'vue';
+import { usePriceData } from './composables/usePriceData.js'; // Ajusta la ruta según corresponda
 
-const priceData = ref({
-  currentPrice: 0,
-  averagePrice: 0,
-  minPrice: { value: 0, timeRange: '' },
-  maxPrice: { value: 0, timeRange: '' },
-  lastUpdated: new Date().toISOString()
-});
+const { priceData } = usePriceData();
 
 const formatter = new Intl.NumberFormat('es-ES', {
   style: 'currency',
@@ -58,13 +53,47 @@ const formatter = new Intl.NumberFormat('es-ES', {
   maximumFractionDigits: 4,
 });
 
-// Formateadores
-const formattedCurrentPrice = computed(() => formatter.format(priceData.value.currentPrice));
-const formattedAveragePrice = computed(() => formatter.format(priceData.value.averagePrice));
-const formattedMinPrice = computed(() => formatter.format(priceData.value.minPrice.value));
-const formattedMaxPrice = computed(() => formatter.format(priceData.value.maxPrice.value));
+// Calcula el precio actual en función del rango horario de la data de la API
+const currentPriceFromData = computed(() => {
+  // Si no hay precios, usamos el currentPrice por defecto
+  if (!priceData.value.prices || !priceData.value.prices.length) {
+    return priceData.value.currentPrice;
+  }
 
-// Usamos la hora actual del cliente para el "lastUpdated"
+  const currentHour = new Date().getHours();
+
+  // Busca el objeto cuyo rango horario contenga la hora actual
+  const matchingPrice = priceData.value.prices.find(item => {
+    // Suponemos que item.hour es un string tipo "HH:MM - HH:MM"
+    if (!item.hour) return false;
+    const [startStr, endStr] = item.hour.split(' - ');
+    const startHour = parseInt(startStr.split(':')[0]);
+    const endHour = parseInt(endStr.split(':')[0]);
+
+    // Caso normal: rango dentro del mismo día
+    if (startHour < endHour) {
+      return currentHour >= startHour && currentHour < endHour;
+    } else {
+      // Rango que abarca medianoche (ej. "23:00 - 00:00")
+      return currentHour >= startHour || currentHour < endHour;
+    }
+  });
+
+  return matchingPrice ? matchingPrice.price : priceData.value.currentPrice;
+});
+
+// Formateadores para mostrar los valores, con valores por defecto si la data aún no está disponible
+const formattedCurrentPrice = computed(() => formatter.format(currentPriceFromData.value));
+const formattedAveragePrice = computed(() => formatter.format(priceData.value.averagePrice || 0));
+const formattedMinPrice = computed(() => {
+  const min = priceData.value.minPrice;
+  return min && min.value != null ? formatter.format(min.value) : '';
+});
+const formattedMaxPrice = computed(() => {
+  const max = priceData.value.maxPrice;
+  return max && max.value != null ? formatter.format(max.value) : '';
+});
+
 const formattedLastUpdated = computed(() => {
   const date = new Date(priceData.value.lastUpdated);
   return date.toLocaleDateString('es-ES', {
@@ -75,29 +104,41 @@ const formattedLastUpdated = computed(() => {
     minute: '2-digit'
   });
 });
-
-// Cargar datos de la API
-onMounted(async () => {
-  try {
-    const response = await fetch('/api/prices');
-    if (!response.ok) throw new Error('Error en la respuesta de la API');
-
-    const data = await response.json();
-    // Asignamos los datos recibidos...
-    priceData.value = {
-      currentPrice: data.currentPrice,
-      averagePrice: data.averagePrice,
-      minPrice: data.minPrice,
-      maxPrice: data.maxPrice,
-      // Aquí forzamos que la hora de actualización sea la hora actual del usuario
-      lastUpdated: new Date().toISOString()
-    };
-  } catch (error) {
-    console.error('Error cargando datos:', error);
-    // Puedes mantener valores por defecto o mostrar un mensaje de error.
-  }
-});
 </script>
+
+<style scoped>
+.header-price {
+  padding: 1rem 0;
+}
+
+.price-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.min-price .stat-value {
+  color: #48bb78; /* Verde para precios mínimos */
+}
+
+.max-price .stat-value {
+  color: #f56565; /* Rojo para precios máximos */
+}
+
+.time-range {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.last-updated {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-top: 0.25rem;
+}
+</style>
+
+
 
   
   <style scoped>
