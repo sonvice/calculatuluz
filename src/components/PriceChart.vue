@@ -3,7 +3,6 @@ import { ref, computed } from 'vue'
 import { BarChart } from 'vue-chart-3'
 import { Chart, registerables } from 'chart.js'
 import { usePriceData } from './composables/usePriceData.js'
-
 Chart.register(...registerables)
 
 // Utilizar el composable para obtener los datos de precios

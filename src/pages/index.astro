@@ -4,6 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import Calculator from '../components/Calculator.vue';
 import PriceChart from '../components/PriceChart.vue';
 import ActualPriceDisplay from '../components/ActualPriceDisplay.vue';
+import PriceCards from '../components/PriceCards.vue';
 ---
 <Layout title="Calculadora de Consumo Eléctrico" description="Calcula el consumo eléctrico de tus electrodomésticos y su coste asociado.">
   <div class="text-primary-100 mt-space-2xl">
@@ -20,6 +21,7 @@ import ActualPriceDisplay from '../components/ActualPriceDisplay.vue';
     <hr class="text-neutral-400 my-space-2xl" />
     <h2 class="fw-700 text-neutral-50">Evolución precio del kWh por horas</h2>
     <ActualPriceDisplay client:only />
+    <PriceCards client:only />
     <div class="bg-primary-900 p-space-l mt-space-s rounded-sm">
       <PriceChart client:only/>
     </div>
