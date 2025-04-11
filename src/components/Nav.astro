@@ -1,18 +1,27 @@
 ---
-import { navigation } from "../constant";
+import { navigation as navDefault } from '../constant';
+
+// Obtenemos la ruta actual
+const currentPath = Astro.url.pathname;
+
+const navigation = navDefault.filter((item) => {
+  // Si el item tiene la propiedad onlyTips, solo se mostrará cuando la ruta empiece con "/tipsyguias"
+  if (item.onlyTips && !currentPath.startsWith('/tipsyguias')) {
+    return false;
+  }
+  return true;
+});
 ---
 
 <header>
-    <div class="container">
-        <div class="nav d-flex text-primary-100">
-            <h1 class="text-size-2">Logo</h1>
-            <nav class="d-flex">
-                {navigation.map((item)=>{
-            return(
-            <a href={item.url}>{item.title}</a>
-        )
-    })}
-        </nav>
+  <div class="container">
+    <div class="nav d-flex text-primary-100">
+      <h1 class="text-size-2"><a href="/">Logo</a></h1>
+      <nav class="d-flex">
+        {navigation.map((item) => (
+          <a href={item.url} class="header__link py-space-l">{item.title}</a>
+        ))}
+      </nav>
     </div>
-    </div>
-  </header>
+  </div>
+</header>

@@ -1,4 +1,4 @@
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
 export function usePriceData() {
   const priceData = ref({
@@ -19,6 +19,7 @@ export function usePriceData() {
       const data = await response.json();
       priceData.value = {
         currentPrice: data.currentPrice,
+        averagePrice: data.averagePrice,
         lastUpdated: new Date().toISOString(),
         prices: data.prices,
         minPrice: data.minPrice,
@@ -34,5 +35,28 @@ export function usePriceData() {
     fetchPriceData();
   });
 
-  return { priceData, fetchPriceData };
+  // Computed que calcula el precio actual según el rango horario de la data
+  const actualPrice = computed(() => {
+    if (!priceData.value.prices || priceData.value.prices.length === 0) {
+      return priceData.value.currentPrice;
+    }
+    const currentHour = new Date().getHours();
+    // Busca en el array de precios el objeto cuyo rango horario incluya la hora actual
+    const matchingPrice = priceData.value.prices.find(item => {
+      if (!item.hour) return false;
+      const [startStr, endStr] = item.hour.split(' - ');
+      const startHour = parseInt(startStr.split(':')[0]);
+      const endHour = parseInt(endStr.split(':')[0]);
+      // Rango dentro del mismo día
+      if (startHour < endHour) {
+        return currentHour >= startHour && currentHour < endHour;
+      } else {
+        // Rango que abarca medianoche (ejemplo "23:00 - 00:00")
+        return currentHour >= startHour || currentHour < endHour;
+      }
+    });
+    return matchingPrice ? matchingPrice.price : priceData.value.currentPrice;
+  });
+
+  return { priceData, fetchPriceData, actualPrice };
 }

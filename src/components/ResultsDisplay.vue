@@ -56,9 +56,4 @@
   });
   </script>
   
-  <style scoped>
-  .results {
-    /* Puedes agregar estilos adicionales si es necesario */
-  }
-  </style>
   

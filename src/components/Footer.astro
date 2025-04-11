@@ -1,20 +1,31 @@
 ---
 
 ---
-<footer>
+
+<footer class="text-neutral-50 p-space-l mt-space-s rounded-sm">
+  <div class="container">
     <p class="data-source">
-      Datos proporcionados por <a href="https://www.ree.es/es" target="_blank" rel="noopener">Red Eléctrica de España</a>
-      a través de la <a href="https://api.esios.ree.es/" target="_blank" rel="noopener">API pública de e·sios</a>.
+      Datos proporcionados por <a
+        href="https://www.ree.es/es"
+        target="_blank"
+        rel="noopener">Red Eléctrica de España</a
+      >
+      a través de la <a
+        href="https://api.esios.ree.es/"
+        target="_blank"
+        rel="noopener">API pública de e·sios</a
+      >.
     </p>
     <p>Precio promedio de referencia: 0.15 €/kWh</p>
     <p><small>Actualizado: <span id="updateTime"></span></small></p>
-  </footer>
-  <script>
-	// Actualizar fecha
-	document.getElementById('updateTime').textContent =
-	  new Date().toLocaleDateString('es-ES', {
-		day: 'numeric',
-		month: 'long',
-		year: 'numeric',
-	  });
-  </script>
+  </div>
+</footer>
+<script>
+  // Actualizar fecha
+  document.getElementById('updateTime').textContent =
+    new Date().toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+</script>

@@ -83,7 +83,7 @@ const chartOptions = computed(() => ({
   },
   plugins: {
     title: {
-      display: true,
+      display: false,
       text: [
         'Evolución de Precios Horarios de Electricidad',
         `Última actualización: ${formattedDate.value}`

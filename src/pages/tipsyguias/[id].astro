@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+const { id } = Astro.params;
+
+// Obtener todas las entradas de la colección tipsyguias
+const allTips = await getCollection('tipsyguias');
+console.log(allTips);
+// Buscar la entrada que coincida con el slug
+const post = allTips.find((entry) => entry.id === id);
+
+// Si no se encuentra el post, lanzar un error o redirigir
+if (!post) {
+  return Astro.redirect('/404'); // O puedes lanzar un error aquí, como prefieras
+}
+
+const { Content } = await render(post);
+---
+
+<Layout title={post.data.title} description={post.data.description ?? ''}>
+  <h1>{post.data.title}</h1>
+  <Content />
+</Layout>

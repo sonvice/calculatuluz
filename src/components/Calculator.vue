@@ -34,7 +34,7 @@
     <ResultsDisplay
       :results="results"
       :lastUpdated="priceData.lastUpdated"
-      :currentPrice="priceData.currentPrice" />
+      :currentPrice="actualPrice" />
 
   </div>
 </template>
@@ -44,10 +44,9 @@ import { ref, watch } from 'vue';
 import CustomSelect from './CustomSelect.vue';
 import InputField from './InputField.vue';
 import ResultsDisplay from './ResultsDisplay.vue';
-import PriceChart from './PriceChart.vue';
 import { usePriceData } from './composables/usePriceData.js';
 
-const { priceData } = usePriceData();
+const { priceData,actualPrice } = usePriceData();
 
 const selectedAppliance = ref('');
 const power = ref('');

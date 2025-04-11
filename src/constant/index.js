@@ -1,3 +1,4 @@
 export const navigation = [
-    {title: 'Tips & Guias', url: '#tips-&-guias'},
-];
+    { title: 'Tips & Guías', url: '/tipsyguias' },
+    { title: 'Calculadora', url: '/', onlyTips: true },
+  ];

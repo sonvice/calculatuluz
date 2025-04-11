@@ -1,0 +1,18 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+const tips = await getCollection('tipsyguias');   
+---
+
+<Layout title="Tips y guías" description="Guías y consejos para optimizar el consumo eléctrico de tu hogar.">
+  <ul>
+    {
+      tips.map((item) => (
+        <li>
+          <a href={`/tipsyguias/${item.id}`}>{item.data.title}</a>
+        </li>
+      ))
+    }
+  </ul>
+</Layout>
