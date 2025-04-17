@@ -102,14 +102,15 @@ defineProps({
 }
 
 .label {
-  font: 400 0.8rem/1 'Montserrat Variable', sans-serif;
+  font-weight: 400;
+  font-size: var(--size--1);
   color: #a0a0a0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .value {
-  font: 500 1.1rem/1 'Montserrat Variable', sans-serif;
+  font-weight: 500;
   color: #f5f5f5;
 }
 

@@ -1,3 +1,9 @@
 .nav{
     --horizontal-alignment:space-between;
+    &__link{
+        text-decoration: none;
+    }
+    &__link--active{
+        color: var(--accent-400);
+    }   
 }

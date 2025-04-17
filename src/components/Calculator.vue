@@ -102,15 +102,23 @@ const calculateConsumption = () => {
     resetResults();
     return;
   }
+
   const kwh = (powerValue * hoursValue) / 1000;
-  const dailyCost = kwh * priceData.value.currentPrice;
+  const dailyNet = kwh * priceData.value.currentPrice;
+  const VAT_FACTOR = 1.21;
+
+  const dailyGross   = dailyNet * VAT_FACTOR;
+  const monthlyGross = dailyGross * 30;
+  const annualGross  = dailyGross * 365;
+
   results.value = {
-    dailyKwh: kwh.toFixed(4),
-    dailyCost: dailyCost.toFixed(3),
-    monthlyCost: (dailyCost * 30).toFixed(3),
-    annualCost: (dailyCost * 365).toFixed(3),
+    dailyKwh:    kwh.toFixed(4),
+    dailyCost:   dailyGross.toFixed(3),      // ya con IVA
+    monthlyCost: monthlyGross.toFixed(3),    // ya con IVA
+    annualCost:  annualGross.toFixed(3),     // ya con IVA
   };
 };
+
 
 const resetResults = () => {
   results.value = {

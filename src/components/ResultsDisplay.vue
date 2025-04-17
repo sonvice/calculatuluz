@@ -1,10 +1,11 @@
 <template>
     <div class="results">
       <h2 class="text-size-1 text-accent-500 mt-space-l">Resultados</h2>
+      <p class="text-neutral-50 text-size--1 mt-space-2xs">Costos incluyen impuestos 21%</p>
       <small v-if="lastUpdated" class="text-size--2 text-primary-200">
         Precio actualizado: {{ formattedDate }} ({{ currentPrice.toFixed(4) }} €/kWh)
       </small>
-      <div class="d-flex mt-space-s">
+      <div class="d-flex mt-space-m">
         <div>
           <h3 class="text-size--1">Consumo Diario</h3>
           <span class="text-size-2 fw-700 text-neutral-50">{{ results.dailyKwh }} kWh</span>

@@ -1,6 +1,6 @@
 ---
 import { navigation as navDefault } from '../constant';
-
+import Logo from '../assets/logo-calcula-tu-luz.svg';
 // Obtenemos la ruta actual
 const currentPath = Astro.url.pathname;
 
@@ -16,11 +16,23 @@ const navigation = navDefault.filter((item) => {
 <header>
   <div class="container">
     <div class="nav d-flex text-primary-100">
-      <h1 class="text-size-2"><a href="/">Logo</a></h1>
+      <h1 class="text-size-2"><a href="/"><Logo/></a></h1>
       <nav class="d-flex">
-        {navigation.map((item) => (
-          <a href={item.url} class="header__link py-space-l">{item.title}</a>
-        ))}
+        {
+          navigation.map((item) => {
+            const isActive =
+              item.url === '/'
+                ? currentPath === '/'
+                : currentPath.startsWith(item.url);
+            return (
+              <a
+                href={item.url}
+                class={`nav__link ${isActive ? 'nav__link--active fw-500' : ''} py-space-l text-neutral-50`}>
+                {item.title}
+              </a>
+            );
+          })
+        }
       </nav>
     </div>
   </div>
