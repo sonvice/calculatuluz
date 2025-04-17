@@ -14,15 +14,16 @@ import PriceCards from '../components/PriceCards.vue';
       los datos necesarios en el formulario. La calculadora te mostrará
       instantáneamente el coste asociado.
     </p>
-    <div class="bg-primary-900 p-space-l mt-space-s rounded-sm">
-   <!--    <CalculatorSinAnt client:only />  -->
+    <div class="bg-primary-900 p-space-l mt-space-l rounded-sm">
       <Calculator client:only />
     </div>
     <hr class="text-neutral-400 my-space-2xl" />
     <h2 class="fw-700 text-neutral-50">Evolución precio del kWh por horas</h2>
-    <ActualPriceDisplay client:only />
+    <div class="mb-space-m">
+      <ActualPriceDisplay client:only />
+    </div>
     <PriceCards client:only />
-    <div class="bg-primary-900 p-space-l mt-space-s rounded-sm">
+    <div class="bg-primary-900 px-space-l pt-space-l mt-space-s mb-space-3xl rounded-sm">
       <PriceChart client:only/>
     </div>
   </div>

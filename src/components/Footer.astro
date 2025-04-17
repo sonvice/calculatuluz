@@ -2,24 +2,32 @@
 
 ---
 
-<footer class="text-neutral-50 p-space-l mt-space-s rounded-sm">
-  <div class="container">
-    <p class="data-source">
-      Datos proporcionados por <a
-        href="https://www.ree.es/es"
-        target="_blank"
-        rel="noopener">Red Eléctrica de España</a
-      >
-      a través de la <a
-        href="https://api.esios.ree.es/"
-        target="_blank"
-        rel="noopener">API pública de e·sios</a
-      >.
-    </p>
-    <p>Precio promedio de referencia: 0.15 €/kWh</p>
-    <p><small>Actualizado: <span id="updateTime"></span></small></p>
+<footer
+class="text-neutral-50 text-size--1 p-space-l mt-space-s rounded-sm bg-primary-900">
+<div class="container">
+  <div class="d-flex">
+      <p>© 2025 Calculatuluz. Todos los derechos reservados.</p>
+      <p class="data-source">
+        Datos proporcionados por <a
+          href="https://www.ree.es/es"
+          target="_blank"
+          rel="noopener">Red Eléctrica de España</a
+        >
+        a través de la <a
+          href="https://api.esios.ree.es/"
+          target="_blank"
+          rel="noopener">API pública de e·sios</a
+        >.
+      </p>
+    </div>
   </div>
 </footer>
+
+<style>
+  footer{
+    --horizontal-alignment: center;}
+</style>
+
 <script>
   // Actualizar fecha
   document.getElementById('updateTime').textContent =

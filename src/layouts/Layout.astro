@@ -16,13 +16,44 @@ const { title, description } = Astro.props;
   <slot name="head" slot="head" />
 <!--   <HeaderPrice /> -->
   <ElectricityPriceHeader client:load />
-  <div class="mt-space-xl">
+  <div id="nav-wrapper" class="nav-wrapper mt-space-xl">
 	  <Nav />
   </div>
   
-  <main class="container">
-    <slot />
+  <main>
+    <div class="container">
+      <slot /> 
+
+    </div>
   </main>
   
   <Footer /> 
 </BaseLayout>
+
+<style>
+  #nav-wrapper.nav--scrolled {
+    position: sticky;
+    top: 0;
+    left: 0;
+  background-color: var(--primary-900);
+  padding-block: var(--space-s);
+  z-index: 50;
+  transition: 0.3s ease;
+  }
+}
+</style>
+
+<script>
+  // Seleccionamos el contenedor
+  const navWrapper = document.getElementById('nav-wrapper');
+
+  // Escuchamos el evento de scroll
+  window.addEventListener('scroll', () => {
+    // scrollY te da los píxeles recorridos verticalmente
+    if (window.scrollY > 100) {
+      navWrapper.classList.add('nav--scrolled');
+    } else {
+      navWrapper.classList.remove('nav--scrolled');
+    }
+  });
+</script>

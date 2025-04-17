@@ -7,7 +7,7 @@
             src="/images/light_bulb.png" 
             width="40" 
             alt="light_bulb" 
-            class="header-price__logo mr-space-xs" 
+            class="header-price__logo" 
           />
           <div class="d-flex">
             <div class="current-price">

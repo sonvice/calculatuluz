@@ -6,7 +6,6 @@ const { id } = Astro.params;
 
 // Obtener todas las entradas de la colección tipsyguias
 const allTips = await getCollection('tipsyguias');
-console.log(allTips);
 // Buscar la entrada que coincida con el slug
 const post = allTips.find((entry) => entry.id === id);
 
@@ -19,6 +18,7 @@ const { Content } = await render(post);
 ---
 
 <Layout title={post.data.title} description={post.data.description ?? ''}>
+  <a href="/tipsyguias" class="text-size-2">Volver</a>
   <h1>{post.data.title}</h1>
   <Content />
 </Layout>
