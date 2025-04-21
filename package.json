@@ -12,6 +12,7 @@
     "@astrojs/node": "^9.2.0",
     "@astrojs/vue": "^5.0.10",
     "@fontsource-variable/montserrat": "^5.2.5",
+    "@supabase/supabase-js": "^2.49.4",
     "astro": "^5.7.2",
     "chart.js": "^3.9.1",
     "luxon": "^3.6.1",
