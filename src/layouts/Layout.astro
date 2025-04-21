@@ -44,9 +44,10 @@ const { title, description } = Astro.props;
 </style>
 
 <script>
-  // Seleccionamos el contenedor
-  const navWrapper = document.getElementById('nav-wrapper');
+// Seleccionamos el contenedor con verificación de nulidad
+const navWrapper = document.getElementById('nav-wrapper');
 
+if (navWrapper) {
   // Escuchamos el evento de scroll
   window.addEventListener('scroll', () => {
     // scrollY te da los píxeles recorridos verticalmente
@@ -56,4 +57,8 @@ const { title, description } = Astro.props;
       navWrapper.classList.remove('nav--scrolled');
     }
   });
+} else {
+  console.warn('⚠️ No se encontró el elemento con id "nav-wrapper"');
+}
+
 </script>

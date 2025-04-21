@@ -1,40 +1,55 @@
 body {
-    font-family: var(--ff-base);
-    font-size: var(--size-0);
-    background-color: var(--primary-800);
-    color: var(--neutral-900);
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-  main{
-    flex: 1;
-  }
-  
-  h1,
-  h2,
-  h3 {
-    line-height: 1.2;
-    font-weight: var(--fw-bold);
-  }
-  
-  h1 {
-    font-size: var(--size-3);
-    max-width: 28ch;
-  }
-  h1,
-  h2 {
-    font-family: var(--ff-accent);
-  }
-  h2 {
-    font-size: var(--size-2);
-  }
-  h3{
-    font-size: var(--size-2);
-  }
-  a:hover {
-    text-decoration: currentColor;
-  }
-  p{
+  font-family: var(--ff-base);
+  font-size: var(--size-0);
+  background-color: var(--primary-800);
+  color: var(--neutral-900);
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+main {
+  flex: 1;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: var(--size-3);
+  max-width: 28ch;
+}
+h1,
+h2 {
+  font-family: var(--ff-accent);
+}
+h2 {
+  font-size: var(--size-2);
+}
+h3 {
+  font-size: var(--size-2);
+}
+a:hover {
+  text-decoration: currentColor;
+}
+p {
   max-width: 70ch;
+}
+:is(h1, h2, h3) {
+  display: flex;
+  font-weight: var(--bold);
+  gap: 1ch;
+  line-height: 1.2;
+}
+a {
+  color: currentColor;
+  text-decoration-color: var(--accent-400);
+  text-decoration-thickness: 2px;
+  text-underline-offset: .2ex;
+}
+[role=list] {
+  margin-bottom: 0;
+  padding: 0;
 }

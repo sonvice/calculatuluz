@@ -10,6 +10,7 @@ const tipsyguias = defineCollection({
     title: z.string(),
     description: z.string().optional(),
     image: z.string().optional(),
+    tags: z.array(z.string()).optional(),
     date: z.coerce.date().optional(),
   }),
 });

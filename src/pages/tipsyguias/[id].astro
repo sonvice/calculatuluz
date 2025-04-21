@@ -14,11 +14,25 @@ if (!post) {
   return Astro.redirect('/404'); // O puedes lanzar un error aquí, como prefieras
 }
 
+//Options
+const options: Intl.DateTimeFormatOptions = {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
+
 const { Content } = await render(post);
 ---
 
 <Layout title={post.data.title} description={post.data.description ?? ''}>
-  <a href="/tipsyguias" class="text-size-2">Volver</a>
-  <h1>{post.data.title}</h1>
-  <Content />
+  <div class="post-tips-guias | mt-space-3xl prose flow text-neutral-50 m-space-auto">
+      <a href="/tipsyguias" class="d-block mb-space-l"> ← Volver</a>
+      <time datetime={post.data.date?.toISOString()}>
+        {post.data.date?.toLocaleDateString(undefined, options)}
+    </time>
+
+    <h1 class="text-neutral-50">{post.data.title}</h1>
+    <Content />
+  </div>
 </Layout>

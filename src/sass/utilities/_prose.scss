@@ -1,0 +1,9 @@
+.prose {
+    --flow-space: var(--space-m);
+    line-height: 1.8;
+    max-width: 50rem;
+  }
+
+  .prose :is(pre,pre+*,figure,figure+*,h2,h3,h4) {
+    --flow-space: var(--space-xl);
+}
