@@ -3,13 +3,19 @@ import netlify from '@astrojs/netlify';
 
 import vue from '@astrojs/vue';
 
+import partytown from '@astrojs/partytown';
+
 export default defineConfig({
   output: 'server',
-  site: 'http://localhost:4321/',
+  site: 'https://calculatuluz.es/',
 
   adapter: netlify({
     edge: false, 
   }),
 
-  integrations: [vue()],
+  integrations: [vue(), partytown({
+    config: {
+      forward: ['dataLayer.push']
+    }
+  })],
 });

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@astrojs/node": "^9.2.0",
+    "@astrojs/partytown": "^2.1.4",
     "@astrojs/vue": "^5.0.10",
     "@fontsource-variable/montserrat": "^5.2.5",
     "@supabase/supabase-js": "^2.49.4",
