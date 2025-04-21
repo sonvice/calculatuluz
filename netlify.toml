@@ -1,0 +1,10 @@
+[build]
+  command   = "npm run build"
+  publish   = "dist/"
+
+[functions]
+  // apunta a las funciones generadas por Astro
+  directory = "dist/functions"
+
+[dev]
+  functions = "dist/functions"

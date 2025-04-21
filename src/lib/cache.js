@@ -1,74 +1,43 @@
-// cache.js
-import fs from 'fs/promises';
-import path from 'path';
+import db from './db.js';
 
-// Definir constantes
-const CACHE_DIR = path.join(process.cwd(), 'public', 'datos-cache');
-const CACHE_FILE = path.join(CACHE_DIR, 'prices.json');
-const BACKUP_FILE = path.join(CACHE_DIR, 'backup-prices.json');
-const CACHE_TTL = 3600 * 1000; // 1 hora en milisegundos
-
-// Helper para crear directorio si no existe
-const ensureCacheDir = async () => {
-  try {
-    await fs.access(CACHE_DIR);
-  } catch {
-    await fs.mkdir(CACHE_DIR, { recursive: true });
-  }
-};
+const KEY = 'prices';
+const CACHE_TTL_MS = 3600 * 1000; // 1 hora
 
 export async function getCachedData() {
-  try {
-    await ensureCacheDir();
-    const data = await fs.readFile(CACHE_FILE, 'utf-8');
-    const parsed = JSON.parse(data);
-    
-    // Verificar si el caché está expirado
-    const cacheAge = Date.now() - parsed.timestamp;
-    if (cacheAge > CACHE_TTL) {
-      console.log('[CACHE] Datos expirados');
-      return null;
-    }
-    
-    console.log(`[CACHE] Última actualización: ${new Date(parsed.timestamp).toLocaleString()}`);
-    console.log(`[CACHE] Precio máximo: ${parsed.data.maxPrice} €/kWh`);
-    
-    return parsed.data;
-  } catch (error) {
-    console.error('[CACHE] Error leyendo caché:', error.message);
+  // Leemos la fila
+  const row = await db
+    .prepare('SELECT value, last_updated FROM cache WHERE key = ?')
+    .bind(KEY)
+    .first();
+  if (!row) return null;
+
+  // Comprobamos si está expirado
+  const age = Date.now() - row.last_updated;
+  if (age > CACHE_TTL_MS) {
+    console.log('[CACHE] Expirado tras', Math.floor(age/1000), 's');
     return null;
   }
+
+  const data = JSON.parse(row.value);
+  console.log('[CACHE] Última actualización:', new Date(row.last_updated).toLocaleString());
+  return data;
 }
 
 export async function updateCache(newData) {
-  try {
-    await ensureCacheDir();
-    
-    const cacheData = {
-      data: newData,
-      timestamp: Date.now()
-    };
-    
-    // Escribir primero el backup
-    await fs.writeFile(BACKUP_FILE, JSON.stringify(cacheData));
-    // Mover el backup al archivo principal
-    await fs.rename(BACKUP_FILE, CACHE_FILE);
-    
-    console.log('[CACHE] Actualizado correctamente');
-    return cacheData;
-  } catch (error) {
-    console.error('[CACHE] Error actualizando caché:', error.message);
-    return null;
-  }
-}
+  const text = JSON.stringify(newData);
+  const now = Date.now();
 
-export async function getBackupData() {
-  try {
-    await ensureCacheDir();
-    const data = await fs.readFile(BACKUP_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('[CACHE] Error leyendo backup:', error.message);
-    return null;
-  }
+  await db
+    .prepare(`
+      INSERT INTO cache (key, value, last_updated)
+      VALUES (?, ?, ?)
+      ON CONFLICT(key) DO UPDATE SET
+        value = excluded.value,
+        last_updated = excluded.last_updated
+    `)
+    .bind(KEY, text, now)
+    .run();
+
+  console.log('[CACHE] Actualizado en D1', new Date(now).toLocaleString());
+  return newData;
 }

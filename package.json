@@ -19,5 +19,8 @@
     "sass": "^1.86.0",
     "vue": "^3.5.13",
     "vue-chart-3": "^3.1.8"
+  },
+  "devDependencies": {
+    "@astrojs/netlify": "^6.3.0"
   }
 }

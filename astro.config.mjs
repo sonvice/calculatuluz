@@ -7,8 +7,8 @@ export default defineConfig({
   output: 'server',
   site: 'http://localhost:4321/',
 
-  adapter: node({
-    mode: 'standalone',
+  adapter: netlify({
+    edge: false, 
   }),
 
   integrations: [vue()],
