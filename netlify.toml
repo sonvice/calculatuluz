@@ -3,7 +3,7 @@
   publish   = "dist/"
 
 [functions]
-  // apunta a las funciones generadas por Astro
+  # apunta a las funciones generadas por Astro
   directory = "dist/functions"
 
 [dev]
