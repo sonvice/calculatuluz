@@ -3,9 +3,9 @@
 ---
 
 <footer
-class="text-neutral-50 text-size--1 p-space-l mt-space-s rounded-sm bg-primary-900">
-<div class="container">
-  <div class="d-flex">
+  class="text-neutral-50 text-size--1 p-space-l mt-space-s rounded-sm bg-primary-900">
+  <div class="container">
+    <div class="d-flex">
       <p>© 2025 Calculatuluz. Todos los derechos reservados.</p>
       <p class="data-source">
         Datos proporcionados por <a
@@ -24,16 +24,20 @@ class="text-neutral-50 text-size--1 p-space-l mt-space-s rounded-sm bg-primary-9
 </footer>
 
 <style>
-  footer{
-    --horizontal-alignment: center;}
+  footer {
+    --horizontal-alignment: center;
+  }
 </style>
 
 <script>
-  // Actualizar fecha
-  document.getElementById('updateTime').textContent =
-    new Date().toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+  document.addEventListener('DOMContentLoaded', () => {
+    const updateElement = document.getElementById('updateTime');
+    if (updateElement) {
+      updateElement.textContent = new Date().toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    }
+  });
 </script>

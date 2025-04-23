@@ -58,5 +58,12 @@ export function usePriceData() {
     return matchingPrice ? matchingPrice.price : priceData.value.currentPrice;
   });
 
-  return { priceData, fetchPriceData, actualPrice };
+  const formattedPrices = computed(() => {
+    return priceData.value.prices.map(item => ({
+      ...item,
+      price: parseFloat(item.price.toFixed(4))
+    }));
+  });
+
+  return { priceData, fetchPriceData, actualPrice,formattedPrices };
 }
