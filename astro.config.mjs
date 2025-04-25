@@ -5,6 +5,8 @@ import vue from '@astrojs/vue';
 
 import partytown from '@astrojs/partytown';
 
+import mdx from '@astrojs/mdx';
+
 export default defineConfig({
   output: 'server',
   site: 'https://calculatuluz.es/',
@@ -17,5 +19,5 @@ export default defineConfig({
     config: {
       forward: ['dataLayer.push']
     }
-  })],
+  }), mdx({extendMarkdownConfig: true,})],
 });

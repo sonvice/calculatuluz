@@ -4,7 +4,7 @@ import { glob } from 'astro/loaders';
 const tipsyguias = defineCollection({
   loader: glob({
     base: './src/tips/tipsyguias',
-    pattern: '**/*.md' 
+    pattern: '**/*.{md,mdx}' 
   }),
   schema: z.object({
     title: z.string(),
