@@ -157,7 +157,6 @@ const chartOptions = computed(() => ({
 <style scoped>
 .chart-container {
   position: relative;
-  height: 500px;
   width: 100%;
 }
 

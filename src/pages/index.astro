@@ -6,27 +6,24 @@ import ActualPriceDisplay from '../components/ActualPriceDisplay.vue';
 import PriceCards from '../components/PriceCards.vue';
 import PriceList from '../components/PriceList.vue';
 ---
-<Layout title="Calculadora de Consumo Eléctrico" description="Calcula el consumo eléctrico de tus electrodomésticos y su coste asociado.">
+<Layout title="Calculadora de Consumo Eléctrico | kWh, Costo Diario y Gráfico de Precios en Tiempo Real" description="Calcula el consumo eléctrico de tus electrodomésticos en kWh y euros. Descubre el precio del kWh por horas con nuestro gráfico actualizado y ahorra en tu factura.">
   <div class="text-primary-100 mt-space-2xl">
-    <h1 class="fw-700 text-neutral-50">Calculadora de consumo eléctrico</h1>
-    <p class="mt-space-s">
-      Descubre el consumo energético de tus electrodomésticos introduciendo
+    <h1 class="fw-700 text-neutral-50">Calculadora consumo eléctrico en kWh y € – Ahorra en tu factura</h1>
+    <p class="mt-space-m">
+      Descubre el consumo energético en euros de tus electrodomésticos introduciendo
       los datos necesarios en el formulario. La calculadora te mostrará
       instantáneamente el coste asociado.
     </p>
-    <div class="bg-primary-900 p-space-l mt-space-l rounded-sm">
+    <div class="bg-primary-900 p-space-l mt-space-xl rounded-sm">
       <Calculator client:load />
     </div>
     <hr class="text-neutral-400 my-space-2xl" />
-    <h2 class="fw-700 text-neutral-50">Evolución precio del kWh por horas</h2>
-    <div class="mb-space-2xs">
-      <ActualPriceDisplay client:load />
-    </div>
-    <p class="mb-space-l">Consulta la evolución del precio del kWh por horas en España y descubre cuáles son las franjas más económicas del día para ahorrar en tu consumo eléctrico. </p>
+    <h2 class="fw-700 text-neutral-50 mb-space-s">Evolución precio del kWh España</h2>
+    <p class="mb-space-xl">Consulta la evolución del precio del kWh por horas en España y descubre cuáles son las franjas más económicas del día para ahorrar en tu consumo eléctrico. </p>
     <PriceCards client:load />
-    <div class="bg-primary-900 px-space-l pt-space-l mt-space-s mb-space-3xl rounded-sm">
+    <div class="bg-primary-900 px-space-l py-space-l mt-space-s mb-space-3xl rounded-sm">
       <PriceChart client:only  class="desktop-only"/>
-      <PriceList client:only  class="mobile-only" />
+      <PriceList client:load  class="mobile-only" />
     </div>
   </div>
 </Layout>

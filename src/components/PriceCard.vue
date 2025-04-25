@@ -18,7 +18,7 @@ defineProps({
       <div class="header">
         <h3 class="category">{{ category }}</h3>
         <span v-if="currentPrice" class="current-price">
-          {{ currentPrice.toFixed(4) }} €/kWh
+           {{ currentPrice.toFixed(3) }} €/kWh
         </span>
       </div>
       
@@ -31,7 +31,7 @@ defineProps({
         <div class="stat">
           <span class="label">Rango</span>
           <span class="value">
-            {{ minPrice.toFixed(4) }} - {{ maxPrice.toFixed(4) }}
+            {{ minPrice.toFixed(3) }} - {{ maxPrice.toFixed(3) }} <small>€/kWh</small>
           </span>
         </div>
       </div>
