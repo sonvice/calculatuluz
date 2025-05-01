@@ -1,5 +1,5 @@
 <template>
-  <div class="custom-select" ref="dropdown">
+  <div class="custom-select text-primary-200" ref="dropdown">
     <div class="select-header" @click="toggleDropdown">
       <div v-if="!selectedLabel" class="placeholder d-flex">
         <svg

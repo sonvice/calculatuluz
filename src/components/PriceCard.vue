@@ -17,7 +17,7 @@ defineProps({
     <div class="content">
       <div class="header">
         <h3 class="category">{{ category }}</h3>
-        <span v-if="currentPrice" class="current-price">
+        <span v-if="currentPrice" class="current-price text-primary-100">
            {{ currentPrice.toFixed(3) }} €/kWh
         </span>
       </div>

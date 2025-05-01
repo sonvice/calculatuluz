@@ -53,3 +53,7 @@ a {
   margin-bottom: 0;
   padding: 0;
 }
+::placeholder {
+  color: var(--primary-200);
+  opacity: 1;
+}

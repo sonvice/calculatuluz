@@ -1,3 +1,9 @@
 .rounded-sm {
   border-radius:var(--rounded-sm); // 2px
 }
+.rounded-md {
+  border-radius:var(--rounded-md); // 4px
+}
+.rounded-lg {
+  border-radius:var(--rounded-lg); // 8px
+}

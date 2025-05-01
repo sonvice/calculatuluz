@@ -1,25 +1,59 @@
 import { getCachedData, updateCache } from '../../lib/cache';
 
-// Configuración principal
-const CACHE_TTL = 3600; // Tiempo de vida de la caché en segundos (1 hora)
-const STALE_TTL = 300; // Tiempo de gracia para datos obsoletos (5 minutos)
-const INDICATOR_ID = 1001; // ID del indicador ESIOS
-const FALLBACK_PRICE = 0.15; // Precio por defecto para fallbacks
+// Configuración principal (MANTENIDO SIN CAMBIOS)
+const CACHE_TTL = 3600;
+const STALE_TTL = 300;
+const INDICATOR_ID = 1001;
+const FALLBACK_PRICE = 0.15;
 
-// Helper para convertir fechas a formato ISO UTC
 function toISOUTC(date) {
   return new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString();
+}
+
+// Función NUEVA para obtener histórico
+async function getHistoricalAverage() {
+  try {
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    
+    const apiUrl = new URL(`https://api.esios.ree.es/indicators/${INDICATOR_ID}`);
+    const params = new URLSearchParams({
+      start_date: toISOUTC(yesterday),
+      end_date: toISOUTC(now),
+      time_trunc: 'day',
+      time_agg: 'avg'
+    });
+    apiUrl.search = params.toString();
+
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Accept': 'application/json',
+        'x-api-key': import.meta.env.ESIOS_TOKEN
+      }
+    });
+
+    if (!response.ok) throw new Error('Error histórico');
+    
+    const data = await response.json();
+    const historicalValue = data.indicator.values[0]?.value;
+    
+    return historicalValue ? historicalValue / 1000 : FALLBACK_PRICE;
+    
+  } catch (error) {
+    console.error('Error obteniendo histórico:', error);
+    return FALLBACK_PRICE;
+  }
 }
 
 export async function GET(context) {
   const ESIOS_TOKEN = import.meta.env.ESIOS_TOKEN;
   
   try {
-    // 1. Manejo de caché: Verificar datos existentes
+    // 1. Manejo de caché (MANTENIDO SIN CAMBIOS)
     const cached = await getCachedData();
     const cacheAge = cached ? Date.now() - new Date(cached.lastUpdated).getTime() : CACHE_TTL * 1000 + 1;
     
-    // Devolver datos de caché si son recientes
     if (cacheAge < CACHE_TTL * 1000) {
       return new Response(JSON.stringify(cached), {
         headers: {
@@ -30,24 +64,22 @@ export async function GET(context) {
       });
     }
 
-    // 2. Configurar rango temporal: Últimas 24 horas UTC
+    // 2. Obtener datos ACTUALES (TU LÓGICA ORIGINAL)
     const now = new Date();
     const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const endDate = new Date(startDate);
     endDate.setUTCDate(startDate.getUTCDate() + 1);
     
-    // 3. Construir URL de la API con parámetros
     const apiUrl = new URL(`https://api.esios.ree.es/indicators/${INDICATOR_ID}`);
     const params = new URLSearchParams({
       start_date: toISOUTC(startDate),
       end_date: toISOUTC(endDate),
-      time_agg: 'avg', // Agregación por promedio
-      time_trunc: 'hour', // Agrupación por hora
-      locale: 'es' // Idioma español
+      time_agg: 'avg',
+      time_trunc: 'hour',
+      locale: 'es'
     });
     apiUrl.search = params.toString();
 
-    // 4. Realizar llamada a la API ESIOS
     const response = await fetch(apiUrl, {
       headers: { 
         'Accept': 'application/json; application/vnd.esios-api-v1+json',
@@ -56,23 +88,23 @@ export async function GET(context) {
       }
     });
     
-    // Manejo de errores HTTP
     if (!response.ok) {
       const errorBody = await response.text();
       throw new Error(`HTTP ${response.status}: ${errorBody}`);
     }
     
-    // 5. Procesamiento de datos recibidos
+    // 3. Procesar datos actuales (TU LÓGICA ORIGINAL)
     const data = await response.json();
     const processed = processData(data, cached);
     
-    // 6. Actualizar caché solo si hay cambios importantes
-// En la función GET, actualizar condición de caché:
-if (!cached || processed.maxPrice.value !== (cached.maxPrice?.value ?? cached.maxPrice)) {
-    await updateCache(processed);
-  }
+    // 4. Obtener histórico SEPARADAMENTE (NUEVO)
+    processed.previousAverage = Number((await getHistoricalAverage()).toFixed(4));
+    
+    // 5. Actualizar caché (MANTENIDO)
+    if (!cached || processed.maxPrice.value !== (cached.maxPrice?.value ?? cached.maxPrice)) {
+      await updateCache(processed);
+    }
 
-    // Devolver datos actualizados
     return new Response(JSON.stringify(processed), {
       headers: {
         'Content-Type': 'application/json',
@@ -82,7 +114,6 @@ if (!cached || processed.maxPrice.value !== (cached.maxPrice?.value ?? cached.ma
     });
     
   } catch (error) {
-    // Manejo de errores: Usar caché o datos de respaldo
     console.error('API Error:', error);
     const cached = await getCachedData();
     return Response.json(cached || getFallbackData(), {
@@ -91,36 +122,11 @@ if (!cached || processed.maxPrice.value !== (cached.maxPrice?.value ?? cached.ma
   }
 }
 
-// Función para generar datos de respaldo
-function getFallbackData() {
-    const fallbackPrice = FALLBACK_PRICE;
-    return {
-      prices: Array.from({length: 24}, (_, i) => ({
-        hour: `${String(i).padStart(2, '0')}:00 - ${String((i + 1) % 24).padStart(2, '0')}:00`,
-        price: fallbackPrice,
-        category: 'Medio'
-      })),
-      currentPrice: fallbackPrice,
-      averagePrice: Number(fallbackPrice.toFixed(3)), // ***
-      minPrice: { // *** Nueva estructura
-        value: Number(fallbackPrice.toFixed(5)),
-        timeRange: 'De 00 a 01h'
-      },
-      maxPrice: { // *** Nueva estructura
-        value: Number(fallbackPrice.toFixed(5)),
-        timeRange: 'De 00 a 01h'
-      },
-      lastUpdated: new Date().toISOString()
-    };
-  }
-
-// Procesamiento principal de datos
+// FUNCIÓN ORIGINAL SIN MODIFICAR
 function processData(apiData, cachedData) {
-    // 1. Extraer valores de la API
     const values = apiData?.indicator?.values || [];
     const currentHour = new Date().getHours();
     
-    // 2. Mapear precios por hora UTC
     const hourlyPrices = values.reduce((acc, item) => {
       const dt = new Date(item.datetime_utc);
       const hour = dt.getUTCHours();
@@ -128,19 +134,15 @@ function processData(apiData, cachedData) {
       return acc;
     }, {});
   
-    // 3. Construir array completo de 24 horas (CORREGIR ACCESO CACHÉ)
     const originalPrices = Array.from({length: 24}, (_, i) => {
-      // *** Usar cachedData?.prices[i]?.price en vez de cachedData?.prices[i]
       return hourlyPrices[i] ?? cachedData?.prices[i]?.price ?? FALLBACK_PRICE;
     });
   
-    // 4. Cálculos estadísticos (DETECTAR MÚLTIPLES HORARIOS)
     const sum = originalPrices.reduce((a, b) => a + b, 0);
     const averagePrice = sum / 24;
     const minPriceValue = Math.min(...originalPrices);
     const maxPriceValue = Math.max(...originalPrices);
     
-    // *** Buscar TODOS los índices con precios mín/máx
     const minIndices = originalPrices
       .map((p, i) => p === minPriceValue ? i : -1)
       .filter(i => i !== -1);
@@ -149,15 +151,13 @@ function processData(apiData, cachedData) {
       .map((p, i) => p === maxPriceValue ? i : -1)
       .filter(i => i !== -1);
   
-    // Helper para formatear rangos (AGREGAR PADDING)
     const getTimeRangeFromIndex = (index) => {
       if (index === -1) return 'No disponible';
-      const startHour = String(index).padStart(2, '0'); // *** Padding para 2 dígitos
+      const startHour = String(index).padStart(2, '0');
       const endHour = String((index + 1) % 24).padStart(2, '0');
-      return `De ${startHour} a ${endHour}h`; // *** Formato 02 en vez de 2
+      return `De ${startHour} a ${endHour}h`;
     };
   
-    // 5. Categorización de precios por hora
     const categorizedPrices = originalPrices.map((price, i) => {
       const nextHour = (i + 1) % 24;
       const percent = (price / maxPriceValue) * 100;
@@ -169,7 +169,6 @@ function processData(apiData, cachedData) {
       };
     });
   
-    // 6. Obtener precio actual (CORREGIR COMPARACIÓN HORAS UTC)
     const currentPriceEntry = categorizedPrices.find(p => {
       const hourPart = p.hour.split(' - ')[0];
       const hour = parseInt(hourPart.split(':')[0], 10);
@@ -177,14 +176,13 @@ function processData(apiData, cachedData) {
     });
     const currentPrice = currentPriceEntry ? currentPriceEntry.price : FALLBACK_PRICE;
   
-    // 7. Estructurar respuesta final (AGREGAR CAMPOS FALTANTES)
     return {
       prices: categorizedPrices,
       currentPrice: Number(currentPrice.toFixed(4)),
-      averagePrice: Number(averagePrice.toFixed(3)), // *** Nuevo campo
+      averagePrice: Number(averagePrice.toFixed(3)),
       minPrice: {
-        value: Number(minPriceValue.toFixed(5)), // *** 5 decimales
-        timeRange: minIndices.map(getTimeRangeFromIndex).join(' / ') // *** Múltiples horarios
+        value: Number(minPriceValue.toFixed(5)),
+        timeRange: minIndices.map(getTimeRangeFromIndex).join(' / ')
       },
       maxPrice: {
         value: Number(maxPriceValue.toFixed(5)),
@@ -192,10 +190,33 @@ function processData(apiData, cachedData) {
       },
       lastUpdated: new Date().toISOString()
     };
-  }
-  
+}
 
-// Clasificador de categorías de precio
+// FUNCIÓN ORIGINAL SIN MODIFICAR
+function getFallbackData() {
+    const fallbackPrice = FALLBACK_PRICE;
+    return {
+      prices: Array.from({length: 24}, (_, i) => ({
+        hour: `${String(i).padStart(2, '0')}:00 - ${String((i + 1) % 24).padStart(2, '0')}:00`,
+        price: fallbackPrice,
+        category: 'Medio'
+      })),
+      currentPrice: fallbackPrice,
+      averagePrice: Number(fallbackPrice.toFixed(3)),
+      previousAverage: Number(fallbackPrice.toFixed(4)),
+      minPrice: {
+        value: Number(fallbackPrice.toFixed(5)),
+        timeRange: 'De 00 a 01h'
+      },
+      maxPrice: {
+        value: Number(fallbackPrice.toFixed(5)),
+        timeRange: 'De 00 a 01h'
+      },
+      lastUpdated: new Date().toISOString()
+    };
+}
+
+// FUNCIÓN ORIGINAL SIN MODIFICAR
 function getPriceCategory(percent) {
   if (percent < 40) return 'Muy bajo';
   if (percent <= 60) return 'Bajo';

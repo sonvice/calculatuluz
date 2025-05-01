@@ -7,8 +7,9 @@ export function usePriceData() {
     prices: [],
     minPrice: null,
     maxPrice: null,
+    previousAverage: null 
   });
-
+  const loading = ref(true);
   const fetchPriceData = async () => {
     try {
       const apiUrl = new URL('/api/prices', window.location.origin);
@@ -20,6 +21,7 @@ export function usePriceData() {
       priceData.value = {
         currentPrice: data.currentPrice,
         averagePrice: data.averagePrice,
+        previousAverage: data.previousAverage,
         lastUpdated: new Date().toISOString(),
         prices: data.prices,
         minPrice: data.minPrice,
@@ -28,6 +30,8 @@ export function usePriceData() {
     } catch (error) {
       console.error('Error fetching prices:', error);
       alert('⚠️ No se pudieron cargar los precios actuales');
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -65,5 +69,5 @@ export function usePriceData() {
     }));
   });
 
-  return { priceData, fetchPriceData, actualPrice,formattedPrices };
+  return { priceData, fetchPriceData, actualPrice,formattedPrices,loading  };
 }

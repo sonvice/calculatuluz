@@ -14,25 +14,6 @@
               <span class="fw-700">Precio actual: </span>
               <span class="header-price__price">{{ formattedCurrentPrice }}</span>
             </div>
-            <div class="stats-container d-flex">
-              <div class="price-stat">
-                <span class="fw-500">Media: </span>
-                <span class="stat-value">{{ formattedAveragePrice }}</span>
-              </div>
-              <div class="price-stat min-price">
-                <span class="fw-500">Mín: </span>
-                <span class="stat-value">{{ formattedMinPrice }}</span>
-                <span class="time-range">({{ priceData.minPrice?.timeRange || '' }})</span>
-              </div>
-              <div class="price-stat max-price">
-                <span class="fw-500">Máx: </span>
-                <span class="stat-value">{{ formattedMaxPrice }}</span>
-                <span class="time-range">({{ priceData.maxPrice?.timeRange || '' }})</span>
-              </div>
-            </div>
-            <div class="last-updated fw-500">
-              Actualizado: {{ formattedLastUpdated }}
-            </div>
           </div>
         </div>
       </div>
