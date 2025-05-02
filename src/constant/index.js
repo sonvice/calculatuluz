@@ -1,7 +1,8 @@
 export const navigation = [
-    { title: 'Tips & Guías', url: '/tipsyguias' },
-    { title: 'Calculadora', url: '/', onlyTips: true },
-  ];
+  { title: 'Tips & Guías', url: '/tipsyguias' },
+  { title: 'Precio luz hoy', url: '/precio-luz-hoy' },
+  { title: 'Calculadora', url: '/', onlyTips: true },
+];
 
 
  export const appliances = [

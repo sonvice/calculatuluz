@@ -1,6 +1,6 @@
 <script setup>
   import { computed } from 'vue';
-  import { usePriceData } from './composables/usePriceData.js';
+  import { usePriceData } from '../utils/usePriceData.js';
 
   const { priceData } = usePriceData();
 

@@ -6,7 +6,7 @@
   
   <script setup>
   import { computed } from 'vue';
-  import { usePriceData } from './composables/usePriceData.js'; // Ajusta la ruta según tu estructura
+  import { usePriceData } from '../utils/usePriceData.js'; // Ajusta la ruta según tu estructura
   
   const { priceData, actualPrice } = usePriceData();
   

@@ -4,23 +4,17 @@ import Calculator from '../components/Calculator.vue';
 import PriceChart from '../components/PriceChart.vue';
 import PriceCards from '../components/PriceCards.vue';
 import PriceList from '../components/PriceList.vue';
-import ElectricityPriceCard from '../components/ElectricityPriceCard.vue';
 import ComsumptionGuidance from '../components/ConsumptionGuidance.vue';
 ---
 <Layout title="Calculadora de Consumo Eléctrico | kWh, Costo Diario y Gráfico de Precios en Tiempo Real" description="Calcula el consumo eléctrico de tus electrodomésticos en kWh y euros. Descubre el precio del kWh por horas con nuestro gráfico actualizado y ahorra en tu factura.">
   <div class="text-primary-100 mt-space-l">
-    <h1 class="fw-700 text-neutral-50">Calculadora de consumo eléctrico en kWh y € – Ahorra en tu factura</h1>
+    <h1 class="fw-700 text-neutral-50">Calculadora online gratuita de consumo eléctrico de electrodomésticos</h1>
     <p class="mt-space-m">
-      Descubre el consumo energético en euros de tus electrodomésticos introduciendo
-      los datos necesarios en el formulario. La calculadora te mostrará
-      instantáneamente el coste asociado.
+      Con esta calculadora de consumo eléctrico de electrodomésticos online, podrás saber en segundos cuántos kWh y euros gasta tu lavadora, nevera o cualquier aparato.
     </p>
-    <div class="mt-space-xl">
-      <ElectricityPriceCard  client:load />
-    </div>
-    <div>
-      <ComsumptionGuidance client:load/>
-    </div>
+    <p class="mt-space-s">Ideal para hogares y pequeños negocios”) y por qué les ayuda (ahorrar, planificar cargas en horas baratas, etc.)</p>
+    <h2 class="mt-space-m text-neutral-50">¿Cómo calcular el consumo en kWh y euros?</h2>
+    <p class="mt-space-s">Multiplicamos la potencia (W) por las horas de uso y dividimos entre 1 000 para obtener kWh. Después aplicamos el precio medio actual (con IVA incluido) para mostrar el coste en €.</p>
     <div class="bg-primary-900 p-space-l mt-space-m rounded-md text-neutral-50">
       <Calculator client:load />
     </div>

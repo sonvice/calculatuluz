@@ -66,7 +66,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { BarChart2Icon, ZapIcon, RefreshCwIcon, InfoIcon } from 'lucide-vue-next';
-import { usePriceData } from './composables/usePriceData.js';
+import { usePriceData } from '../utils/usePriceData.js';
 
 // Datos y estado de carga
 const { priceData, loading } = usePriceData();

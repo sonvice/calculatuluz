@@ -23,7 +23,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { usePriceData } from './composables/usePriceData.js'; // Ajusta la ruta según corresponda
+import { usePriceData } from '../utils/usePriceData.js'; // Ajusta la ruta según corresponda
 
 const { priceData } = usePriceData();
 

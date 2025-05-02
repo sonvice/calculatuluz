@@ -142,7 +142,7 @@
 
 <script setup>
   import { computed, onMounted, onUnmounted, ref } from 'vue';
-  import { usePriceData } from './composables/usePriceData.js';
+  import { usePriceData } from '../utils/usePriceData.js';
   import TrendArrow from './TrendArrow.vue';
 
   // Datos y estado de carga

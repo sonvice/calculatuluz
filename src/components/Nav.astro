@@ -5,8 +5,8 @@ import Logo from '../assets/logo-calcula-tu-luz.svg';
 const currentPath = Astro.url.pathname;
 
 const navigation = navDefault.filter((item) => {
-  // Si el item tiene la propiedad onlyTips, solo se mostrará cuando la ruta empiece con "/tipsyguias"
-  if (item.onlyTips && !currentPath.startsWith('/tipsyguias')) {
+  // Mostrar la Calculadora en todas las rutas excepto "/"
+  if (item.onlyTips && currentPath === '/') {
     return false;
   }
   return true;

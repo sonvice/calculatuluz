@@ -9,7 +9,7 @@ import mdx from '@astrojs/mdx';
 
 export default defineConfig({
   output: 'server',
-  site: 'https://calculatuluz.es/',
+  site: 'https://calculatuluz.es',
 
   adapter: netlify({
     edge: false, 

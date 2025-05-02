@@ -1,5 +1,6 @@
 <template>
   <div>
+    <form role="form" aria-labelledby="calc-title">
     <div class="form-calulator">
       <div>
         <p class="text-size--1 mb-space-3xs">Selecciona un electrodoméstico</p>
@@ -37,6 +38,7 @@
       :results="results"
       :lastUpdated="priceData.lastUpdated"
       :currentPrice="actualPrice" />
+    </form>
   </div>
 </template>
 
@@ -46,7 +48,7 @@
   import CustomSelect from './CustomSelect.vue';
   import InputField from './InputField.vue';
   import ResultsDisplay from './ResultsDisplay.vue';
-  import { usePriceData } from './composables/usePriceData.js';
+  import { usePriceData } from '../utils/usePriceData.js';
 
   const { priceData, actualPrice } = usePriceData();
 

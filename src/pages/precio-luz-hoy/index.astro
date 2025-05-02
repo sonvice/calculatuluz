@@ -1,0 +1,94 @@
+---
+import ElectricityPriceCard from '../../components/ElectricityPriceCard.vue';
+import Layout from '../../layouts/Layout.astro';
+import ComsumptionGuidance from '../../components/ConsumptionGuidance.vue';
+import PriceCards from '../../components/PriceCards.vue';
+import PriceChart from '../../components/PriceChart.vue';
+import PriceList from '../../components/PriceList.vue';
+
+// Construir URL absoluta (funciona tanto en dev como en producción)
+const site = import.meta.env.SITE || 'http://localhost:4321'; 
+const apiUrl = new URL('/api/prices', site);
+
+// Hacer fetch con URL absoluta
+const response = await fetch(apiUrl, {
+  headers: { Accept: 'application/json' },
+});
+if (!response.ok) {
+  throw new Error(`Error al cargar los datos: ${response.status}`);
+}
+const priceData = await response.json();
+
+// Obtener precio actual según la hora
+const currentHour = new Date().getHours();
+const actualPrice = priceData.prices.find(item => {
+  const [start, end] = item.hour.split(' - ');
+  const startHour = parseInt(start.split(':')[0]);
+  const endHour = parseInt(end.split(':')[0]);
+  if (startHour < endHour) return currentHour >= startHour && currentHour < endHour;
+  return currentHour >= startHour || currentHour < endHour;
+})?.price ?? priceData.currentPrice;
+
+// Formatear fecha
+const formattedDate = new Intl.DateTimeFormat('es-ES', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+}).format(new Date());
+---
+
+
+
+<Layout title="Precio de la luz hoy en España - Tarifas por hora actualizadas" description="Consulta el precio de la luz por horas hoy en España. Ahorra planificando tus consumos con las tarifas más baratas del día.">
+  <div class="text-primary-100 mt-space-l">
+    <h1 class="fw-700 text-neutral-50">Precio de la luz hoy por horas en España – { formattedDate }</h1>
+    <p class="mt-space-m">
+        Consulta el precio de la luz hoy por horas en España. Te mostramos las franjas horarias más baratas y más caras para ayudarte a ahorrar en tu factura eléctrica.
+    </p>  
+    <h2 class="mt-space-xl text-neutral-50">¿Quieres calcular cuánto te cuesta usar tus electrodomésticos hoy?{actualPrice}</h2> 
+    <p class="mt-space-s">
+        👉 Usa nuestra <a href="/">calculadora de consumo</a>
+        para saber cuánto te cuesta usar tus electrodomésticos hoy.
+    </p>
+    <div class="mt-space-xl">
+        <ElectricityPriceCard  client:load />
+      </div>
+      <div>
+        <ComsumptionGuidance client:load/>
+      </div> 
+      
+      <hr class="text-neutral-400 my-space-2xl" />
+      <h2 class="fw-700 text-neutral-50 mb-space-s">Evolución precio del kWh España</h2>
+      <p class="mb-space-xl text-primary-100">Consulta la evolución del precio del kWh por horas en España y descubre cuáles son las franjas más económicas del día para ahorrar en tu consumo eléctrico. </p>
+      <PriceCards client:only />
+      <div class="bg-primary-900 px-space-l py-space-l mt-space-s mb-space-3xl rounded-sm">
+        <PriceChart client:only  class="desktop-only"/>
+        <PriceList client:only  class="mobile-only" />
+      </div>
+</Layout>
+
+
+<style>
+    hr {
+     opacity: 0.2;
+    }
+    .desktop-only {
+      display: block;
+    }
+    
+    .mobile-only {
+      display: none;
+    }
+  
+    @media (max-width: 767px) {
+      .desktop-only {
+        display: none !important;
+      }
+      
+      .mobile-only {
+        display: block !important;
+      }
+    }
+  </style>
