@@ -1,165 +1,203 @@
 <template>
-    <header class="price-header mt-space-xl">
-      <div>
-        <div class="header-content">
-          <div class="last-updated mb-space-s text-size--1 text-primary-200">
-            Actualizado: {{ formattedLastUpdated }}
-          </div>
-  
-          <div v-if="!hydrated || loading" class="cards-grid rounded-md">
-            <div class="skeleton rounded-md"></div>
-            <div class="skeleton rounded-md"></div>
-            <div class="skeleton rounded-md"></div>
-            <div class="skeleton rounded-md"></div>
-          </div>
-  
-          <div v-else class="cards-grid">
-            <!-- Precio Actual -->
-            <div class="price-card current rounded-md bg-primary-900">
-              <div class="card-header">
-                <span class="card-badge text-primary-50 bg-accent-500">Ahora</span>
-                <h3 class="card-title text-primary-100">Precio Actual</h3>
-                <div class="time-indicator">
-                  <span class="current-hour text-primary-200">{{ currentHour }}h</span>
-                </div>
+  <header class="price-header mt-space-xl">
+    <div>
+      <div class="header-content">
+        <div class="last-updated mb-space-s text-size--1 text-primary-200">
+          Actualizado: {{ formattedLastUpdated }}
+        </div>
+
+        <div v-if="!hydrated || loading" class="cards-grid rounded-md">
+          <div class="skeleton rounded-md"></div>
+          <div class="skeleton rounded-md"></div>
+          <div class="skeleton rounded-md"></div>
+          <div class="skeleton rounded-md"></div>
+        </div>
+
+        <div v-else class="cards-grid">
+          <!-- Precio Actual -->
+          <div class="price-card current rounded-md bg-primary-900">
+            <div class="card-header">
+              <span class="card-badge text-primary-50 bg-accent-500"
+                >Ahora</span
+              >
+              <h3 class="card-title text-primary-100">Precio Actual</h3>
+              <div class="time-indicator">
+                <span class="current-hour text-primary-200"
+                  >{{ currentHour }}h</span
+                >
               </div>
-              <div class="card-content">
-                <p class="price-display text-primary-50 d-flex">
-                  <span>{{ formattedCurrentPrice }}</span>
-                  <span class="price-trend">
-                    <!-- Arrow based on nextPriceDifference -->
-                    <TrendArrow :value="nextPriceDifference" />
-                    <span class="trend-percentage">
-                      {{ nextPriceDifference }}%
-                      <div class="trend-tooltip">
-                        {{ trendExplanation }}
-                        <div class="tooltip-arrow"></div>
-                      </div>
-                    </span>
+            </div>
+            <div class="card-content">
+              <p class="price-display text-primary-50 d-flex">
+                <span>{{ formattedCurrentPrice }}</span>
+                <span class="price-trend">
+                  <!-- Arrow based on nextPriceDifference -->
+                  <TrendArrow :value="nextPriceDifference" />
+                  <span class="trend-percentage">
+                    {{ nextPriceDifference }}%
+                    <div class="trend-tooltip">
+                      {{ trendExplanation }}
+                      <div class="tooltip-arrow"></div>
+                    </div>
                   </span>
+                </span>
+              </p>
+              <div class="next-hour-info bg-primary-500">
+                <div class="next-price text-primary-100">
+                  <span>Próxima hora:</span>
+                  <strong>{{ formattedNextPrice }}</strong>
+                </div>
+                <p class="text-size--1 text-primary-200">
+                  Cambio en {{ minutesRemaining }} min.
                 </p>
-                <div class="next-hour-info bg-primary-500">
-                  <div class="next-price text-primary-100">
-                    <span>Próxima hora:</span>
-                    <strong>{{ formattedNextPrice }}</strong>
-                  </div>
-                  <p class="text-size--1 text-primary-200">
-                    Cambio en {{ minutesRemaining }} min.
-                  </p>
-                </div>
               </div>
             </div>
-  
-            <!-- Media Diaria -->
-            <div class="price-card average rounded-md bg-primary-900">
-              <div class="card-header">
-                <h3 class="card-title text-primary-100">Media Diaria</h3>
-                <div class="comparison-badge text-primary-200">
-                  <span :class="comparisonClass">{{ comparisonPercentage }}%</span> vs. ayer
-                </div>
-              </div>
-              <div class="card-content">
-                <p class="price-display secondary text-primary-50">{{ formattedAveragePrice }}</p>
-                <div class="progress-bar bg-primary-100">
-                  <div class="progress-fill" :style="averageProgressStyle"></div>
-                </div>
-                <div class="trend-description text-primary-100">
-                  <template v-if="comparisonPercentage !== '--'">
-                    <span v-if="Math.abs(comparisonPercentageValue) > 0">
-                      Los precios están un <strong>{{ Math.abs(comparisonPercentageValue).toFixed(1) }}%</strong>
-                      {{ comparisonPercentageValue > 0 ? 'más altos' : 'más bajos' }} que ayer.<br>
-                     <!--  La media actual está al {{ averageProgressPercentage }}% del precio máximo diario. -->
-                    </span>
-                    <span v-else>
-                      Los precios se mantienen estables respecto a ayer.<br>
-                      <!-- La media actual está al {{ averageProgressPercentage }}% del precio máximo diario. -->
-                    </span>
-                  </template>
-                  <span v-else>Cargando datos históricos...</span>
-                </div>
+          </div>
+
+          <!-- Media Diaria -->
+          <div class="price-card average rounded-md bg-primary-900">
+            <div class="card-header">
+              <h3 class="card-title text-primary-100">Media Diaria</h3>
+              <div class="comparison-badge text-primary-200">
+                <span :class="comparisonClass"
+                  >{{ comparisonPercentage }}%</span
+                >
+                vs. ayer
               </div>
             </div>
-  
-            <!-- Mínimo Diario -->
-            <div class="price-card min rounded-md bg-primary-900">
-              <div class="card-header">
-                <h3 class="card-title text-primary-100">Mínimo Diario</h3>
-                <div class="time-range text-primary-200">
-                  <span class="text-primary-50">Desde</span> {{ priceData.minPrice?.timeRange || '--:--' }}
-                </div>
+            <div class="card-content">
+              <p class="price-display secondary text-primary-50">
+                {{ formattedAveragePrice }}
+              </p>
+              <div class="progress-bar bg-primary-100">
+                <div class="progress-fill" :style="averageProgressStyle"></div>
               </div>
-              <div class="card-content">
-                <p class="price-display text-accent-500">{{ formattedMinPrice }}</p>
-                <div class="savings-hint">Ahorra hasta 2,15€ si programas este consumo</div>
+              <div class="trend-description text-primary-100">
+                <template v-if="comparisonPercentage !== '--'">
+                  <span v-if="Math.abs(comparisonPercentageValue) > 0">
+                    Los precios están un
+                    <strong
+                      >{{
+                        Math.abs(comparisonPercentageValue).toFixed(1)
+                      }}%</strong
+                    >
+                    {{
+                      comparisonPercentageValue > 0 ? 'más altos' : 'más bajos'
+                    }}
+                    que ayer.<br />
+                    <!--  La media actual está al {{ averageProgressPercentage }}% del precio máximo diario. -->
+                  </span>
+                  <span v-else>
+                    Los precios se mantienen estables respecto a ayer.<br />
+                    <!-- La media actual está al {{ averageProgressPercentage }}% del precio máximo diario. -->
+                  </span>
+                </template>
+                <span v-else>Cargando datos históricos...</span>
               </div>
             </div>
-  
-            <!-- Máximo Diario -->
-            <div class="price-card max rounded-md bg-primary-900">
-              <div class="card-header">
-                <h3 class="card-title text-primary-100">Máximo Diario</h3>
-                <div class="time-range text-primary-200">{{ priceData.maxPrice?.timeRange || '--:--' }}</div>
+          </div>
+
+          <!-- Mínimo Diario -->
+          <div class="price-card min rounded-md bg-primary-900">
+            <div class="card-header">
+              <h3 class="card-title text-primary-100">Mínimo Diario</h3>
+              <div class="time-range text-primary-200">
+                <span class="text-primary-50">Desde</span>
+                {{ priceData.minPrice?.timeRange || '--:--' }}
               </div>
-              <div class="card-content">
-                <p class="price-display warning text-primary-50">{{ formattedMaxPrice }}</p>
-                <div class="warning-message">⚠️ Evita consumos intensivos en este horario</div>
+            </div>
+            <div class="card-content">
+              <p class="price-display text-accent-500">
+                {{ formattedMinPrice }}
+              </p>
+              <div class="savings-hint text-primary-50">
+                Ahorra hasta <strong>{{ formattedSavings }}</strong> por kWh si
+                programas tu consumo en la hora más barata.
+              </div>
+            </div>
+          </div>
+
+          <!-- Máximo Diario -->
+          <div class="price-card max rounded-md bg-primary-900">
+            <div class="card-header">
+              <h3 class="card-title text-primary-100">Máximo Diario</h3>
+              <div class="time-range text-primary-200">
+                {{ priceData.maxPrice?.timeRange || '--:--' }}
+              </div>
+            </div>
+            <div class="card-content">
+              <p class="price-display warning text-primary-50">
+                {{ formattedMaxPrice }}
+              </p>
+              <div class="warning-message">
+                ⚠️ Evita consumos intensivos en este horario
               </div>
             </div>
           </div>
         </div>
       </div>
-    </header>
-  </template>
-  
-  <script setup>
+    </div>
+  </header>
+</template>
+
+<script setup>
   import { computed, onMounted, onUnmounted, ref } from 'vue';
   import { usePriceData } from './composables/usePriceData.js';
   import TrendArrow from './TrendArrow.vue';
-  
+
   // Datos y estado de carga
   const { priceData, loading } = usePriceData();
   const hydrated = ref(false);
   const now = ref(Date.now());
   let interval;
-  
+
   // Formateador de moneda
   const formatter = new Intl.NumberFormat('es-ES', {
     style: 'currency',
     currency: 'EUR',
     minimumFractionDigits: 4,
-    maximumFractionDigits: 4
+    maximumFractionDigits: 4,
   });
-  
+
   // Iniciar ciclo de actualización cada minuto
   onMounted(() => {
     hydrated.value = true;
-    interval = setInterval(() => { now.value = Date.now(); }, 60000);
+    interval = setInterval(() => {
+      now.value = Date.now();
+    }, 60000);
   });
   onUnmounted(() => clearInterval(interval));
-  
+
   // Última actualización
   const formattedLastUpdated = computed(() => {
     const date = new Date(priceData.value.lastUpdated);
     return date.toLocaleDateString('es-ES', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit'
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   });
-  
+
   // Precio actual y próxima hora
-  const currentHour = computed(() => new Date().getHours().toString().padStart(2, '0'));
+  const currentHour = computed(() =>
+    new Date().getHours().toString().padStart(2, '0')
+  );
   const formattedCurrentPrice = computed(() =>
     formatter.format(
-      priceData.value.prices?.[new Date().getHours()]?.price
-        ?? priceData.value.currentPrice
-        ?? 0
+      priceData.value.prices?.[new Date().getHours()]?.price ??
+        priceData.value.currentPrice ??
+        0
     )
   );
   const formattedNextPrice = computed(() =>
-    formatter.format(priceData.value.prices?.[(new Date().getHours() + 1) % 24]?.price ?? 0)
+    formatter.format(
+      priceData.value.prices?.[(new Date().getHours() + 1) % 24]?.price ?? 0
+    )
   );
   const minutesRemaining = computed(() => 60 - new Date().getMinutes() - 1);
-  
+
   // Diferencia para próxima hora (numérico, 1 decimal)
   const nextPriceDifference = computed(() => {
     const hour = new Date().getHours();
@@ -168,7 +206,7 @@
     if (!cur) return 0;
     return Number((((nxt - cur) / cur) * 100).toFixed(1));
   });
-  
+
   // Explicación de la tendencia
   const trendExplanation = computed(() => {
     const d = nextPriceDifference.value;
@@ -176,17 +214,21 @@
     if (d < 0) return `El precio disminuirá un ${Math.abs(d)}% la próxima hora`;
     return 'El precio se mantendrá estable en la próxima hora';
   });
-  
+
   // Media diaria vs máximo
   const averageProgressPercentage = computed(() => {
     const max = priceData.value.maxPrice?.value ?? 1;
     const avg = priceData.value.averagePrice ?? 0;
     return Math.round((avg / max) * 100);
   });
-  const averageProgressStyle = computed(() => ({ width: `${averageProgressPercentage.value}%` }));
-  
+  const averageProgressStyle = computed(() => ({
+    width: `${averageProgressPercentage.value}%`,
+  }));
+
   // Formateos de media, mínimo y máximo
-  const formattedAveragePrice = computed(() => formatter.format(priceData.value.averagePrice ?? 0));
+  const formattedAveragePrice = computed(() =>
+    formatter.format(priceData.value.averagePrice ?? 0)
+  );
   const formattedMinPrice = computed(() =>
     priceData.value.minPrice?.value
       ? formatter.format(priceData.value.minPrice.value)
@@ -197,7 +239,7 @@
       ? formatter.format(priceData.value.maxPrice.value)
       : ''
   );
-  
+
   // Comparación vs ayer
   const comparisonPercentage = computed(() => {
     const cur = priceData.value.averagePrice ?? 0;
@@ -206,12 +248,27 @@
     const pct = ((cur - prev) / prev) * 100;
     return `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}`;
   });
-  const comparisonPercentageValue = computed(() => parseFloat(comparisonPercentage.value) || 0);
+
+  // Ahorro por kWh si consumes en hora mínima
+  const savingPerKWh = computed(() => {
+    const current =
+      priceData.value.currentPrice ??
+      priceData.value.prices?.[new Date().getHours()]?.price ??
+      0;
+    const min = priceData.value.minPrice?.value ?? current;
+    return Math.max(0, current - min);
+  });
+  const formattedSavings = computed(() => formatter.format(savingPerKWh.value));
+
+  // Comparación vs ayer
+  const comparisonPercentageValue = computed(
+    () => parseFloat(comparisonPercentage.value) || 0
+  );
   const comparisonClass = computed(() => {
     const val = comparisonPercentageValue.value;
     return val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral';
   });
-  </script>
+</script>
 
 <style scoped>
   .skeleton {
@@ -372,7 +429,6 @@
   }
 
   /* Para mantener consistencia con la tarjeta de Mínimo */
-
 
   .savings-hint {
     background: #f0fff4;
