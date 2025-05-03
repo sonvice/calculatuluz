@@ -21,5 +21,11 @@ export default defineConfig({
     config: {
       forward: ['dataLayer.push']
     }
-  }), mdx(), sitemap()],
+  }), mdx(), sitemap({
+    customPages: [
+      '/', 
+      '/tipsyguias',
+      '/precio-luz-hoy',
+    ],
+  })],
 });

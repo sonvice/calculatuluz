@@ -43,7 +43,8 @@ import Faq from '../components/Faq.astro';
         <strong class="text-neutral-50">Aplicamos el precio actual por hora:</strong><br>
         <p class="mt-space-xs">
           Multiplicamos esos kWh por el precio de la luz vigente en ese tramo (€/kWh) y sumamos el 21 % de IVA:<br>
-          <code>Coste € = kWh × Precio actual por hora × 1,21</code>
+          <code>Coste € = kWh × Precio actual 
+          por hora × 1,21</code>
         </p>
       </li>
     </ol>
@@ -100,5 +101,7 @@ import Faq from '../components/Faq.astro';
   hr {
     opacity: 0.2;
   }
-
+  code {
+  white-space: pre-wrap;
+}
 </style>
