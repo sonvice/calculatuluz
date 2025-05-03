@@ -7,6 +7,8 @@ import partytown from '@astrojs/partytown';
 
 import mdx from '@astrojs/mdx';
 
+import sitemap from '@astrojs/sitemap';
+
 export default defineConfig({
   output: 'server',
   site: 'https://calculatuluz.es',
@@ -19,5 +21,5 @@ export default defineConfig({
     config: {
       forward: ['dataLayer.push']
     }
-  }), mdx()],
+  }), mdx(), sitemap()],
 });

@@ -16,7 +16,7 @@ const { title, description } = Astro.props;
   <slot name="head" slot="head" />
 <!--   <HeaderPrice /> -->
   <ElectricityPriceHeader client:load />
-  <div class="nav-wrapper py-space-xl">
+  <div class="nav-wrapper py-space-l">
 	  <Nav />
   </div>
   
@@ -38,9 +38,9 @@ const { title, description } = Astro.props;
     top: 0;
     left: 0;
   background-color: var(--primary-900);
-  padding-block: var(--space-l);
   z-index: 50;
   transition: 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 }
 </style>
