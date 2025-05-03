@@ -1,53 +1,104 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Calculator from '../components/Calculator.vue';
-import PriceChart from '../components/PriceChart.vue';
-import PriceCards from '../components/PriceCards.vue';
-import PriceList from '../components/PriceList.vue';
-import ComsumptionGuidance from '../components/ConsumptionGuidance.vue';
+import Faq from '../components/Faq.astro';
 ---
-<Layout title="Calculadora de Consumo Eléctrico | kWh, Costo Diario y Gráfico de Precios en Tiempo Real" description="Calcula el consumo eléctrico de tus electrodomésticos en kWh y euros. Descubre el precio del kWh por horas con nuestro gráfico actualizado y ahorra en tu factura.">
+
+<Layout
+  title="Calculadora de Consumo Eléctrico | kWh, Costo Diario y Gráfico de Precios en Tiempo Real"
+  description="Calcula el consumo eléctrico de tus electrodomésticos en kWh y euros. Descubre el precio del kWh por horas con nuestro gráfico actualizado y ahorra en tu factura.">
   <div class="text-primary-100 mt-space-l">
-    <h1 class="fw-700 text-neutral-50">Calculadora online gratuita de consumo eléctrico de electrodomésticos</h1>
+    <h1 class="fw-700 text-neutral-50">
+      Calculadora online gratuita de consumo eléctrico de electrodomésticos
+    </h1>
     <p class="mt-space-m">
-      Con esta calculadora de consumo eléctrico de electrodomésticos online, podrás saber en segundos cuántos kWh y euros gasta tu lavadora, nevera o cualquier aparato.
+      Con esta calculadora de consumo eléctrico de electrodomésticos online,
+      podrás saber en segundos cuántos kWh y euros gasta tu lavadora, nevera o
+      cualquier aparato.
     </p>
-    <p class="mt-space-s">Ideal para hogares y pequeños negocios”) y por qué les ayuda (ahorrar, planificar cargas en horas baratas, etc.)</p>
-    <h2 class="mt-space-m text-neutral-50">¿Cómo calcular el consumo en kWh y euros?</h2>
-    <p class="mt-space-s">Multiplicamos la potencia (W) por las horas de uso y dividimos entre 1 000 para obtener kWh. Después aplicamos el precio medio actual (con IVA incluido) para mostrar el coste en €.</p>
-    <div class="bg-primary-900 p-space-l mt-space-m rounded-md text-neutral-50">
+    <p class="mt-space-s">
+      Ideal para hogares y pequeños negocios”) y por qué les ayuda (ahorrar,
+      planificar cargas en horas baratas, etc.)
+    </p>
+    <h2 id="como-funciona-calculadora" class="text-neutral-50 mt-space-xl">
+      Cómo calcula nuestra calculadora de consumo eléctrico en kWh y €
+    </h2>
+    <p class="mt-space-s">
+      ¿Quieres saber <strong>cuánto te cuesta usar tu electrodoméstico ahora mismo</strong>? Nuestra 
+      <strong>calculadora de consumo eléctrico en kWh y euros</strong> extrae el 
+      <strong>precio de la luz por hora</strong> directamente de  Red Eléctrica de España  para ofrecerte un resultado 
+      <em>en tiempo real</em>.
+    </p>
+    <p>El cálculo se realiza en dos pasos:</p>
+    <ol class="flow mt-space-m">
+      <li>
+        <strong class="text-neutral-50">Calculamos los kWh:</strong><br>
+        <p class="mt-space-xs">
+
+          Multiplicamos la potencia del aparato (vatios, W) por las horas de uso y dividimos entre 1 000:<br>
+          <code>kWh = (Potencia [W] × Horas de uso) ÷ 1 000</code>
+        </p>
+      </li>
+      <li>
+        <strong class="text-neutral-50">Aplicamos el precio actual por hora:</strong><br>
+        <p class="mt-space-xs">
+          Multiplicamos esos kWh por el precio de la luz vigente en ese tramo (€/kWh) y sumamos el 21 % de IVA:<br>
+          <code>Coste € = kWh × Precio actual por hora × 1,21</code>
+        </p>
+      </li>
+    </ol>
+    <p>
+      De este modo obtienes <strong>de inmediato</strong> el gasto diario de tu aparato en euros, ideal 
+      para programar su uso en las franjas más económicas.
+    </p>
+    <div class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50">
       <Calculator client:load />
     </div>
     <hr class="text-neutral-400 my-space-2xl" />
-    <h2 class="fw-700 text-neutral-50 mb-space-s">Evolución precio del kWh España</h2>
-    <p class="mb-space-xl text-primary-100">Consulta la evolución del precio del kWh por horas en España y descubre cuáles son las franjas más económicas del día para ahorrar en tu consumo eléctrico. </p>
-    <PriceCards client:only />
-    <div class="bg-primary-900 px-space-l py-space-l mt-space-s mb-space-3xl rounded-sm">
-      <PriceChart client:only  class="desktop-only"/>
-      <PriceList client:only  class="mobile-only" />
-    </div>
+    <h2 class="text-neutral-50">
+      Diferencia entre vatios (W) y kilovatios hora (kWh)
+    </h2>
+    <p class="mt-space-s">
+      Entender la diferencia entre <strong>vatios (W)</strong> y <strong
+        >kilovatios hora (kWh)</strong
+      > es fundamental para gestionar el consumo energético de tu hogar o negocio.
+      Mientras los <strong>vatios (W)</strong> miden la <strong
+        >potencia instantánea</strong
+      > de un dispositivo (la energía que consume en un momento dado), los <strong
+        >kilovatios hora (kWh)</strong
+      > reflejan el <strong>consumo acumulado</strong> durante un período. Por ejemplo,
+      una bombilla de 100 W usa 0,1 kWh cada hora. Dominar estos conceptos te permitirá
+      leer correctamente tu factura de la luz y optimizar tu consumo energético.
+    </p>
+    <h2 class="mt-space-xl text-neutral-50">5 consejos para ahorrar energía</h2>
+    <p class="mt-space-s">
+      Reducir el consumo eléctrico es clave para cuidar el medio ambiente y tu
+      bolsillo. Combina <strong>hábitos inteligentes</strong> con tecnología eficiente:
+      programa electrodomésticos como lavadoras en <strong>horas valle</strong> (cuando
+      la energía es más económica) y apuesta por bombillas <strong>LED</strong> de
+      bajo consumo. <a href="/precio-luz-hoy">Consulta aquí</a> las horas más baratas
+      del día antes de usar tus electrodomésticos. Pequeños cambios generan grandes
+      ahorros.
+    </p>
+
+    <ul role="list" class="flow mt-space-m">
+      <li>🔋 Programa lavadoras/lavavajillas en horario valle</li>
+      <li>
+        💡 Sustituye bombillas tradicionales por LED (hasta 80% de ahorro)
+      </li>
+      <li>🔌 Desenchufa dispositivos en stand-by (TV, cargadores)</li>
+      <li>🌡️ Regula termostatos: 21°C en invierno y 26°C en verano</li>
+      <li>🔄 Mantén limpios filtros de aire acondicionado y calderas</li>
+    </ul>
+  </div>
+  <div class="mt-space-xl">
+    <Faq/>
   </div>
 </Layout>
 
 <style>
   hr {
-   opacity: 0.2;
-  }
-  .desktop-only {
-    display: block;
-  }
-  
-  .mobile-only {
-    display: none;
+    opacity: 0.2;
   }
 
-  @media (max-width: 767px) {
-    .desktop-only {
-      display: none !important;
-    }
-    
-    .mobile-only {
-      display: block !important;
-    }
-  }
 </style>

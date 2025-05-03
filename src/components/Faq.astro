@@ -1,0 +1,69 @@
+---
+const faqData = [
+  {
+    question: '¿Cómo calculo el consumo de un electrodoméstico?',
+    answer: 'Multiplica la potencia en kW por las horas de uso. Ej.: 1,5 kW × 2 h = 3 kWh.'
+  },
+  {
+    question: '¿Qué significa kWh?',
+    answer: 'Es la unidad de energía: kilovatio (1 000 W) consumido en una hora.'
+  },
+  {
+    question: '¿Cómo ahorro usando esta calculadora?',
+    answer: 'Te ayuda a programar cargas en horas valle, donde el precio por kWh es más bajo.'
+  },
+  {
+    question: '¿Incluye IVA el coste calculado?',
+    answer: 'Sí, todos los precios muestran el total con IVA al 21 %.'
+  }
+];
+
+// Generar JSON-LD para FAQPage
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqData.map(({ question, answer }) => ({
+    '@type': 'Question',
+    name: question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: answer
+    }
+  }))
+};
+---
+
+<!-- Inyectar datos estructurados JSON-LD -->
+<script type="application/ld+json">
+{JSON.stringify(jsonLd)}
+</script>
+
+<section class="faq-section text-neutral-50">
+  <h2>Preguntas frecuentes</h2>
+  {faqData.map(({ question, answer }) => (
+    <details class="faq-item mt-space-s">
+      <summary class="faq-question">{question}</summary>
+      <div class="faq-answer text-primary-100">
+        <p>{answer}</p>
+      </div>
+    </details>
+  ))}
+</section>
+
+<style>
+.faq-section {
+  margin: 2rem 0;
+  max-width: 800px;
+}
+.faq-item {
+  border-bottom: 1px solid var(--primary-200);
+  padding: 1rem 0;
+}
+.faq-question {
+  font-weight: bold;
+  cursor: pointer;
+}
+.faq-answer {
+  margin-top: 0.5rem;
+}
+</style>

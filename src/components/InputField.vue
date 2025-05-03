@@ -1,8 +1,8 @@
 <template>
   <div class="box-input d-flex relative">
-    <p class="text-size--1 mb-space-3xs">
+    <!-- <p class="text-size--1 mb-space-3xs">
       {{ label }} <span v-if="suffix" class="input-suffix">({{ suffix }})</span>
-    </p>
+    </p> -->
     <div class="d-flex">
       <input
         type="number"

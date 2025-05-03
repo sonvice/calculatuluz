@@ -1,46 +1,95 @@
 <template>
-  <div>
-    <form role="form" aria-labelledby="calc-title">
-    <div class="form-calulator">
+  <form
+    role="form"
+    aria-labelledby="calc-title"
+    @submit.prevent="handleCalculate"
+  >
+    <fieldset>
+      <legend id="calc-title" class="visually-hidden">
+        Calculadora de consumo eléctrico
+      </legend>
+      <div     class="form-calculator">
+
+      <!-- Selección de Electrodoméstico -->
       <div>
-        <p class="text-size--1 mb-space-3xs">Selecciona un electrodoméstico</p>
-        <CustomSelect :appliances="appliances" v-model="selectedAppliance" />
+        <label
+          for="appliance"
+          class="text-size--1 mb-space-3xs"
+        >
+          Selecciona un electrodoméstico
+        </label>
+        <CustomSelect
+          id="appliance"
+          name="appliance"
+          :appliances="appliances"
+          v-model="selectedAppliance"
+          aria-describedby="appliance-help"
+        />
+        <p id="appliance-help" class="visually-hidden">
+          Elige un electrodoméstico de la lista o introduce potencia manualmente.
+        </p>
       </div>
+
+      <!-- Inputs de potencia y horas -->
       <div class="wrapper-inputs">
-        <InputField
-          label="Potencia Eléctrica"
-          suffix="W"
-          placeholder="Ej: 1500"
-          v-model="power"
-          min="0"
-          max="3500"
-          step="50"
-          :error="errors.power"
-          note="Máx. Recomendado: 3500W" />
-        <InputField
-          label="Horas de uso Diario"
-          placeholder="Ej: 2.5"
-          v-model="hours"
-          min="0.5"
-          max="24"
-          step="0.5"
-          :error="errors.hours"
-          note="Usa punto decimal (ej: 1.5)" />
+        <div>
+          <label for="power" class="text-size--1 mb-space-3xs">Potencia Eléctrica (W)</label>
+          <InputField
+            id="power"
+            name="power"
+            placeholder="Ej: 1500"
+            v-model="power"
+            min="0"
+            max="3500"
+            step="50"
+            :error="errors.power"
+            note="Máx. recomendado: 3500 W"
+          />
+        </div>
+        <div>
+          <label for="hours" class="text-size--1 mb-space-3xs">Horas de uso diaria</label>
+          <InputField
+            id="hours"
+            name="hours"
+            placeholder="Ej: 2.5"
+            v-model="hours"
+            min="0.5"
+            max="24"
+            step="0.5"
+            :error="errors.hours"
+            note="Usa punto decimal (ej: 1.5)"
+          />
+        </div>
       </div>
+
+      <!-- Botones -->
       <div class="button-group d-flex">
-        <button class="btn" data-type="accent" @click="handleCalculate">
+        <button
+          type="submit"
+          class="btn"
+          data-type="accent"
+        >
           Calcular consumo
         </button>
-        <button class="btn" @click="resetForm">Reiniciar</button>
+        <button
+          type="button"
+          class="btn"
+          @click="resetForm"
+        >
+          Reiniciar
+        </button>
       </div>
     </div>
-    <ResultsDisplay
-      :results="results"
-      :lastUpdated="priceData.lastUpdated"
-      :currentPrice="actualPrice" />
-    </form>
-  </div>
+      <!-- Resultados -->
+      <ResultsDisplay
+        :results="results"
+        :lastUpdated="priceData.lastUpdated"
+        :currentPrice="actualPrice"
+      />
+    </fieldset>
+  </form>
 </template>
+
 
 <script setup>
   import { ref, watch, reactive } from 'vue';
@@ -167,17 +216,26 @@
 </script>
 
 <style scoped>
-  .form-calulator {
+
+form fieldset {
+  border: none;    
+  margin: 0;      
+  padding: 0;     
+}
+label {
+  display:inline-block;
+}
+  .form-calculator {
     display: grid;
     gap: var(--space-m);
   }
   @media (min-width: 64em) {
-    .form-calulator {
+    .form-calculator {
       grid-template-columns: 1fr 1fr;
     }
   }
   @media (min-width: 90em) {
-    .form-calulator {
+    .form-calculator {
       grid-template-columns: 1fr 1fr 1fr;
     }
   }
