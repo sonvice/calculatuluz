@@ -23,9 +23,9 @@ export default defineConfig({
     }
   }), mdx(), sitemap({
     customPages: [
-      '/', 
-      '/tipsyguias',
-      '/precio-luz-hoy',
+      'https://calculatuluz.es/',
+      'https://calculatuluz.es/tipsyguias',
+      'https://calculatuluz.es/precio-luz-hoy',
     ],
   })],
 });
