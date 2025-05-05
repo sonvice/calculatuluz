@@ -20,7 +20,12 @@ import Faq from '../components/Faq.astro';
       Ideal para hogares y pequeños negocios”) y por qué les ayuda (ahorrar,
       planificar cargas en horas baratas, etc.)
     </p>
-    <h2 id="como-funciona-calculadora" class="text-neutral-50 mt-space-xl">
+   
+    <div class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50">
+      <Calculator client:load />
+    </div>
+    <hr class="text-neutral-400 my-space-2xl" />
+     <h2 id="como-funciona-calculadora" class="text-neutral-50 mt-space-xl">
       Cómo calcula nuestra calculadora de consumo eléctrico en kWh y €
     </h2>
     <p class="mt-space-s">
@@ -36,15 +41,14 @@ import Faq from '../components/Faq.astro';
         <p class="mt-space-xs">
 
           Multiplicamos la potencia del aparato (vatios, W) por las horas de uso y dividimos entre 1 000:<br>
-          <code>kWh = (Potencia [W] × Horas de uso) ÷ 1 000</code>
+          <code>kWh = (Potencia [W] x Horas de uso) ÷ 1 000</code>
         </p>
       </li>
       <li>
         <strong class="text-neutral-50">Aplicamos el precio actual por hora:</strong><br>
         <p class="mt-space-xs">
           Multiplicamos esos kWh por el precio de la luz vigente en ese tramo (€/kWh) y sumamos el 21 % de IVA:<br>
-          <code>Coste € = kWh × Precio actual 
-          por hora × 1,21</code>
+          <code>Coste € = kWh x Precio actual por hora x 1,21</code>
         </p>
       </li>
     </ol>
@@ -52,11 +56,7 @@ import Faq from '../components/Faq.astro';
       De este modo obtienes <strong>de inmediato</strong> el gasto diario de tu aparato en euros, ideal 
       para programar su uso en las franjas más económicas.
     </p>
-    <div class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50">
-      <Calculator client:load />
-    </div>
-    <hr class="text-neutral-400 my-space-2xl" />
-    <h2 class="text-neutral-50">
+    <h2 class="text-neutral-50 mt-space-xl">
       Diferencia entre vatios (W) y kilovatios hora (kWh)
     </h2>
     <p class="mt-space-s">
@@ -82,7 +82,7 @@ import Faq from '../components/Faq.astro';
       ahorros.
     </p>
 
-    <ul role="list" class="flow mt-space-m">
+    <ul role="list" class="flow mt-space-xl">
       <li>🔋 Programa lavadoras/lavavajillas en horario valle</li>
       <li>
         💡 Sustituye bombillas tradicionales por LED (hasta 80% de ahorro)
