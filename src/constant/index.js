@@ -12,7 +12,8 @@ export const navigation = [
     { value: 800, label: 'Microondas', watts: '800W', image: '/images/microwave.jpg' },
     { value: 900, label: 'Aire acondicionado', watts: '900W', image: '/images/aire-acondicionado.jpg' },
     { value: 1200, label: 'Horno', watts: '1.200W', image: '/images/horno.jpg' },
-    { value: 1200, label: 'Secador de pelo', watts: '1200W', image: '/images/hair-dryer.jpg' },
-    { value: 2000, label: 'Lavadora', watts: '2000W', image: '/images/washing-machine.jpg' },
+    { value: 1200, label: 'Secador de pelo', watts: '1.200W', image: '/images/hair-dryer.jpg' },
+    { value: 1800, label: 'Lavaplatos', watts: '1.800W', image: '/images/lavaplatos.jpg' },
+    { value: 2000, label: 'Lavadora', watts: '2.000W', image: '/images/washing-machine.jpg' },
     { value: 'custom', label: 'Personalizado', watts: '', image: '/images/personalizado.jpg' },
   ];
