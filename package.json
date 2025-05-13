@@ -9,14 +9,14 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/mdx": "^4.2.5",
-    "@astrojs/node": "^9.2.0",
+    "@astrojs/mdx": "^4.2.6",
+    "@astrojs/node": "^9.2.1",
     "@astrojs/partytown": "^2.1.4",
-    "@astrojs/sitemap": "^3.3.1",
-    "@astrojs/vue": "^5.0.10",
+    "@astrojs/sitemap": "^3.4.0",
+    "@astrojs/vue": "^5.0.13",
     "@fontsource-variable/montserrat": "^5.2.5",
     "@supabase/supabase-js": "^2.49.4",
-    "astro": "^5.7.2",
+    "astro": "^5.7.12",
     "chart.js": "^3.9.1",
     "lucide-vue-next": "^0.503.0",
     "luxon": "^3.6.1",
@@ -26,6 +26,6 @@
     "vue-chart-3": "^3.1.8"
   },
   "devDependencies": {
-    "@astrojs/netlify": "^6.3.0"
+    "@astrojs/netlify": "^6.3.2"
   }
 }
