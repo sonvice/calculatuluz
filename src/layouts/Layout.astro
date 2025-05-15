@@ -11,7 +11,7 @@ interface Props {
 
 const { title, description } = Astro.props;
 ---
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} lang="es" description={description}>
   <!-- Transfer slots to BaseLayout -->
   <slot name="head" slot="head" />
 <!--   <HeaderPrice /> -->
