@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SubscribeForm from '../../components/SubscribeForm.vue';
+---
+
+<Layout
+  title="Gracias por suscribirte"
+  description="Gracias por unirte a nuestra comunidad. Aquí encontrarás recursos útiles para optimizar el consumo eléctrico de tu hogar.">
+  <h1 class="fw-700 text-neutral-50 mt-space-2xl">Gracias por suscribirte</h1>
+  <SubscribeForm client:load></SubscribeForm>
+</Layout>
