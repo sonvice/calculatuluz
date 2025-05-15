@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Calculator from '../components/Calculator.vue';
 import Faq from '../components/Faq.astro';
+import SubscribeForm from '../components/SubscribeForm.vue';
 ---
 
 <Layout
@@ -18,7 +19,7 @@ import Faq from '../components/Faq.astro';
     <p class="mt-space-s">
       Ideal para hogares y pequeños negocios que buscan ahorrar, planificar cargas en las horas más económicas y entender mejor su gasto energético.
     </p>
-
+   
     <div class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50">
       <Calculator client:load />
     </div>
@@ -92,6 +93,13 @@ import Faq from '../components/Faq.astro';
   </div>
   <div class="mt-space-xl">
     <Faq/>
+  </div>
+  <div class="mt-space-xl text-neutral-50">
+    <h2 class="text-neutral-50">Suscríbete a nuestra newsletter</h2>
+    <p class="my-space-s">
+      Recibe consejos y novedades sobre ahorro energético directamente en tu correo.
+    </p>
+    <SubscribeForm client:load/>
   </div>
 </Layout>
 

@@ -1,7 +1,7 @@
 name: Envío Diario de Horas Económicas
 on:
   schedule:
-    - cron: '0 18 * * *' # 18:00 UTC = 20:00 CEST (España en verano)
+    - cron: '25 18 * * *' # 18:00 UTC = 20:00 CEST (España en verano)
 
 jobs:
   send-emails:
