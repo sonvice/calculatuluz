@@ -1,8 +1,9 @@
-import type { APIRoute } from "astro";
-import  supabase  from "../../lib/supabaseClient";
+import supabase from "../../lib/supabaseClient";
 
-export const GET: APIRoute = async ({ request, redirect }) => {
-  const url = new URL(request.url);
+export const prerender = false;   
+
+export const GET: APIRoute = async ({ request }) => {
+  const url   = new URL(request.url);
   const token = url.searchParams.get("token");
 
   // 1. Actualizar estado en Supabase
@@ -11,8 +12,14 @@ export const GET: APIRoute = async ({ request, redirect }) => {
     .update({ confirmed: true })
     .eq("token", token);
 
-  if (error) return redirect("/error", 302);
+  console.log("confirm", { token, data, error });
+  if (error) {
+    return new Response("Error al confirmar el email", { status: 500 });
+  }
 
-  // 2. Redirigir a página de éxito
-  return redirect("/gracias", 302);
+  // 2. Redirigir al “gracias”
+  return new Response(null, {
+    status: 302,
+    headers: { Location: "/gracias" },
+  });
 };

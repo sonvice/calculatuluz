@@ -1,7 +1,7 @@
 import  supabase  from "../lib/supabaseClient.js";
 import { Resend } from "resend";
 
-const resend = new Resend(import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function main() {
     try {

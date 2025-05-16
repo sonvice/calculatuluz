@@ -1,7 +1,5 @@
-// @ts-ignore
-import type { APIRoute } from "astro";
-import  supabase  from "../../lib/supabaseClient.js";
-import  {Resend}  from "resend";
+import  supabase  from "../../lib/supabaseClient";
+import { Resend } from "resend";
 
 const resend = new Resend(import.meta.env.RESEND_API_KEY);
 
@@ -21,17 +19,17 @@ export const POST: APIRoute = async ({ request }) => {
       { status: 400 }
     );
   }
-
+  const base = import.meta.env.PUBLIC_BASE_URL || new URL(request.url).origin;
   // 2. Enviar email de confirmación
   await resend.emails.send({
     from: "CalculaTuLuz <info@calculatuluz.es>",
     to: email,
     subject: "Confirma tu suscripción",
     html: `
-      <p>Haz clic para confirmar:</p>
-      <a href="${new URL(request.url).origin}/api/confirm?token=${token}">
+    <p>Haz clic para confirmar:</p>
+       <a href="${base}/api/confirm?token=${token}">
         Confirmar Email
-      </a>
+       </a>
     `
   });
 
