@@ -1,0 +1,182 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Política de Privacidad | CalculaTuLuz" description="Conoce cómo protegemos tus datos personales en CalculaTuLuz. Cumplimos con el RGPD y garantizamos la seguridad de tu información.">
+  <main class="container privacy-policy">
+    <h1 class="text-neutral-50">Política de Privacidad</h1>
+    <p class="text-primary-100"><strong>Última actualización:</strong> 15 de Abril de 2025</p>
+
+    <section class="section">
+      <h2>1. Responsable del Tratamiento</h2>
+      <p>CalculaTuLuz (en adelante, "el Sitio Web") es gestionado por:</p>
+      <ul class="contact-list">
+        <li><strong>Identificación:</strong> CalculaTuLuz (servicio bajo persona física)</li>
+        <li><strong>Contacto:</strong> info@calculatuluz.es</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>2. Datos que Recopilamos</h2>
+      <p>En cumplimiento del RGPD, tratamos:</p>
+      <div class="data-table">
+        <div class="data-row header">
+          <div>Finalidad</div>
+          <div>Datos</div>
+          <div>Base Legal</div>
+        </div>
+        <div class="data-row">
+          <div>Suscripción a alertas</div>
+          <div>Email</div>
+          <div>Consimiento explícito (Art. 6.1.a RGPD)</div>
+        </div>
+        <div class="data-row">
+          <div>Cálculo de consumo</div>
+          <div>Potencia y horas de uso (no asociados a usuario)</div>
+          <div>Interés legítimo (Art. 6.1.f RGPD)</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>3. Finalidades del Tratamiento</h2>
+      <ul class="purpose-list">
+        <li>📧 Envío de alertas personalizadas sobre precios de la luz</li>
+        <li>📊 Mejora continua de nuestra calculadora eléctrica</li>
+        <li>🔐 Gestión segura de credenciales de usuario</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>4. Terceros Prestadores</h2>
+      <div class="providers-grid">
+        <div class="provider-card">
+          <h3>Supabase</h3>
+          <p>Almacenamiento seguro de emails en UE</p>
+          <a href="https://supabase.com/privacy" target="_blank" rel="noopener">Política de Privacidad</a>
+        </div>
+        <div class="provider-card">
+          <h3>Resend</h3>
+          <p>Envío de emails transaccionales</p>
+          <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener">Política de Privacidad</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>5. Tus Derechos</h2>
+      <div class="rights-grid">
+        <div class="right-card">
+          <h3>📭 Acceso</h3>
+          <p>Solicita una copia de tus datos almacenados</p>
+        </div>
+        <div class="right-card">
+          <h3>✏️ Rectificación</h3>
+          <p>Actualiza o corrige información inexacta</p>
+        </div>
+        <div class="right-card">
+          <h3>🗑️ Supresión</h3>
+          <p>Elimina permanentemente tus datos</p>
+        </div>
+        <div class="right-card">
+          <h3>⛔ Oposición</h3>
+          <p>Limita el tratamiento de tus datos</p>
+        </div>
+      </div>
+      <p class="cta-contact">Para ejercer tus derechos: <a href="mailto:info@calculatuluz.es">info@calculatuluz.es</a></p>
+    </section>
+
+    <section class="section">
+      <h2>6. Medidas de Seguridad</h2>
+      <ul class="security-list">
+        <li>🔒 Cifrado AES-256 en reposo y TLS 1.3 en tránsito</li>
+        <li>🛡️ Autenticación de dos factores en sistemas críticos</li>
+        <li>📅 Copias de seguridad diarias retenidas 30 días</li>
+      </ul>
+    </section>
+
+    <section class="section age-warning">
+      <h2>7. Menores de Edad</h2>
+      <p>❌ No recopilamos datos de menores de 14 años. Si detectamos algún registro en este sentido, lo eliminaremos inmediatamente.</p>
+    </section>
+
+    <section class="section changes">
+      <h2>8. Cambios en la Política</h2>
+      <p>Notificaremos modificaciones sustanciales mediante:</p>
+      <ul>
+        <li>📢 Banner destacado en el Sitio Web</li>
+        <li>📩 Email a suscriptores (cuando afecte a tratamiento de datos)</li>
+      </ul>
+    </section>
+  </main>
+</Layout>
+
+<style lang="scss">
+.privacy-policy {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  line-height: 1.6;
+
+  .effective-date {
+    color: #666;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+  }
+
+  .section {
+    margin: 3rem 0;
+    padding: 1.5rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+
+    h2 {
+      color: #2c3e50;
+      border-left: 4px solid #4CAF50;
+      padding-left: 1rem;
+    }
+  }
+
+  .data-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr;
+    margin: 1rem 0;
+    border: 1px solid #ddd;
+
+    .data-row {
+      padding: 1rem;
+      border-top: 1px solid #eee;
+
+      &.header {
+        font-weight: bold;
+        background: #f5f5f5;
+      }
+    }
+  }
+
+  .providers-grid, .rights-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    margin: 2rem 0;
+  }
+
+  .provider-card, .right-card {
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .cta-contact {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 1.1rem;
+  }
+
+  .age-warning {
+    background: #fff3f3;
+    border-left: 4px solid #ff4444;
+  }
+}
+</style>

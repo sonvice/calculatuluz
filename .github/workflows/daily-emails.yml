@@ -1,11 +1,14 @@
 name: Envío Diario de Horas Económicas
 on:
   schedule:
-    - cron: '25 18 * * *' # 18:00 UTC = 20:00 CEST (España en verano)
-
+    - cron: '25 18 * * *'  # 18:25 UTC = 20:25 CEST (España en verano)
+  
 jobs:
   send-emails:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./src/scripts  # 👈 Nueva línea clave
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -14,20 +17,22 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
+          cache: 'pnpm'  # o 'npm' si usas npm
 
       - name: Instalar dependencias
         run: npm install
+        working-directory: ./  # 👈 Instalar desde raíz
 
       - name: Ejecutar script
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-        run: node src/scripts/send-daily.js
+        run: node send-daily.js  # 👈 Ruta relativa al working-directory
 
-      - name: Notificar éxito (opcional)
+      - name: Notificar éxito
         if: success()
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_MESSAGE: "✅ Emails diarios enviados correctamente"
+          SLACK_MESSAGE: "✅ Emails enviados: ${{ github.run_number }}"

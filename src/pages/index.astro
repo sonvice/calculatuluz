@@ -94,12 +94,20 @@ import SubscribeForm from '../components/SubscribeForm.vue';
   <div class="mt-space-xl">
     <Faq/>
   </div>
-  <div class="mt-space-xl text-neutral-50">
-    <h2 class="text-neutral-50">Suscríbete a nuestra newsletter</h2>
-    <p class="my-space-s">
-      Recibe consejos y novedades sobre ahorro energético directamente en tu correo.
-    </p>
-    <SubscribeForm client:load/>
+  <div class="mt-space-xl text-neutral-50 ">
+    <div class="newsletter-header text-primary-50">
+      <h2>⚡¡No te pierdas las horas más baratas de luz!</h2>
+      <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
+      <ul role="list" class="mt-space-m flow">
+        <li>✅ Las <strong>3 horas clave</strong> para ahorrar en tu factura</li>
+        <li>🚨 Alertas de <strong>picos de precio</strong> que debes evitar</li>
+        <li>💡 Consejos prácticos para cada electrodoméstico</li>
+        <li>📊 Comparativas de ahorro <strong>personalizadas</strong></li>
+      </ul>
+      <div class="mt-space-m">
+        <SubscribeForm client:load/>
+      </div>
+    </div>
   </div>
 </Layout>
 
@@ -110,4 +118,12 @@ import SubscribeForm from '../components/SubscribeForm.vue';
   code {
   white-space: pre-wrap;
 }
+.newsletter-header {
+   max-width: 800px;
+    padding: 1rem;
+    background: var(--primary-900);
+    border-radius: 8px;
+  }
+ 
+
 </style>

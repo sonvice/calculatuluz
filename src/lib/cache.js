@@ -1,5 +1,5 @@
 // cache.js
-import supabase from './supabaseClient.js';
+import {supabase} from './supabaseClient.js';
 
 const CACHE_KEY = 'precios-electricos';
 const CACHE_TTL = 1000 * 60 * 60; // 1 hora

@@ -1,25 +1,28 @@
-import supabase from "../../lib/supabaseClient";
-
-export const prerender = false;   
+import type { APIRoute } from "astro";
+import { supabaseAdmin } from '../../lib/supabaseClient.js';
+export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
-  const url   = new URL(request.url);
-  const token = url.searchParams.get("token");
+  const token = new URL(request.url).searchParams.get('token');
+  console.log('🔎 [confirm] token recibido:', token);
 
-  // 1. Actualizar estado en Supabase
-  const { data, error } = await supabase
-    .from("subscribers")
+  // Usa supabaseAdmin para saltarte RLS
+  const { data, error } = await supabaseAdmin
+    .from('subscribers')
     .update({ confirmed: true })
-    .eq("token", token);
+    .eq('token', token);
 
-  console.log("confirm", { token, data, error });
+  console.log('🔄 [confirm] resultado update:', { data, error });
+
   if (error) {
-    return new Response("Error al confirmar el email", { status: 500 });
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500 }
+    );
   }
 
-  // 2. Redirigir al “gracias”
   return new Response(null, {
     status: 302,
-    headers: { Location: "/gracias" },
+    headers: { Location: '/gracias' },
   });
 };

@@ -1,7 +1,6 @@
 <template>
   <form @submit.prevent="handleSubmit">
-    <div class="form-group">
-      <label for="email">Correo electrónico:</label>
+    <div class="form-group d-flex">
       <input
         id="email"
         v-model.trim="email"
@@ -9,6 +8,9 @@
         required
         placeholder="tucorreo@ejemplo.com"
       />
+      <button type="submit" data-type="accent" class="btn" :disabled="loading">
+        {{ loading ? 'Enviando...' : 'Suscribirme' }}
+      </button>
     </div>
 
     <div class="form-group terms">
@@ -22,9 +24,6 @@
       </label>
     </div>
 
-    <button type="submit" :disabled="loading">
-      {{ loading ? 'Enviando...' : 'Suscribirme' }}
-    </button>
 
     <div v-if="error" class="error-message">
       {{ error }}
@@ -68,6 +67,15 @@ const handleSubmit = async () => {
 <style scoped>
 .form-group {
   margin-bottom: 1rem;
+  --gutter:var(--space-2xs);
+}
+.form-group input {
+  flex: 3;
+  flex-basis:400px;
+}
+.form-group .btn {
+flex:1;
+justify-content: center;
 }
 
 label {
@@ -86,14 +94,6 @@ input[type="email"] {
   margin: 1rem 0;
 }
 
-button {
-  background: #4CAF50;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
 
 button:disabled {
   background: #cccccc;

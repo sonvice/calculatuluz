@@ -1,6 +1,6 @@
-import  supabase  from "../../lib/supabaseClient";
+import type { APIRoute } from "astro";
+import  {supabase}  from "../../lib/supabaseClient";
 import { Resend } from "resend";
-
 const resend = new Resend(import.meta.env.RESEND_API_KEY);
 
 export const POST: APIRoute = async ({ request }) => {

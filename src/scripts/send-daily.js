@@ -1,4 +1,4 @@
-import  supabase  from "../lib/supabaseClient.js";
+import  {supabase}  from "../lib/supabaseClient.js";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);

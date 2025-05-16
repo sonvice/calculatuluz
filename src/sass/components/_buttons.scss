@@ -51,11 +51,11 @@
   }
 
   &[data-type="primary"] {
-   --button-bg-color:var(--neutral-900);
-   --button-color-text:var(--neutral-50);
-   --button-border-color:var(--neutral-900);
+   --button-bg-color:var(--primary-900);
+   --button-color-text:var(--primary-50);
+   --button-border-color:var(--primary-900);
    --button-border-color-hover:var(--button-bg-color-hover);
-   --button-bg-color-hover:var(--neutral-700);
+   --button-bg-color-hover:var(--primary-700);
    --button-color-text-hover:var(--neutral-50);
    --button-outline-color:var(--button-bg-color-hover);
   }
