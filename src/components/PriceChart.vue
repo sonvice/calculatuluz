@@ -149,7 +149,7 @@ function toggleDay() {
     {{ showTomorrow ? 'Ver precios de hoy' : 'Ver precios de mañana' }}
   </button>
     <span v-if="!canToggleTomorrow" class="ml-2 text-sm text-gray-500">
-      Precios mañana disponibles a las 20:05
+      Precios mañana disponibles a las 20:25
     </span>
   </div>
 

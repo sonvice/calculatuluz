@@ -197,7 +197,7 @@ export async function GET(context) {
 
     // 5. Bandera para front: precios de mañana disponibles tras 20:05 CET/CEST
     const nowMadrid = DateTime.now().setZone('Europe/Madrid');
-    const cutoff    = nowMadrid.set({ hour: 20, minute: 5, second: 0, millisecond: 0 });
+    const cutoff    = nowMadrid.set({ hour: 20, minute: 25, second: 0, millisecond: 0 });
     const tomorrowAvailable = nowMadrid >= cutoff;
 
     if (isTomorrow && !tomorrowAvailable) {
