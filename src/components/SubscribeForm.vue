@@ -33,7 +33,6 @@
 
 <script setup>
 import { ref } from 'vue';
-
 const email = ref('');
 const acceptedTerms = ref(false);
 const loading = ref(false);

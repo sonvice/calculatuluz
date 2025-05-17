@@ -26,6 +26,9 @@ importers:
       '@fontsource-variable/montserrat':
         specifier: ^5.2.5
         version: 5.2.5
+      '@lucide/astro':
+        specifier: ^0.511.0
+        version: 0.511.0(astro@5.7.13(@netlify/blobs@8.2.0)(@types/node@22.15.18)(rollup@4.40.2)(sass@1.88.0)(typescript@5.8.3))
       '@supabase/supabase-js':
         specifier: ^2.49.4
         version: 2.49.4
@@ -558,6 +561,11 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
+
+  '@lucide/astro@0.511.0':
+    resolution: {integrity: sha512-Qq3WAQVyL+mMSl8UYJJdfIbhfO/tskRRDWilZcwxazhd+e99KfSbxS1q0xjrCIUN4VFD8W/BCcNasChJqQv/8A==}
+    peerDependencies:
+      astro: ^4 || ^5
 
   '@mapbox/node-pre-gyp@1.0.11':
     resolution: {integrity: sha512-Yhlar6v9WQgUp/He7BdgzOz8lqMQ8sU+jkCq7Wx8Myc5YFJLbEe7lgui/V7G1qB1DJykHSGwreceSaD60Y0PUQ==}
@@ -4192,6 +4200,10 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+
+  '@lucide/astro@0.511.0(astro@5.7.13(@netlify/blobs@8.2.0)(@types/node@22.15.18)(rollup@4.40.2)(sass@1.88.0)(typescript@5.8.3))':
+    dependencies:
+      astro: 5.7.13(@netlify/blobs@8.2.0)(@types/node@22.15.18)(rollup@4.40.2)(sass@1.88.0)(typescript@5.8.3)
 
   '@mapbox/node-pre-gyp@1.0.11':
     dependencies:

@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import Calculator from '../components/Calculator.vue';
 import Faq from '../components/Faq.astro';
 import SubscribeForm from '../components/SubscribeForm.vue';
+import { Check,Siren,Lightbulb,ChartColumnBig } from '@lucide/astro';
 ---
 
 <Layout
@@ -94,15 +95,15 @@ import SubscribeForm from '../components/SubscribeForm.vue';
   <div class="mt-space-xl">
     <Faq/>
   </div>
-  <div class="mt-space-xl text-neutral-50 ">
+  <div class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md">
     <div class="newsletter-header text-primary-50">
       <h2>⚡¡No te pierdas las horas más baratas de luz!</h2>
       <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
       <ul role="list" class="mt-space-m flow">
-        <li>✅ Las <strong>3 horas clave</strong> para ahorrar en tu factura</li>
-        <li>🚨 Alertas de <strong>picos de precio</strong> que debes evitar</li>
-        <li>💡 Consejos prácticos para cada electrodoméstico</li>
-        <li>📊 Comparativas de ahorro <strong>personalizadas</strong></li>
+        <li class="d-flex"><Check color='var(--accent-500)' /> Las <strong>3 horas clave</strong> para ahorrar en tu factura</li>
+        <li class="d-flex"><Siren color="var(--red-500)" /> Alertas de <strong>picos de precio</strong> que debes evitar</li>
+        <li class="d-flex"><Lightbulb color="var(--orange-300)" /> Consejos prácticos para cada electrodoméstico</li>
+        <li class="d-flex"><ChartColumnBig color="var(--primary-200)" /> Comparativas de ahorro <strong>personalizadas</strong></li>
       </ul>
       <div class="mt-space-m">
         <SubscribeForm client:load/>
@@ -120,8 +121,6 @@ import SubscribeForm from '../components/SubscribeForm.vue';
 }
 .newsletter-header {
    max-width: 800px;
-    padding: 1rem;
-    background: var(--primary-900);
     border-radius: 8px;
   }
  
