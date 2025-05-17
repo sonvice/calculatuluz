@@ -17,16 +17,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-          cache: 'pnpm'  # Cache para pnpm
+          cache: 'pnpm'
 
-      - name: Instalar pnpm  # 👈 Nuevo paso para instalar pnpm
-        uses: pnpm/action-setup-pnpm@v2
+      - name: Instalar pnpm  # 👈 Acción corregida
+        uses: pnpm/action-setup@v2  # 👈 Nombre correcto
         with:
-          version: 8  # Ajusta según tu versión de pnpm
+          version: 8  # Verifica tu versión de pnpm (7, 8, 9, etc.)
 
       - name: Instalar dependencias
-        run: pnpm install  # 👈 Usar pnpm en lugar de npm
-        working-directory: ./  # Desde la raíz donde está package.json
+        run: pnpm install
+        working-directory: ./  # Desde la raíz del proyecto
 
       - name: Ejecutar script
         env:
