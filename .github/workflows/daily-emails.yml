@@ -1,13 +1,14 @@
 name: Envío Diario de Horas Económicas
 on:
   schedule:
-    - cron: '00 19 * * *'  # 19:00 UTC = 21:00 CEST (España en verano)
+    - cron: '25 18 * * *'  # 16:25 UTC = 20:25 CEST (España en verano)
+  
 jobs:
   send-emails:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./src/scripts  # 👈 Nueva línea clave
+        working-directory: ./src/scripts
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -16,18 +17,23 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-          cache: 'pnpm'  # o 'npm' si usas npm
+          cache: 'pnpm'  # Cache para pnpm
+
+      - name: Instalar pnpm  # 👈 Nuevo paso para instalar pnpm
+        uses: pnpm/action-setup-pnpm@v2
+        with:
+          version: 8  # Ajusta según tu versión de pnpm
 
       - name: Instalar dependencias
-        run: npm install
-        working-directory: ./  # 👈 Instalar desde raíz
+        run: pnpm install  # 👈 Usar pnpm en lugar de npm
+        working-directory: ./  # Desde la raíz donde está package.json
 
       - name: Ejecutar script
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-        run: node send-daily.js  # 👈 Ruta relativa al working-directory
+        run: node send-daily.js
 
       - name: Notificar éxito
         if: success()
