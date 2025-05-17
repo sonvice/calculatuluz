@@ -1,44 +1,57 @@
 <!-- src/components/PriceChart.vue -->
+<template>
+  <div class="chart-container">
+    <!-- SWITCH -->
+    <div class="flex items-center mb-4">
+      <button
+        @click="toggleDay"
+        :disabled="!canToggle"
+        class="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:bg-gray-400"
+      >
+        {{ $day === 'today' ? 'Ver precios de mañana' : 'Ver precios de hoy' }}
+      </button>
+      <span v-if="!canToggle" class="ml-2 text-sm text-gray-500">
+        Precios mañana disponibles a las 20:05
+      </span>
+    </div>
+
+    <!-- GRÁFICO / Estados -->
+    <div v-if="$loading.value" class="text-center py-8">
+      Cargando gráfico…
+    </div>
+    <div v-else-if="!filteredPrices.length" class="text-center py-8">
+      Sin datos para mostrar.
+    </div>
+    <div v-else class="chart-container">
+      <BarChart :chart-data="chartData" :options="chartOptions" />
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { useStore } from '@nanostores/vue'
+import { day, priceData, loading } from '../stores/prices.js'
 import { BarChart } from 'vue-chart-3'
 import { Chart, registerables } from 'chart.js'
-import { usePriceData } from '../utils/usePriceData.js'
 Chart.register(...registerables)
 
-// 1. Parámetro día (today / tomorrow)
-const day = ref('today')
+// 1. Suscribirse a los atoms
+const $data = useStore(priceData)
+const $loading = useStore(loading)
+const $day = useStore(day)
 
-// 2. Hook para obtener datos según `day`
-const { priceData, fetchPriceData } = usePriceData(day)
+// 2. Switch control
+const canToggle = computed(() => !!$data.value.tomorrowAvailable)
+function toggleDay() {
+  if (!canToggle.value) return
+  day.set($day.value === 'today' ? 'tomorrow' : 'today')
+}
 
-// 3. Refetch al cambiar `day`
-watch(day, () => {
-  fetchPriceData()
-})
+// 3. Asegurar que prices es siempre array
+const prices = computed(() => Array.isArray($data.value.prices) ? $data.value.prices : [])
 
-// 4. Control del switch
-const showTomorrow       = ref(false)
-const canToggleTomorrow  = computed(() => priceData.value.tomorrowAvailable)
-
-// 5. Formateo de fecha
-const formattedDate = computed(() => {
-  if (!priceData.value.lastUpdated) return 'Cargando...'
-  const options = {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZoneName: 'short'
-  }
-  return new Date(priceData.value.lastUpdated)
-    .toLocaleDateString('es-ES', options)
-    .replace(/^\w/, c => c.toUpperCase())
-})
-
-// 6. Leyenda / filtros
+// 4. Filtrar categorías ocultas
 const hiddenCategories = ref([])
 const categoryColors = {
   'Muy bajo': '#4CAF50',
@@ -46,12 +59,11 @@ const categoryColors = {
   'Medio':    '#FF9800',
   'Alto':     '#F44336'
 }
-
-// 7. Datos filtrados y chart
 const filteredPrices = computed(() =>
-  priceData.value.prices.filter(p => !hiddenCategories.value.includes(p.category))
+  prices.value.filter(p => !hiddenCategories.value.includes(p.category))
 )
 
+// 5. chartData
 const chartData = computed(() => ({
   labels: filteredPrices.value.map(p => p.hour.split(' - ')[0]),
   datasets: [{
@@ -65,7 +77,19 @@ const chartData = computed(() => ({
   }]
 }))
 
-// 8. Opciones del gráfico
+// 6. Formateo fecha
+const formattedDate = computed(() => {
+  const lu = $data.value.lastUpdated
+  if (!lu) return 'Cargando...'
+  return new Date(lu)
+    .toLocaleString('es-ES', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
+    })
+    .replace(/^\w/, c => c.toUpperCase())
+})
+
+// 7. chartOptions
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
@@ -92,10 +116,12 @@ const chartOptions = computed(() => ({
     },
     tooltip: {
       callbacks: {
-        title: ctx => priceData.value.prices[ctx[0].dataIndex].hour,
+        title: ctx => prices.value[ctx[0].dataIndex]?.hour ?? '',
         label: ctx => {
-          const p = priceData.value.prices[ctx.dataIndex]
-          return [`Precio: ${p.price.toFixed(4)} €/kWh`, `Categoría: ${p.category}`]
+          const p = prices.value[ctx.dataIndex]
+          return p
+            ? [`Precio: ${p.price.toFixed(4)} €/kWh`, `Categoría: ${p.category}`]
+            : []
         }
       }
     },
@@ -107,7 +133,7 @@ const chartOptions = computed(() => ({
         font: { family: 'Montserrat Variable', size: 12, weight: '500' },
         usePointStyle: true,
         generateLabels: () => {
-          const cats = [...new Set(priceData.value.prices.map(p => p.category))]
+          const cats = [...new Set(prices.value.map(p => p.category))]
           return cats.map(cat => ({
             text: hiddenCategories.value.includes(cat) ? `(${cat})` : cat,
             fillStyle: categoryColors[cat],
@@ -127,45 +153,9 @@ const chartOptions = computed(() => ({
   }
 }))
 
-// 9. Handler del botón
-function toggleDay() {
-  if (!canToggleTomorrow.value) return
-  showTomorrow.value = !showTomorrow.value
-  day.value = showTomorrow.value ? 'tomorrow' : 'today'
-}
 </script>
 
-<template>
 
-  <!-- GRÁFICO -->
-  <div class="chart-container">
-      <!-- SWITCH -->
-  <div class="flex items-center mb-4">
-    <button
-    @click="toggleDay"
-    :disabled="!canToggleTomorrow"
-    class="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:bg-gray-400"
-  >
-    {{ showTomorrow ? 'Ver precios de hoy' : 'Ver precios de mañana' }}
-  </button>
-    <span v-if="!canToggleTomorrow" class="ml-2 text-sm text-gray-500">
-      Precios mañana disponibles a las 20:25
-    </span>
-  </div>
-
-    <div v-if="priceData.prices.length && (!showTomorrow || canToggleTomorrow)">
-      <BarChart :chart-data="chartData" :options="chartOptions" />
-    </div>
-    <div v-else>
-      <template v-if="showTomorrow && !canToggleTomorrow">
-        Mañana aún no disponible.
-      </template>
-      <template v-else>
-        Cargando gráfico...
-      </template>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .chart-container { position: relative; width: 100%; }
