@@ -1,73 +1,58 @@
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 
-export function usePriceData() {
+export function usePriceData(initialDay = 'today') {
+  // Día que vamos a fetch (today | tomorrow)
+  const day       = ref(initialDay);
+  // Datos de precios
   const priceData = ref({
-    currentPrice: null,
-    lastUpdated: null,
-    prices: [],
-    minPrice: null,
-    maxPrice: null,
-    previousAverage: null 
+    currentPrice:     null,
+    averagePrice:     null,
+    previousAverage:  null,
+    lastUpdated:      null,
+    prices:           [],
+    minPrice:         null,
+    maxPrice:         null,
+    tomorrowAvailable: false
   });
   const loading = ref(true);
-  const fetchPriceData = async () => {
+
+  // Función de fetch, recibe opcionalmente el día a consultar
+  async function fetchPriceData(fetchDay = day.value) {
+    loading.value = true;
     try {
-      const apiUrl = new URL('/api/prices', window.location.origin);
-      const response = await fetch(apiUrl, {
-        headers: { Accept: 'application/json' },
-      });
-      if (!response.ok) throw new Error(`Error ${response.status}`);
-      const data = await response.json();
+      // Construimos la URL con ?day=tomorrow si toca
+      const url = new URL('/api/prices', window.location.origin);
+      if (fetchDay === 'tomorrow') {
+        url.searchParams.set('day', 'tomorrow');
+      }
+
+      const res = await fetch(url, { headers: { Accept: 'application/json' } });
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      const data = await res.json();
+
+      // Volcar los datos al ref
       priceData.value = {
-        currentPrice: data.currentPrice,
-        averagePrice: data.averagePrice,
-        previousAverage: data.previousAverage,
-        lastUpdated: new Date().toISOString(),
-        prices: data.prices,
-        minPrice: data.minPrice,
-        maxPrice: data.maxPrice,
+        currentPrice:      data.currentPrice,
+        averagePrice:      data.averagePrice,
+        previousAverage:   data.previousAverage,
+        lastUpdated:       data.lastUpdated || new Date().toISOString(),
+        prices:            data.prices,
+        minPrice:          data.minPrice,
+        maxPrice:          data.maxPrice,
+        tomorrowAvailable: data.tomorrowAvailable ?? false
       };
-    } catch (error) {
-      console.error('Error fetching prices:', error);
-      alert('⚠️ No se pudieron cargar los precios actuales');
+    } catch (e) {
+      console.error('Error fetching prices:', e);
+      alert('⚠️ No se pudieron cargar los precios');
     } finally {
       loading.value = false;
     }
-  };
+  }
 
+  // Cuando montamos, hacemos el primer fetch
   onMounted(() => {
     fetchPriceData();
   });
 
-  // Computed que calcula el precio actual según el rango horario de la data
-  const actualPrice = computed(() => {
-    if (!priceData.value.prices || priceData.value.prices.length === 0) {
-      return priceData.value.currentPrice;
-    }
-    const currentHour = new Date().getHours();
-    // Busca en el array de precios el objeto cuyo rango horario incluya la hora actual
-    const matchingPrice = priceData.value.prices.find(item => {
-      if (!item.hour) return false;
-      const [startStr, endStr] = item.hour.split(' - ');
-      const startHour = parseInt(startStr.split(':')[0]);
-      const endHour = parseInt(endStr.split(':')[0]);
-      // Rango dentro del mismo día
-      if (startHour < endHour) {
-        return currentHour >= startHour && currentHour < endHour;
-      } else {
-        // Rango que abarca medianoche (ejemplo "23:00 - 00:00")
-        return currentHour >= startHour || currentHour < endHour;
-      }
-    });
-    return matchingPrice ? matchingPrice.price : priceData.value.currentPrice;
-  });
-
-  const formattedPrices = computed(() => {
-    return priceData.value.prices.map(item => ({
-      ...item,
-      price: parseFloat(item.price.toFixed(4))
-    }));
-  });
-
-  return { priceData, fetchPriceData, actualPrice,formattedPrices,loading  };
+  return { day, priceData, fetchPriceData, loading };
 }
