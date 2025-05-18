@@ -29,6 +29,9 @@ importers:
       '@lucide/astro':
         specifier: ^0.511.0
         version: 0.511.0(astro@5.7.13(@netlify/blobs@8.2.0)(@types/node@22.15.18)(rollup@4.40.2)(sass@1.88.0)(typescript@5.8.3))
+      '@nanostores/vue':
+        specifier: ^1.0.0
+        version: 1.0.0(nanostores@1.0.1)(vue@3.5.14(typescript@5.8.3))
       '@supabase/supabase-js':
         specifier: ^2.49.4
         version: 2.49.4
@@ -44,6 +47,9 @@ importers:
       luxon:
         specifier: ^3.6.1
         version: 3.6.1
+      nanostores:
+        specifier: ^1.0.1
+        version: 1.0.1
       next-tick:
         specifier: ^1.1.0
         version: 1.1.0
@@ -578,6 +584,20 @@ packages:
 
   '@mdx-js/mdx@3.1.0':
     resolution: {integrity: sha512-/QxEhPAvGwbQmy1Px8F899L5Uc2KZ6JtXwlCgJmjSTBedwOZkByYcBG4GceIGPXRDsmfxhHazuS+hlOShRLeDw==}
+
+  '@nanostores/vue@1.0.0':
+    resolution: {integrity: sha512-+WtqBD0YXZoMmk7rjRrm0yd2F8e2O3yOk6jR3vpUREBj7UaKEEKpMrPpkpcltboL5ShlYYP0QkSwkpaMwmigOQ==}
+    engines: {node: ^20.0.0 || >=22.0.0}
+    peerDependencies:
+      '@nanostores/logger': ^0.4.0 || ^1.0.0
+      '@vue/devtools-api': '>=7.6.2'
+      nanostores: ^0.11.3 || ^1.0.0
+      vue: '>=3.3.1'
+    peerDependenciesMeta:
+      '@nanostores/logger':
+        optional: true
+      '@vue/devtools-api':
+        optional: true
 
   '@netlify/binary-info@1.0.0':
     resolution: {integrity: sha512-4wMPu9iN3/HL97QblBsBay3E1etIciR84izI3U+4iALY+JHCrI+a2jO0qbAZ/nxKoegypYEaiiqWXylm+/zfrw==}
@@ -2527,6 +2547,10 @@ packages:
     engines: {node: ^18 || >=20}
     hasBin: true
 
+  nanostores@1.0.1:
+    resolution: {integrity: sha512-kNZ9xnoJYKg/AfxjrVL4SS0fKX++4awQReGqWnwTRHxeHGZ1FJFVgTqr/eMrNQdp0Tz7M7tG/TDaX8QfHDwVCw==}
+    engines: {node: ^20.0.0 || >=22.0.0}
+
   neotraverse@0.6.18:
     resolution: {integrity: sha512-Z4SmBUweYa09+o6pG+eASabEpP6QkQ70yHj351pQoEXIs8uHbaU2DWVmzBANKgflPa47A50PtB2+NgRpQvr7vA==}
     engines: {node: '>= 10'}
@@ -4262,6 +4286,11 @@ snapshots:
     transitivePeerDependencies:
       - acorn
       - supports-color
+
+  '@nanostores/vue@1.0.0(nanostores@1.0.1)(vue@3.5.14(typescript@5.8.3))':
+    dependencies:
+      nanostores: 1.0.1
+      vue: 3.5.14(typescript@5.8.3)
 
   '@netlify/binary-info@1.0.0': {}
 
@@ -6739,6 +6768,8 @@ snapshots:
   nanoid@3.3.11: {}
 
   nanoid@5.1.5: {}
+
+  nanostores@1.0.1: {}
 
   neotraverse@0.6.18: {}
 
