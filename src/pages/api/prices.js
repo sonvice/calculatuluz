@@ -162,7 +162,6 @@ function getFallbackData() {
 export async function GET(context) {
   const url        = new URL(context.request.url);
   const isTomorrow = url.searchParams.get('day') === 'tomorrow';
-
   // 1. Manejo de caché (igual que siempre)
   const cached = await getCachedData();
   const ageMs  = cached
@@ -195,28 +194,35 @@ export async function GET(context) {
     // 4. Añadir promedio histórico (día anterior)
     processed.previousAverage = Number((await getHistoricalAverage()).toFixed(4));
 
-    // 5. Bandera para front: precios de mañana disponibles tras 20:05 CET/CEST
+    // 5. Bandera para front: precios de mañana disponibles tras 20:25 CET/CEST
     const nowMadrid = DateTime.now().setZone('Europe/Madrid');
-    const cutoff    = nowMadrid.set({ hour: 20, minute: 25, second: 0, millisecond: 0 });
-    const tomorrowAvailable = nowMadrid >= cutoff;
+    const cutoff = nowMadrid.startOf('day').plus({ 
+      hours: 20, 
+      minutes: 25,
+      seconds: 0 
+    })
+    const tomorrowAvailable = isTomorrow 
+  ? nowMadrid >= cutoff.minus({ days: 1 })  
+  : nowMadrid >= cutoff;
 
-    if (isTomorrow && !tomorrowAvailable) {
-      // Antes de las 20:05, devolvemos vacío + flag false
-      return new Response(JSON.stringify({
-        prices: [],
-        currentPrice: null,
-        averagePrice: null,
-        minPrice: null,
-        maxPrice: null,
-        lastUpdated: nowMadrid.toISO(),
-        previousAverage: await getHistoricalAverage(),
-        tomorrowAvailable: false
-      }), {
+  if (isTomorrow && !tomorrowAvailable) {
+    // MODIFICAR PARA MANTENER DATOS EXISTENTES:
+    return new Response(JSON.stringify({
+      ...(cached || getFallbackData()),  // Mantener datos previos
+      prices: [],
+      tomorrowAvailable: false,
+      debugInfo: {  // Agregar para debug
+        nowMadrid: nowMadrid.toISO(),
+        cutoff: cutoff.toISO(),
+        isAfterCutoff: nowMadrid >= cutoff,
+        isTomorrowRequest: isTomorrow
+      }
+    }), {
         headers: { 'Content-Type': 'application/json', 'X-Data-Source': 'no-tomorrow-yet' }
       });
     }
 
-    processed.tomorrowAvailable = nowMadrid >= cutoff;
+    processed.tomorrowAvailable = tomorrowAvailable;
 
     // 6. Actualizar caché si cambió algo esencial
     if (!cached || processed.maxPrice.value !== (cached.maxPrice?.value ?? cached.maxPrice)) {

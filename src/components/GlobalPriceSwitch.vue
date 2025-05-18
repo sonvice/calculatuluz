@@ -1,3 +1,4 @@
+<!-- src/components/GlobalSwitch.vue -->
 <template>
   <div class="switch-container mt-space-2xs">
     <div class="switch-wrapper">
@@ -31,26 +32,28 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { Clock } from 'lucide-vue-next';
-import { useStore } from '@nanostores/vue';
-import { day, priceData } from '../stores/prices.js';
+import { computed, watch } from 'vue'
+import { Clock } from 'lucide-vue-next'
+import { useStore } from '@nanostores/vue'
+import { day, priceData } from '../stores/prices.js'
 
-const dayStore = useStore(day);
-const priceDataStore = useStore(priceData);
+const dayStore       = useStore(day)        
+const priceDataStore = useStore(priceData)  
 
-const canToggle = computed(() => {
-  return priceDataStore.tomorrowAvailable || isAfterAvailabilityTime();
-});
+// computed booleana para habilitar switch
+const canToggle = computed(() => priceDataStore.value?.tomorrowAvailable ?? false)
 
-function isAfterAvailabilityTime() {
-  const now = new Date();
-  return now.getHours() > 20 || (now.getHours() === 20 && now.getMinutes() >= 25);
-}
+// 1) Observa directamente la disponibilidad
+watch(
+  () => priceDataStore.tomorrowAvailable,
+  avail => console.log('📅 tomorrowAvailable cambió a:', avail)
+)
+
 
 function toggleDay() {
-  if (!canToggle.value) return;
-  day.set(dayStore.value === 'today' ? 'tomorrow' : 'today');
+  if (!canToggle.value) return
+  const next = dayStore.value === 'today' ? 'tomorrow' : 'today'
+  day.set(next)
 }
 </script>
 

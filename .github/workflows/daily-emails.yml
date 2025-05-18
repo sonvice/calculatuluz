@@ -1,14 +1,12 @@
 name: Envío Diario de Horas Económicas
+
 on:
   schedule:
-    - cron: '25 18 * * *'  # 16:25 UTC = 20:25 CEST (España en verano)
-  
+    - cron: '25 18 * * *'  # 16:25 UTC = 20:25 CEST
+
 jobs:
   send-emails:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./src/scripts
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -19,23 +17,23 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
 
-      - name: Instalar pnpm  # 👈 Acción corregida
-        uses: pnpm/action-setup@v2  # 👈 Nombre correcto
+      - name: Setup pnpm CLI
+        uses: pnpm/action-setup@v2
         with:
-          version: 8  # Verifica tu versión de pnpm (7, 8, 9, etc.)
+          version: 8
 
-      - name: Instalar dependencias
+      - name: Instalar dependencias con pnpm
         run: pnpm install
-        working-directory: ./  # Desde la raíz del proyecto
 
-      - name: Ejecutar script
+      - name: Ejecutar script de envío
+        working-directory: src/scripts
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: node send-daily.js
 
-      - name: Notificar éxito
+      - name: Notificar éxito por Slack
         if: success()
         uses: rtCamp/action-slack-notify@v2
         env:

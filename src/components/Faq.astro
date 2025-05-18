@@ -28,25 +28,7 @@ const faqData = [
   }
 ];
 
-// Generar JSON-LD para FAQPage
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faqData.map(({ question, answer }) => ({
-    '@type': 'Question',
-    name: question,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: answer
-    }
-  }))
-};
 ---
-
-<!-- Inyectar datos estructurados JSON-LD -->
-<script type="application/ld+json">
-{JSON.stringify(jsonLd)}
-</script>
 
 <section class="faq-section text-neutral-50">
   <h2>Preguntas frecuentes</h2>

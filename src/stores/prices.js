@@ -1,6 +1,5 @@
 // src/stores/prices.js
 import { atom } from 'nanostores'
-import { DateTime } from 'luxon'
 
 export const day       = atom('today')
 export const loading   = atom(true)
@@ -16,17 +15,30 @@ export const priceData = atom({
 })
 
 async function fetchPrices(fetchDay) {
-  loading.set(true)
+  loading.set(true);
   try {
-    const url = new URL('/api/prices', window.location.origin)
-    if (fetchDay === 'tomorrow') url.searchParams.set('day', 'tomorrow')
-    const res  = await fetch(url, { headers: { Accept: 'application/json' } })
-    const data = await res.json()
-    priceData.set({ ...data })
+    const url = new URL('/api/prices', window.location.origin);
+    if (fetchDay === 'tomorrow') {
+      url.searchParams.set('day', 'tomorrow');
+    }
+    
+    // Forzar actualización cada minuto
+    url.searchParams.set('_t', Date.now()); 
+
+    const res = await fetch(url);
+    const data = await res.json();
+    
+    // Actualización crítica (mergear datos)
+    priceData.set({
+      ...priceData.get(), 
+      ...data, 
+      prices: data.prices 
+    });
+
   } catch (e) {
-    console.error('Error fetching prices:', e)
+    console.error('Fetch error:', e);
   } finally {
-    loading.set(false)
+    loading.set(false);
   }
 }
 
