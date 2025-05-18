@@ -92,128 +92,119 @@
 
 
 <script setup>
-  import { ref, watch, reactive } from 'vue';
-  import { appliances } from '../constant/index.js';
-  import CustomSelect from './CustomSelect.vue';
-  import InputField from './InputField.vue';
-  import ResultsDisplay from './ResultsDisplay.vue';
-  import { usePriceData } from '../utils/usePriceData.js';
+import { ref, watch, reactive, computed } from 'vue';
+import { useStore } from '@nanostores/vue';
+import { priceData } from '../stores/prices.js';
 
-  const { priceData, actualPrice } = usePriceData();
+import { appliances } from '../constant/index.js';
+import CustomSelect from './CustomSelect.vue';
+import InputField from './InputField.vue';
+import ResultsDisplay from './ResultsDisplay.vue';
 
-  const selectedAppliance = ref('');
-  const power = ref('');
-  const hours = ref('');
-  const errors = reactive({
-    power: '',
-    hours: '',
+const selectedAppliance = ref('');
+const power = ref('');
+const hours = ref('');
+
+const errors = reactive({
+  power: '',
+  hours: '',
+});
+
+const results = ref({
+  dailyKwh: '0.0000',
+  dailyCost: '0.000',
+  monthlyCost: '0.000',
+  annualCost: '0.000',
+});
+
+// Nanostore
+const priceStore = useStore(priceData);
+const actualPrice = computed(() => priceStore.value?.currentPrice ?? 0);
+
+// Actualizar potencia si se selecciona electrodoméstico
+watch(selectedAppliance, (newVal) => {
+  if (newVal && newVal !== 'custom') {
+    power.value = newVal;
+  }
+});
+
+// Recalcular cuando cambian datos
+watch([power, hours], () => calculateConsumption());
+watch(() => actualPrice.value, () => calculateConsumption());
+
+const handleCalculate = () => {
+  errors.power = '';
+  errors.hours = '';
+
+  let valid = true;
+
+  if (!power.value) {
+    errors.power = '⚠️ Este campo es requerido';
+    valid = false;
+  } else if (isNaN(power.value)) {
+    errors.power = '⚠️ Debes introducir un número';
+    valid = false;
+  }
+
+  if (!hours.value) {
+    errors.hours = '⚠️ Este campo es requerido';
+    valid = false;
+  } else if (isNaN(hours.value)) {
+    errors.hours = '⚠️ Debes introducir un número';
+    valid = false;
+  }
+
+  // Limpiar errores al escribir
+  watch(power, (newVal) => {
+    if (errors.power && newVal !== '') errors.power = '';
   });
-  const results = ref({
-    dailyKwh: '0.0000',
+  watch(hours, (newVal) => {
+    if (errors.hours && newVal !== '') errors.hours = '';
+  });
+
+  if (!valid) return;
+
+  calculateConsumption();
+};
+
+const calculateConsumption = () => {
+  const powerValue = parseFloat(power.value) || 0;
+  const hoursValue = parseFloat(hours.value) || 0;
+
+  if (powerValue <= 0 || hoursValue <= 0 || !actualPrice.value) {
+    resetResults();
+    return;
+  }
+
+  const kwh = (powerValue * hoursValue) / 1000;
+  const dailyNet = kwh * actualPrice.value;
+  const VAT_FACTOR = 1.21;
+
+  results.value = {
+    dailyKwh: kwh.toFixed(4),
+    dailyCost: (dailyNet * VAT_FACTOR).toFixed(3),
+    monthlyCost: (dailyNet * VAT_FACTOR * 30).toFixed(3),
+    annualCost: (dailyNet * VAT_FACTOR * 365).toFixed(3),
+  };
+};
+
+const resetResults = () => {
+  results.value = {
+    dailyKwh: '0.000',
     dailyCost: '0.000',
     monthlyCost: '0.000',
     annualCost: '0.000',
-  });
-
-  watch(selectedAppliance, (newVal) => {
-    if (newVal && newVal !== 'custom') {
-      power.value = newVal;
-    }
-  });
-
-  watch([power, hours], () => {
-    calculateConsumption();
-  });
-
-  watch(
-    () => priceData.value.currentPrice,
-    () => {
-      calculateConsumption();
-    }
-  );
-
-  const handleCalculate = () => {
-    // 1) Limpiamos errores anteriores
-    errors.power = '';
-    errors.hours = '';
-
-    let valid = true;
-
-    // 2) Validación de “requerido” y “numérico”
-    if (!power.value) {
-      errors.power = '⚠️ Este campo es requerido';
-      valid = false;
-    } else if (isNaN(power.value)) {
-      errors.power = '⚠️ Debes introducir un número';
-      valid = false;
-    }
-
-    if (!hours.value) {
-      errors.hours = '⚠️ Este campo es requerido';
-      valid = false;
-    } else if (isNaN(hours.value)) {
-      errors.hours = '⚠️ Debes introducir un número';
-      valid = false;
-    }
-
-    // —————— WATCHERS PARA LIMPIAR ERRORES AL ESCRIBIR ——————
-    watch(power, (newVal) => {
-      if (errors.power && newVal !== '') {
-        errors.power = '';
-      }
-    });
-    watch(hours, (newVal) => {
-      if (errors.hours && newVal !== '') {
-        errors.hours = '';
-      }
-    });
-
-    // 3) Si todo OK, seguimos adelante
-    if (!valid) return;
-    calculateConsumption();
   };
+};
 
-  const calculateConsumption = () => {
-    if (!priceData.value.currentPrice) return;
-    const powerValue = parseFloat(power.value) || 0;
-    const hoursValue = parseFloat(hours.value) || 0;
-    if (powerValue <= 0 || hoursValue <= 0) {
-      resetResults();
-      return;
-    }
-
-    const kwh = (powerValue * hoursValue) / 1000;
-    const dailyNet = kwh * priceData.value.currentPrice;
-    const VAT_FACTOR = 1.21;
-
-    const dailyGross = dailyNet * VAT_FACTOR;
-    const monthlyGross = dailyGross * 30;
-    const annualGross = dailyGross * 365;
-
-    results.value = {
-      dailyKwh: kwh.toFixed(4),
-      dailyCost: dailyGross.toFixed(3), // ya con IVA
-      monthlyCost: monthlyGross.toFixed(3), // ya con IVA
-      annualCost: annualGross.toFixed(3), // ya con IVA
-    };
-  };
-
-  const resetResults = () => {
-    results.value = {
-      dailyKwh: '0.000',
-      dailyCost: '0.000',
-      monthlyCost: '0.000',
-      annualCost: '0.000',
-    };
-  };
-
-  const resetForm = () => {
-    selectedAppliance.value = '';
-    power.value = '';
-    hours.value = '';
-    resetResults();
-  };
+const resetForm = () => {
+  selectedAppliance.value = '';
+  power.value = '';
+  hours.value = '';
+  resetResults();
+};
 </script>
+
 
 <style scoped>
 

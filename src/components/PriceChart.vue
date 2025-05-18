@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useStore } from '@nanostores/vue'
 import { day, priceData, loading } from '../stores/prices.js'
 import { BarChart } from 'vue-chart-3'
