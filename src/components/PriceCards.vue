@@ -1,10 +1,11 @@
 <script setup>
 import { computed } from 'vue';
-import { usePriceData } from '../utils/usePriceData.js';
+import { useStore } from '@nanostores/vue';
+import { priceData } from '../stores/prices.js'; // Importar la store
 import PriceCard from './PriceCard.vue';
 
-const { priceData } = usePriceData();
-
+// Obtener la store reactiva
+const priceStore = useStore(priceData);
 
 // Mantenemos los mismos colores y categorías que el gráfico
 const categoryColors = {
@@ -14,11 +15,11 @@ const categoryColors = {
   'Alto': '#F44336'
 };
 
-// Agrupamos los precios por categoría (misma lógica que la leyenda del gráfico)
+// Agrupamos los precios por categoría (usando la store)
 const groupedData = computed(() => {
-  if (!priceData.value.prices) return {};
+  if (!priceStore.value.prices) return {};
   
-  return priceData.value.prices.reduce((acc, price) => {
+  return priceStore.value.prices.reduce((acc, price) => {
     const category = price.category;
     if (!acc[category]) {
       acc[category] = {
@@ -38,12 +39,12 @@ const groupedData = computed(() => {
   }, {});
 });
 
-// Obtenemos el precio actual (misma lógica que el gráfico)
+// Obtenemos el precio actual desde la store
 const currentPrice = computed(() => {
-  if (!priceData.value.prices) return null;
+  if (!priceStore.value.prices) return null;
   
   const currentHour = new Date().getHours();
-  const priceEntry = priceData.value.prices.find(p => {
+  const priceEntry = priceStore.value.prices.find(p => {
     const [start] = p.hour.split(' - ');
     const hour = parseInt(start.split(':')[0]);
     return hour === currentHour;
@@ -55,7 +56,7 @@ const currentPrice = computed(() => {
 
 <template>
   <div class="cards-container">
-    <template v-if="priceData.prices?.length">
+    <template v-if="priceStore.prices?.length">
       <PriceCard
         v-for="(category, name) in groupedData"
         :key="name"
