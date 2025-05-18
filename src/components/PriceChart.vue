@@ -1,20 +1,6 @@
 <!-- src/components/PriceChart.vue -->
 <template>
   <div class="chart-container">
-    <!-- SWITCH -->
-    <div class="flex items-center mb-4">
-      <button
-        @click="toggleDay"
-        :disabled="!canToggle"
-        class="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:bg-gray-400"
-      >
-        {{ $day === 'today' ? 'Ver precios de mañana' : 'Ver precios de hoy' }}
-      </button>
-      <span v-if="!canToggle" class="ml-2 text-sm text-gray-500">
-        Precios mañana disponibles a las 20:05
-      </span>
-    </div>
-
     <!-- GRÁFICO / Estados -->
     <div v-if="$loading.value" class="text-center py-8">
       Cargando gráfico…
@@ -40,13 +26,6 @@ Chart.register(...registerables)
 const $data = useStore(priceData)
 const $loading = useStore(loading)
 const $day = useStore(day)
-
-// 2. Switch control
-const canToggle = computed(() => !!$data.value.tomorrowAvailable)
-function toggleDay() {
-  if (!canToggle.value) return
-  day.set($day.value === 'today' ? 'tomorrow' : 'today')
-}
 
 // 3. Asegurar que prices es siempre array
 const prices = computed(() => Array.isArray($data.value.prices) ? $data.value.prices : [])

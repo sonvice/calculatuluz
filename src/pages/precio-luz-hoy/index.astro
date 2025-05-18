@@ -7,6 +7,7 @@ import PriceChart from '../../components/PriceChart.vue';
 import PriceList from '../../components/PriceList.vue';
 import { Check, Siren, Lightbulb, ChartColumnBig } from '@lucide/astro';
 import SubscribeForm from '../../components/SubscribeForm.vue';
+import GlobalPriceSwitch from '../../components/GlobalPriceSwitch.vue';
 
 // Construir URL absoluta (funciona tanto en dev como en producción)
 const site = import.meta.env.SITE || 'http://localhost:4321';
@@ -55,6 +56,9 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
       franjas horarias más baratas y más caras para ayudarte a ahorrar en tu
       factura eléctrica.
     </p>
+    <div class="mt-space-m">
+      <p>Puedes consultar el precio de mañana</p> <GlobalPriceSwitch/>
+     </div>
     <h2 class="mt-space-xl text-neutral-50">
       ¿Quieres calcular cuánto te cuesta usar tus electrodomésticos hoy?
     </h2>

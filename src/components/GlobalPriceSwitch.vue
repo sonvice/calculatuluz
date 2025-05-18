@@ -1,35 +1,152 @@
-<!-- src/islands/GlobalPriceSwitch.vue -->
 <template>
-    <div class="flex items-center mb-6">
-      <button
-        @click="toggleDay"
-        :disabled="!canToggle"
-        class="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:bg-gray-400"
-      >
-        {{ day === 'today' ? 'Ver precios de mañana' : 'Ver precios de hoy' }}
-      </button>
-      <span v-if="!canToggle" class="ml-2 text-sm text-gray-500">
-        Precios mañana disponibles a las 20:05
-      </span>
+  <div class="switch-container mt-space-2xs">
+    <div class="switch-wrapper">
+      <!-- Switch -->
+      <label class="switch" :class="{ disabled: !canToggle }">
+        <input 
+          type="checkbox"
+          class="switch-input"
+          :checked="dayStore === 'tomorrow'"
+          :disabled="!canToggle"
+          @change="toggleDay"
+        >
+        <div class="switch-track" :class="{ active: dayStore === 'tomorrow' }">
+          <div class="switch-handle" :class="{ tomorrow: dayStore === 'tomorrow' }">
+            <Clock v-if="!canToggle" :size="16" class="clock-icon" />
+          </div>
+        </div>
+        <div class="switch-labels">
+          <span :class="{ active: dayStore === 'today' }">Hoy</span>
+          <span :class="{ active: dayStore === 'tomorrow' }">Mañana</span>
+        </div>
+      </label>
     </div>
-  </template>
-  
-  <script setup>
-  import { useStore } from '@nanostores/vue'
-  import { day, priceData } from '../stores/prices.js'
-  
-  // Convertimos los átomos en reactivos de Vue
-  const dayStore       = useStore(day)
-  const priceDataStore = useStore(priceData)
-  
-  // Computed para si podemos alternar
-  import { computed } from 'vue'
-  const canToggle = computed(() => priceDataStore.tomorrowAvailable)
-  
-  // Alternar día
-  function toggleDay() {
-    if (!canToggle.value) return
-    day.set(dayStore === 'today' ? 'tomorrow' : 'today')
-  }
-  </script>
-  
+
+    <!-- Mensaje de disponibilidad -->
+    <div v-if="!canToggle" class="availability-message">
+      <Clock :size="18" class="clock-icon" />
+      <span>Disponible a las 20:25</span>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue';
+import { Clock } from 'lucide-vue-next';
+import { useStore } from '@nanostores/vue';
+import { day, priceData } from '../stores/prices.js';
+
+const dayStore = useStore(day);
+const priceDataStore = useStore(priceData);
+
+const canToggle = computed(() => {
+  return priceDataStore.tomorrowAvailable || isAfterAvailabilityTime();
+});
+
+function isAfterAvailabilityTime() {
+  const now = new Date();
+  return now.getHours() > 20 || (now.getHours() === 20 && now.getMinutes() >= 25);
+}
+
+function toggleDay() {
+  if (!canToggle.value) return;
+  day.set(dayStore.value === 'today' ? 'tomorrow' : 'today');
+}
+</script>
+
+<style>
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.switch-wrapper {
+  position: relative;
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.switch.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.switch-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-track {
+  width: 56px;
+  height: 32px;
+  background: #e0e0e0;
+  border-radius: 16px;
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.switch-track.active {
+  background: var(--accent-500);
+}
+
+.switch-handle {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.switch-handle.tomorrow {
+  transform: translateX(24px);
+}
+
+.clock-icon {
+  color: #757575;
+  stroke-width: 2;
+}
+
+.switch-labels {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.switch-labels span {
+  color: #666;
+  transition: color 0.3s ease;
+}
+
+.switch-labels span.active {
+  color: var(--accent-500);
+}
+
+.availability-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.availability-message .clock-icon {
+  color: inherit;
+}
+</style>
