@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!hydrated || loading" class="card-skeleton mt-space-m"></div>
+  <div v-if="!hydrated || $loading" class="card-skeleton mt-space-m"></div>
   <section v-else class="guidance-card rounded-md mt-space-m bg-primary-900">
     <ul role="list" class="guidance-list text-primary-50 m-space-0 d-grid">
       <!-- Media diaria vs pico máximo -->
@@ -65,36 +65,37 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { useStore } from '@nanostores/vue';
+import { priceData, loading } from '../stores/prices.js';
 import { BarChart2Icon, ZapIcon, RefreshCwIcon, InfoIcon } from 'lucide-vue-next';
-import { usePriceData } from '../utils/usePriceData.js';
 
-// Datos y estado de carga
-const { priceData, loading } = usePriceData();
+const store = useStore(priceData);
+const $loading = useStore(loading);
 const hydrated = ref(false);
 onMounted(() => { hydrated.value = true; });
 
 // % media diaria sobre pico máximo
 const averageProgressPercentage = computed(() => {
-  const max = priceData.value.maxPrice?.value || 1;
-  const avg = priceData.value.averagePrice || 0;
+  const max = store.value.maxPrice?.value || 1;
+  const avg = store.value.averagePrice || 0;
   return Math.round((avg / max) * 100);
 });
 
 // % precio actual sobre pico máximo
 const currentProgressPercentage = computed(() => {
-  const max = priceData.value.maxPrice?.value || 1;
-  const now = priceData.value.currentPrice != null
-    ? priceData.value.currentPrice
-    : priceData.value.prices?.[new Date().getHours()]?.price || 0;
+  const max = store.value.maxPrice?.value || 1;
+  const now = store.value.currentPrice != null
+    ? store.value.currentPrice
+    : store.value.prices?.[new Date().getHours()]?.price || 0;
   return Math.round((now / max) * 100);
 });
 
 // % cambio próxima hora
 const nextDifferenceValue = computed(() => {
-  if (!priceData.value.prices?.length) return null;
+  if (!store.value.prices?.length) return null;
   const h = new Date().getHours();
-  const current = priceData.value.prices[h]?.price || 0;
-  const next = priceData.value.prices[(h + 1) % 24]?.price || 0;
+  const current = store.value.prices[h]?.price || 0;
+  const next = store.value.prices[(h + 1) % 24]?.price || 0;
   if (current === 0) return null;
   return ((next - current) / current * 100).toFixed(1);
 });
@@ -105,8 +106,6 @@ const nextDifferenceClass = computed(() => {
   if (isNaN(val)) return 'text-neutral-700';
   return val > 0 ? 'text-red-600' : val < 0 ? 'text-green-600' : 'text-neutral-700';
 });
-
-
 </script>
 
 <style scoped>
