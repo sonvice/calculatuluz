@@ -16,6 +16,7 @@
     "@astrojs/vue": "^5.0.13",
     "@fontsource-variable/montserrat": "^5.2.5",
     "@lucide/astro": "^0.511.0",
+    "@nanostores/persistent": "^1.0.0",
     "@nanostores/vue": "^1.0.0",
     "@supabase/supabase-js": "^2.49.4",
     "astro": "^5.7.12",

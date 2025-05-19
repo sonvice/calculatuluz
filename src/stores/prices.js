@@ -1,7 +1,20 @@
 // src/stores/prices.js
 import { atom } from 'nanostores'
+import { persistentAtom } from '@nanostores/persistent'
 
-export const day       = atom('today')
+export const day = persistentAtom('selected-day', 'today', {
+  encode: JSON.stringify,
+  decode: (value) => {
+    // Solo en cliente y con valor válido
+    if (typeof window === 'undefined') return 'today'
+    try {
+      const parsed = JSON.parse(value)
+      return parsed === 'tomorrow' ? 'tomorrow' : 'today'
+    } catch {
+      return 'today'
+    }
+  }
+})
 export const loading   = atom(true)
 export const priceData = atom({
   currentPrice:     null,
@@ -45,7 +58,9 @@ async function fetchPrices(fetchDay) {
 // dispara cada vez que cambie day en cliente
 day.subscribe((newDay) => {
   if (typeof window !== 'undefined') {
+    // Sincronizar con API y localStorage
     fetchPrices(newDay)
+    localStorage.setItem('selected-day', JSON.stringify(newDay))
   }
 })
 

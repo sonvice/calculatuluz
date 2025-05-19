@@ -21,7 +21,6 @@ if (!response.ok) {
   throw new Error(`Error al cargar los datos: ${response.status}`);
 }
 
-
 // Formatear fecha
 const formattedDate = new Intl.DateTimeFormat('es-ES', {
   day: '2-digit',
@@ -44,9 +43,7 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
       franjas horarias más baratas y más caras para ayudarte a ahorrar en tu
       factura eléctrica.
     </p>
-    <div class="mt-space-m">
-      <p>Puedes consultar el precio de mañana</p> <GlobalPriceSwitch client:load/>
-     </div>
+
     <h2 class="mt-space-xl text-neutral-50">
       ¿Quieres calcular cuánto te cuesta usar tus electrodomésticos hoy?
     </h2>
@@ -70,25 +67,34 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
       cuáles son las franjas más económicas del día para ahorrar en tu consumo
       eléctrico.
     </p>
-    <PriceCards client:only />
+    <div class="wrapper-switch d-flex">
+      <GlobalPriceSwitch client:load />
+    </div>
+    <PriceCards client:load />
     <div
       class="bg-primary-900 px-space-l py-space-l mt-space-s mb-space-3xl rounded-sm">
       <PriceChart client:only class="desktop-only" />
       <PriceList client:only class="mobile-only" />
     </div>
-    <div class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture">
-    <div class="newsletter-header text-primary-50">
-      <h2>⚡¡No te pierdas las horas más baratas de luz!</h2>
-      <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
-      <ListNewsletter/>
-      <div class="mt-space-m">
-        <SubscribeForm client:load />
+    <div
+      class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture">
+      <div class="newsletter-header text-primary-50">
+        <h2>⚡¡No te pierdas las horas más baratas de luz!</h2>
+        <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
+        <ListNewsletter />
+        <div class="mt-space-m">
+          <SubscribeForm client:visible />
+        </div>
       </div>
     </div>
-  </div> 
   </div>
 
   <style>
+    .wrapper-switch {
+     --horizontal-alignment:flex-end;
+      --vertical-alignment: center;
+      margin-bottom: var(--space-m);
+    }
     hr {
       opacity: 0.2;
     }
@@ -112,7 +118,5 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
         display: block !important;
       }
     }
-
-
   </style>
 </Layout>

@@ -1,29 +1,27 @@
-<!-- src/components/GlobalSwitch.vue -->
 <template>
-  <div class="switch-container mt-space-2xs">
+  <!-- Añadir client:only en el componente padre (Astro) -->
+  <div v-if="isHydrated" class="switch-container mt-space-2xs">
     <div class="switch-wrapper">
-      <!-- Switch -->
       <label class="switch" :class="{ disabled: !canToggle }">
         <input 
           type="checkbox"
           class="switch-input"
-          :checked="dayStore === 'tomorrow'"
+          :checked="isTomorrow"
           :disabled="!canToggle"
           @change="toggleDay"
         >
-        <div class="switch-track" :class="{ active: dayStore === 'tomorrow' }">
-          <div class="switch-handle" :class="{ tomorrow: dayStore === 'tomorrow' }">
+        <div class="switch-track" :class="{ active: isTomorrow }">
+          <div class="switch-handle" :class="{ tomorrow: isTomorrow }">
             <Clock v-if="!canToggle" :size="16" class="clock-icon" />
           </div>
         </div>
         <div class="switch-labels">
-          <span :class="{ active: dayStore === 'today' }">Hoy</span>
-          <span :class="{ active: dayStore === 'tomorrow' }">Mañana</span>
+          <span :class="{ active: !isTomorrow }">Hoy</span>
+          <span :class="{ active: isTomorrow }">Mañana</span>
         </div>
       </label>
     </div>
 
-    <!-- Mensaje de disponibilidad -->
     <div v-if="!canToggle" class="availability-message">
       <Clock :size="18" class="clock-icon" />
       <span>Disponible a las 20:25</span>
@@ -32,28 +30,38 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { Clock } from 'lucide-vue-next'
 import { useStore } from '@nanostores/vue'
 import { day, priceData } from '../stores/prices.js'
 
-const dayStore       = useStore(day)        
-const priceDataStore = useStore(priceData)  
+const isHydrated = ref(false)
+const dayStore = useStore(day)
+const priceDataStore = useStore(priceData)
 
-// computed booleana para habilitar switch
-const canToggle = computed(() => priceDataStore.value?.tomorrowAvailable ?? false)
+// Estado computado optimizado
+const isTomorrow = computed(() => dayStore.value === 'tomorrow')
+const canToggle = computed(() => priceDataStore.value?.tomorrowAvailable)
 
-// 1) Observa directamente la disponibilidad
-watch(
-  () => priceDataStore.tomorrowAvailable,
-  avail => console.log('📅 tomorrowAvailable cambió a:', avail)
-)
-
+// Sincronización de estado inicial
+onMounted(() => {
+  const savedDay = localStorage.getItem('selected-day')
+  const initialDay = savedDay ? JSON.parse(savedDay) : 'today'
+  
+  if (initialDay !== dayStore.value) {
+    day.set(initialDay)
+  }
+  
+  // Forzar nuevo frame antes de mostrar el componente
+  requestAnimationFrame(() => {
+    isHydrated.value = true
+  })
+})
 
 function toggleDay() {
   if (!canToggle.value) return
-  const next = dayStore.value === 'today' ? 'tomorrow' : 'today'
-  day.set(next)
+  const newDay = isTomorrow.value ? 'today' : 'tomorrow'
+  day.set(newDay)
 }
 </script>
 
