@@ -3,25 +3,36 @@ import Layout from '../layouts/Layout.astro';
 import Calculator from '../components/Calculator.vue';
 import Faq from '../components/Faq.astro';
 import SubscribeForm from '../components/SubscribeForm.vue';
-import { Check,Siren,Lightbulb,ChartColumnBig } from '@lucide/astro';
+import ListNewsletter from '../components/ListNewsletter.astro';
+import heroImg from '../assets/imgs/calculator.png';
 ---
 
 <Layout
   title="Calculadora de Consumo Eléctrico de Electrodomésticos | Gratis, kWh y Costo Diario"
   description="Calcula el consumo eléctrico de tus electrodomésticos en kWh y euros. Descubre el precio del kWh por horas con nuestro gráfico actualizado y ahorra en tu factura.">
   <div class="text-primary-100 mt-space-l">
-    <h1 class="fw-700 text-neutral-50">
-      Calculadora online gratuita de consumo eléctrico de electrodomésticos
-    </h1>
-    <p class="mt-space-m">
-      Con esta calculadora online de consumo eléctrico de electrodomésticos podrás saber en segundos cuántos kWh y euros consume tu lavadora, nevera u otros aparatos. 
-      Los cálculos se basan en el precio actual de la electricidad, actualizado en tiempo real según los datos oficiales de la red eléctrica de España.
-    </p>
-    <p class="mt-space-s">
-      Ideal para hogares y pequeños negocios que buscan ahorrar, planificar cargas en las horas más económicas y entender mejor su gasto energético.
-    </p>
+    <div class="hero-wrapper">
+      <div>
+
+        <h1 class="fw-700 text-neutral-50">
+          Calculadora online gratuita de consumo eléctrico de electrodomésticos
+        </h1>
+        <p class="mt-space-m">
+          Con esta calculadora online de consumo eléctrico de electrodomésticos podrás saber en segundos cuántos kWh y euros consume tu lavadora, nevera u otros aparatos. 
+          Los cálculos se basan en el precio actual de la electricidad, actualizado en tiempo real según los datos oficiales de la red eléctrica de España.
+        </p>
+        <p class="mt-space-s">
+          Ideal para hogares y pequeños negocios que buscan ahorrar, planificar cargas en las horas más económicas y entender mejor su gasto energético.
+        </p>
+      </div>
+      <img
+        src={heroImg.src}
+        width={heroImg.width/1.8}
+        alt="Calculadora de consumo eléctrico"
+        class="mt-space-m mb-space-l w-full max-w-2xl rounded-md shadow-lg">
+    </div>
    
-    <div class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50">
+    <div class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50 bg-texture">
       <Calculator client:load />
     </div>
     <hr class="text-neutral-400 my-space-2xl" />
@@ -95,16 +106,11 @@ import { Check,Siren,Lightbulb,ChartColumnBig } from '@lucide/astro';
   <div class="mt-space-xl">
     <Faq/>
   </div>
-  <div class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md">
+  <div class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture">
     <div class="newsletter-header text-primary-50">
       <h2>⚡¡No te pierdas las horas más baratas de luz!</h2>
       <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
-      <ul role="list" class="mt-space-m flow">
-        <li class="d-flex"><Check color='var(--accent-500)' /> Las <strong>3 horas clave</strong> para ahorrar en tu factura</li>
-        <li class="d-flex"><Siren color="var(--red-500)" /> Alertas de <strong>picos de precio</strong> que debes evitar</li>
-        <li class="d-flex"><Lightbulb color="var(--orange-300)" /> Consejos prácticos para cada electrodoméstico</li>
-        <li class="d-flex"><ChartColumnBig color="var(--primary-200)" /> Comparativas de ahorro <strong>personalizadas</strong></li>
-      </ul>
+      <ListNewsletter/>
       <div class="mt-space-m">
         <SubscribeForm client:load/>
       </div>
@@ -123,6 +129,22 @@ import { Check,Siren,Lightbulb,ChartColumnBig } from '@lucide/astro';
    max-width: 800px;
     border-radius: 8px;
   }
- 
+ .hero-wrapper{
+  display: block;
+  grid-template-columns: 1fr 1fr;
+  justify-items: center;
+  align-items: center;
 
+  & img{
+    display: none;
+  }
+}
+@media (min-width: 63.99875em) {
+  .hero-wrapper {
+  display: grid;
+    & img{
+    display: block;
+  }
+  }
+}
 </style>

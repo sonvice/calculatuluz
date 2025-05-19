@@ -11,7 +11,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="card">
+  <div class="card bg-texture">
     <div class="color-indicator" :style="{ backgroundColor: color }"></div>
     
     <div class="content">
@@ -41,7 +41,7 @@ defineProps({
 
 <style scoped>
 .card {
-  background: var(--primary-900);
+
   border-radius: 12px;
   padding: 1.2rem;
   backdrop-filter: blur(8px);

@@ -15,7 +15,7 @@
 
         <div v-else class="cards-grid">
           <!-- Precio Actual -->
-          <div class="price-card current rounded-md bg-primary-900">
+          <div class="price-card current rounded-md bg-primary-900 bg-texture">
             <div class="card-header">
               <span class="card-badge text-primary-50 bg-accent-500"
                 >Ahora</span
@@ -55,7 +55,7 @@
           </div>
 
           <!-- Media Diaria -->
-          <div class="price-card average rounded-md bg-primary-900">
+          <div class="price-card average rounded-md bg-primary-900 bg-texture">
             <div class="card-header">
               <h3 class="card-title text-primary-100">Media Diaria</h3>
               <div class="comparison-badge text-primary-200">
@@ -98,7 +98,7 @@
           </div>
 
           <!-- Mínimo Diario -->
-          <div class="price-card min rounded-md bg-primary-900">
+          <div class="price-card min rounded-md bg-primary-900 bg-texture">
             <div class="card-header">
               <h3 class="card-title text-primary-100">Mínimo Diario</h3>
               <div class="time-range text-primary-200">
@@ -118,7 +118,7 @@
           </div>
 
           <!-- Máximo Diario -->
-          <div class="price-card max rounded-md bg-primary-900">
+          <div class="price-card max rounded-md bg-primary-900 bg-texture">
             <div class="card-header">
               <h3 class="card-title text-primary-100">Máximo Diario</h3>
               <div class="time-range text-primary-200">

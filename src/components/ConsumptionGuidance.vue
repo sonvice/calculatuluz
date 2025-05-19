@@ -1,6 +1,6 @@
 <template>
   <div v-if="!hydrated || $loading" class="card-skeleton mt-space-m"></div>
-  <section v-else class="guidance-card rounded-md mt-space-m bg-primary-900">
+  <section v-else class="guidance-card rounded-md mt-space-m bg-primary-900 bg-texture">
     <ul role="list" class="guidance-list text-primary-50 m-space-0 d-grid">
       <!-- Media diaria vs pico máximo -->
       <li>

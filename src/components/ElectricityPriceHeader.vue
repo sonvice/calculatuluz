@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-primary-900 mb-space-l">
+  <header class="bg-primary-900">
     <div class="container">
       <div class="header-price py-space-s text-primary-100 text-center">
         <div class="d-flex align-center">

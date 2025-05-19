@@ -1,5 +1,6 @@
 .nav{
     --horizontal-alignment:space-between;
+    --gutter:var(--space-l);
     &__link{
         text-decoration: none;
     }

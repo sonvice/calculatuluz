@@ -1,0 +1,30 @@
+---
+import { Check, Siren, ChartColumnBig } from '@lucide/astro';
+---
+
+<ul role="list" class="list-newsletter mt-space-m flow">
+  <li class="d-flex">
+    <Check color="var(--accent-500)" />
+    <p>
+      Las <strong>3 horas clave</strong>
+      para ahorrar en tu factura
+    </p>
+  </li>
+  <li class="d-flex">
+    <Siren color="var(--red-500)" />
+    <p>Alertas de <strong>picos de precio</strong> que debes evitar</p>
+  </li>
+  <li class="d-flex">
+    <ChartColumnBig color="var(--primary-200)" />
+    <p>Comparativas de ahorro <strong>personalizadas</strong></p>
+  </li>
+</ul>
+
+<style>
+  .list-newsletter li {
+    flex-wrap: nowrap;
+  }
+  .list-newsletter li svg {
+    flex-shrink: 0;
+  }
+</style>
