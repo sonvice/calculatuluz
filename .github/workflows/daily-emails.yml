@@ -11,16 +11,18 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
+      # 1️⃣ Primero instalamos pnpm
+      - name: Setup pnpm CLI
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      # 2️⃣ Ahora sí, setup-node con cache pnpm
       - name: Configurar Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
           cache: 'pnpm'
-
-      - name: Setup pnpm CLI
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
 
       - name: Instalar dependencias con pnpm
         run: pnpm install

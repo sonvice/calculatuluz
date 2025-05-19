@@ -23,9 +23,10 @@
 
 <script setup>
 import { computed } from 'vue';
-import { usePriceData } from '../utils/usePriceData.js'; // Ajusta la ruta según corresponda
+import { useStore } from '@nanostores/vue';
+import { priceData } from '../stores/prices.js'; // Importar la store
 
-const { priceData } = usePriceData();
+const priceStore = useStore(priceData); // Obtener la store reactiva
 
 const formatter = new Intl.NumberFormat('es-ES', {
   style: 'currency',
@@ -37,15 +38,14 @@ const formatter = new Intl.NumberFormat('es-ES', {
 // Calcula el precio actual en función del rango horario de la data de la API
 const currentPriceFromData = computed(() => {
   // Si no hay precios, usamos el currentPrice por defecto
-  if (!priceData.value.prices || !priceData.value.prices.length) {
-    return priceData.value.currentPrice;
+  if (!priceStore.value.prices || !priceStore.value.prices.length) {
+    return priceStore.value.currentPrice || 0;
   }
 
   const currentHour = new Date().getHours();
 
   // Busca el objeto cuyo rango horario contenga la hora actual
-  const matchingPrice = priceData.value.prices.find(item => {
-    // Suponemos que item.hour es un string tipo "HH:MM - HH:MM"
+  const matchingPrice = priceStore.value.prices.find(item => {
     if (!item.hour) return false;
     const [startStr, endStr] = item.hour.split(' - ');
     const startHour = parseInt(startStr.split(':')[0]);
@@ -60,30 +60,11 @@ const currentPriceFromData = computed(() => {
     }
   });
 
-  return matchingPrice ? matchingPrice.price : priceData.value.currentPrice;
+  return matchingPrice ? matchingPrice.price : priceStore.value.currentPrice;
 });
 
-// Formateadores para mostrar los valores, con valores por defecto si la data aún no está disponible
-const formattedCurrentPrice = computed(() => formatter.format(currentPriceFromData.value));
-const formattedAveragePrice = computed(() => formatter.format(priceData.value.averagePrice || 0));
-const formattedMinPrice = computed(() => {
-  const min = priceData.value.minPrice;
-  return min && min.value != null ? formatter.format(min.value) : '';
-});
-const formattedMaxPrice = computed(() => {
-  const max = priceData.value.maxPrice;
-  return max && max.value != null ? formatter.format(max.value) : '';
-});
-
-const formattedLastUpdated = computed(() => {
-  const date = new Date(priceData.value.lastUpdated);
-  return date.toLocaleDateString('es-ES', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+// Formateador con valor por defecto
+const formattedCurrentPrice = computed(() => {
+  return formatter.format(currentPriceFromData.value || 0);
 });
 </script>
-
