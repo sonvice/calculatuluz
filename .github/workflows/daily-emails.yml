@@ -7,6 +7,14 @@ on:
 jobs:
   send-emails:
     runs-on: ubuntu-latest
+
+    # Variables de entorno para todo el job
+    env:
+      SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY:         ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      RESEND_API_KEY:            ${{ secrets.RESEND_API_KEY }}
+
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -15,22 +23,18 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-          cache: 'npm'               # ← cambiamos a cache de npm
+          cache: 'npm'
 
       - name: Instalar dependencias con npm
-        run: npm ci                # ← npm ci para entornos CI, más rápido y fiable
+        run: npm ci
 
       - name: Ejecutar script de envío
         working-directory: src/scripts
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: node send-daily.js
 
       - name: Notificar éxito por Slack
         if: success()
         uses: rtCamp/action-slack-notify@v2
         env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_MESSAGE: "✅ Emails enviados: ${{ github.run_number }}"
+          SLACK_WEBHOOK:  ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE:  "✅ Emails enviados: ${{ github.run_number }}"
