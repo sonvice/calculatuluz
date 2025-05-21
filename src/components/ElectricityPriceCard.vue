@@ -1,5 +1,5 @@
 <template>
-  <header class="price-header mt-space-xl">
+  <header class="price-header">
     <div>
       <div class="header-content">
         <div class="last-updated d-flex mb-space-s text-size--1 text-primary-200">
@@ -548,9 +548,9 @@
   }
 
   .last-updated {
-    margin-top: 1.5rem;
     gap: 0.5rem;
     --horizontal-alignment:space-between;
+    --vertical-alignment:end;
   }
 
   .card-badge {

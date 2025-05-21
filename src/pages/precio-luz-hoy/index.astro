@@ -8,6 +8,7 @@ import PriceChart from '../../components/PriceChart.vue';
 import PriceList from '../../components/PriceList.vue';
 import SubscribeForm from '../../components/SubscribeForm.vue';
 import GlobalPriceSwitch from '../../components/GlobalPriceSwitch.vue';
+import ElectricityPriceHeader from '../../components/ElectricityPriceHeader.vue';
 
 // Construir URL absoluta (funciona tanto en dev como en producción)
 const site = import.meta.env.SITE || 'http://localhost:4321';
@@ -34,7 +35,7 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
 <Layout
   title="Precio de la luz hoy en España - Tarifas por hora actualizadas"
   description="Consulta el precio de la luz por horas hoy en España. Ahorra planificando tus consumos con las tarifas más baratas del día.">
-  <div class="text-primary-100 mt-space-l">
+  <div class="hero-luz-day text-primary-100 mt-space-l">
     <h1 class="fw-700 text-neutral-50 d-block">
       Precio de la luz hoy por horas en España  - {formattedDate} 
     </h1>
@@ -43,7 +44,7 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
       franjas horarias más baratas y más caras para ayudarte a ahorrar en tu
       factura eléctrica.
     </p>
-
+    
     <h2 class="mt-space-xl text-neutral-50">
       ¿Quieres calcular cuánto te cuesta usar tus electrodomésticos hoy?
     </h2>
@@ -51,7 +52,7 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
       👉 Usa nuestra <a href="/">calculadora de consumo</a>
       para saber cuánto te cuesta usar tus electrodomésticos hoy.
     </p>
-    <div class="mt-space-xl">
+    <div>
       <ElectricityPriceCard client:load />
     </div>
     <div>
@@ -59,16 +60,21 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
     </div>
 
     <hr class="text-neutral-400 my-space-2xl" />
-    <h2 class="fw-700 text-neutral-50 mb-space-s">
-      Evolución precio del kWh España
-    </h2>
-    <p class="mb-space-xl text-primary-100">
-      Consulta la evolución del precio del kWh por horas en España y descubre
-      cuáles son las franjas más económicas del día para ahorrar en tu consumo
-      eléctrico.
-    </p>
-    <div class="wrapper-switch d-flex">
-      <GlobalPriceSwitch client:load />
+    <div class="title-evolution d-flex">
+      <div>
+        <h2 class="fw-700 text-neutral-50 mb-space-s">
+          Evolución precio del kWh España
+        </h2>
+        <p class="mb-space-xl text-primary-100">
+          Consulta la evolución del precio del kWh por horas en España y descubre
+          cuáles son las franjas más económicas del día para ahorrar en tu consumo
+          eléctrico.
+        </p>
+      </div>
+
+      <div class="wrapper-switch d-flex">
+        <GlobalPriceSwitch client:load />
+      </div>
     </div>
     <PriceCards client:load />
     <div
@@ -90,6 +96,15 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
   </div>
 
   <style>
+    .hero-luz-day__subcribe {
+      max-width: 600px;
+    }
+    .hero-luz-day__price{
+       max-width: max-content;
+    }
+    .title-evolution{
+      --horizontal-alignment:space-between;
+    }
     .wrapper-switch {
      --horizontal-alignment:flex-end;
       --vertical-alignment: center;
