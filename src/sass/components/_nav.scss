@@ -1,15 +1,19 @@
-.nav{
-    --horizontal-alignment:space-between;
-    --gutter:var(--space-l);
-    &__link{
-        text-decoration: none;
-    }
-    &__link--active{
-        color: var(--accent-400);
-        border-bottom: 2px solid var(--accent-400);
-    }
-    & nav{
-        --horizontal-alignment:flex-start;
-        --gutter:var(--space-m);
-    }
+.nav {
+  --horizontal-alignment: space-between;
+  --gutter: var(--space-l);
+  &__link {
+    text-decoration: none;
+  }
+  &__link--active {
+    color: var(--accent-400);
+    border-bottom: 2px solid var(--accent-400);
+  }
+  & nav {
+    --horizontal-alignment: flex-start;
+    --gutter: var(--space-m);
+  }
+
+  & nav a:hover {
+    color: var(--accent-400);
+  }
 }

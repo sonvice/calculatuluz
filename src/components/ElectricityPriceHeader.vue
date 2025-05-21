@@ -11,8 +11,8 @@
           />
           <div class="d-flex">
             <div class="current-price">
-              <span class="fw-700">Precio actual: </span>
-              <span class="header-price__price">{{ formattedCurrentPrice }}</span>
+              <span>Precio actual: </span>
+              <span class="header-price__price fw-700">{{ formattedCurrentPrice }}</span>
             </div>
           </div>
         </div>
