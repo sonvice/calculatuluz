@@ -17,15 +17,14 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useStore } from '@nanostores/vue'
-import { day, priceData, loading } from '../stores/prices.js'
+import {  priceData, loading } from '../stores/prices.js'
 import { BarChart } from 'vue-chart-3'
-import { Chart, registerables } from 'chart.js'
+import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables)
 
 // 1. Suscribirse a los atoms
 const $data = useStore(priceData)
 const $loading = useStore(loading)
-const $day = useStore(day)
 
 // 3. Asegurar que prices es siempre array
 const prices = computed(() => Array.isArray($data.value.prices) ? $data.value.prices : [])
@@ -42,19 +41,24 @@ const filteredPrices = computed(() =>
   prices.value.filter(p => !hiddenCategories.value.includes(p.category))
 )
 
-// 5. chartData
-const chartData = computed(() => ({
-  labels: filteredPrices.value.map(p => p.hour.split(' - ')[0]),
-  datasets: [{
-    label: 'Precio (€/kWh)',
-    data: filteredPrices.value.map(p => p.price),
-    backgroundColor: filteredPrices.value.map(p => categoryColors[p.category]),
-    borderColor: '#333',
-    borderWidth: 1,
-    barPercentage: 0.9,
-    categoryPercentage: 0.9
-  }]
-}))
+const chartData = computed(() => {
+  const visiblePrices = prices.value.filter(p => !hiddenCategories.value.includes(p.category))
+  
+  return {
+    labels: visiblePrices.map(p => p.hour.split(' - ')[0]),
+    datasets: [{
+      label: 'Precio (€/kWh)',
+      data: visiblePrices.map(p => p.price),
+      backgroundColor: visiblePrices.map(p => categoryColors[p.category]),
+      borderColor: '#333',
+      borderWidth: 1,
+      barPercentage: 0.9,
+      categoryPercentage: 0.9
+    }]
+  }
+})
+
+
 
 // 6. Formateo fecha
 const formattedDate = computed(() => {
@@ -67,6 +71,8 @@ const formattedDate = computed(() => {
     })
     .replace(/^\w/, c => c.toUpperCase())
 })
+
+
 
 // 7. chartOptions
 const chartOptions = computed(() => ({
@@ -109,16 +115,16 @@ const chartOptions = computed(() => ({
       position: 'top',
       labels: {
         color: '#f5f5f5',
-        font: { family: 'Montserrat Variable', size: 12, weight: '500' },
+        font: { family: 'Montserrat Variable', size: 13, weight: '500'},
         usePointStyle: true,
-        generateLabels: () => {
+        generateLabels: (chart) => {
           const cats = [...new Set(prices.value.map(p => p.category))]
           return cats.map(cat => ({
             text: hiddenCategories.value.includes(cat) ? `(${cat})` : cat,
             fillStyle: categoryColors[cat],
             strokeStyle: 'transparent',
             hidden: hiddenCategories.value.includes(cat),
-            extra: cat
+            extra: cat,
           }))
         }
       },
@@ -127,10 +133,13 @@ const chartOptions = computed(() => ({
         hiddenCategories.value = hiddenCategories.value.includes(cat)
           ? hiddenCategories.value.filter(c => c !== cat)
           : [...hiddenCategories.value, cat]
-      }
+      },
+      
     }
   }
 }))
+
+
 
 </script>
 

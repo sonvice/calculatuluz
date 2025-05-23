@@ -20,7 +20,7 @@
     "@nanostores/vue": "^1.0.0",
     "@supabase/supabase-js": "^2.49.4",
     "astro": "^5.7.12",
-    "chart.js": "^3.9.1",
+    "chart.js": "^4.4.9",
     "lucide-vue-next": "^0.503.0",
     "luxon": "^3.6.1",
     "nanostores": "^1.0.1",

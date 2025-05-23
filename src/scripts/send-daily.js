@@ -18,8 +18,17 @@ async function main() {
           ...h,
           priceFormatted: h.price.toFixed(4).replace('.', ',') + '€/kWh'
         }));
+
+        // 3. Filtrar horas caras (top 3 a evitar)
+        const worstHours = [...prices]
+          .sort((a, b) => b.price - a.price)
+          .slice(0, 3)
+          .map(h => ({
+            ...h,
+            priceFormatted: h.price.toFixed(4).replace(".", ",") + "€/kWh",
+          }));
   
-      // 3. Obtener suscriptores
+      // 4. Obtener suscriptores
       const { data: subscribers, error } = await supabase
         .from("subscribers")
         .select("email")
@@ -28,7 +37,7 @@ async function main() {
       if (error) throw error;
       if (!subscribers.length) return;
   
-      // 4. Construir email
+      // 5. Construir email
       const emailHtml = `
         <div style="max-width: 600px; margin: 20px auto; font-family: Arial, sans-serif;">
           <img src="https://calculatuluz.es/logo.png" alt="Logo" style="height: 60px;">
@@ -45,6 +54,20 @@ async function main() {
                   </td>
                 </tr>
               `).join('')}
+            </table>
+          </div>
+
+           <div style="background: #ffe6e6; padding: 20px; border-radius: 10px; margin-top: 20px;">
+            <h3 style="margin-top: 0; color: #c0392b;">🔔 Alertas de picos de precio que debes evitar:</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              ${worstHours.map(h => `
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 10px;">${h.hour}</td>
+                  <td style="text-align: right; color: #c0392b; font-weight: bold;">
+                    ${h.priceFormatted}
+                  </td>
+                </tr>
+              `).join("")}
             </table>
           </div>
   
