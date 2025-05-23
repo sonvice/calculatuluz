@@ -32,9 +32,4 @@ jobs:
         working-directory: src/scripts
         run: node send-daily.js
 
-      - name: Notificar éxito por Slack
-        if: success()
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK:  ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_MESSAGE:  "✅ Emails enviados: ${{ github.run_number }}"
+
