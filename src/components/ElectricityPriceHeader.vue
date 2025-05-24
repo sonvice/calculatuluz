@@ -5,7 +5,8 @@
         <div class="d-flex align-center">
           <img 
             src="/images/light_bulb.png" 
-            width="40" 
+            width="40"
+            height="40" 
             alt="light_bulb" 
             class="header-price__logo" 
           />
