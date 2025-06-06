@@ -159,6 +159,7 @@ const nextDifferenceClass = computed(() => {
   position: relative;
   display: inline-block;
   cursor: pointer;
+  vertical-align: middle;
 }
 .tooltip-container .tooltip {
   display: none;
