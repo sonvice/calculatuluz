@@ -47,11 +47,11 @@
   }
   
   .trend-up {
-    fill: #4CAF50; /* Verde para tendencia positiva */
+    fill: #F44336; /* Verde para tendencia positiva */
   }
   
   .trend-down {
-    fill: #F44336; /* Rojo para tendencia negativa */
+    fill: #4CAF50; /* Rojo para tendencia negativa */
   }
   
   .trend-neutral {
