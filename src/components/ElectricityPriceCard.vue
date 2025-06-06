@@ -3,7 +3,7 @@
     <div>
       <div class="header-content">
         <div class="last-updated d-flex mb-space-s text-size--1 text-primary-200">
-          Actualizado: {{ formattedLastUpdated }}
+         <p>Actualizado: <time :datetime=formattedLastUpdated>{{ formattedLastUpdated }}</time></p> 
           <div class="mt-space-m">
             <small>Puedes consultar el precio de mañana</small>
             <GlobalPriceSwitch />

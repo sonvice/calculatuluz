@@ -37,7 +37,7 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
   description="Consulta el precio de la luz por horas hoy en España. Ahorra planificando tus consumos con las tarifas más baratas del día.">
   <div class="hero-luz-day text-primary-100 mt-space-l">
     <h1 class="fw-700 text-neutral-50 d-block">
-      Precio de la luz hoy por horas en España  - {formattedDate} 
+      Precio de la luz hoy por horas en España  - <time datetime=`${formattedDate}`>{formattedDate}</time> 
     </h1>
     <p class="mt-space-m">
       Consulta el precio de la luz hoy por horas en España. Te mostramos las
