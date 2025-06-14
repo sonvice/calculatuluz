@@ -76,4 +76,9 @@
     --button-bg-color-hover:var(--neutral-900);
     --button-color-text-hover:var(--neutral-50);
   }
+
+  &[data-size="small"]{
+    --button-font-size:var(--size--1);
+  }
+
 }

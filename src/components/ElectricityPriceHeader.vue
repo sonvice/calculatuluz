@@ -1,8 +1,9 @@
 <template>
-  <header class="bg-primary-900">
+  <header class="bg-primary-900 py-space-s">
     <div class="container">
-      <div class="header-price py-space-s text-primary-100 text-center">
-        <div class="d-flex align-center">
+      <div class="header-price d-flex">
+      <div class="text-primary-100 text-center">
+        <div class="header-price__now d-flex align-center">
           <img 
             src="/images/light_bulb.png" 
             width="40"
@@ -17,6 +18,7 @@
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   </header>

@@ -1,9 +1,10 @@
+<!-- src/components/PriceHeader.vue -->
 <template>
   <header class="price-header">
     <div>
       <div class="header-content">
         <div class="last-updated d-flex mb-space-s text-size--1 text-primary-200">
-         <p>Actualizado: <time :datetime=formattedLastUpdated>{{ formattedLastUpdated }}</time></p> 
+          <p>Actualizado: <time :datetime="formattedLastUpdated">{{ formattedLastUpdated }}</time></p>
           <div class="mt-space-m">
             <small>Puedes consultar el precio de mañana</small>
             <GlobalPriceSwitch />
@@ -21,21 +22,16 @@
           <!-- Precio Actual -->
           <div class="price-card current rounded-md bg-primary-900 bg-texture">
             <div class="card-header">
-              <span class="card-badge text-primary-50 bg-accent-500"
-                >Ahora</span
-              >
+              <span class="card-badge text-primary-50 bg-accent-500">Ahora</span>
               <h3 class="card-title text-primary-100">Precio Actual</h3>
               <div class="time-indicator">
-                <span class="current-hour text-primary-200"
-                  >{{ currentHour }}h</span
-                >
+                <span class="current-hour text-primary-200">{{ currentHour }}h</span>
               </div>
             </div>
             <div class="card-content">
               <p class="price-display text-primary-50 d-flex">
                 <span>{{ formattedCurrentPrice }}</span>
                 <span class="price-trend">
-                  <!-- Arrow based on nextPriceDifference -->
                   <TrendArrow :value="nextPriceDifference" />
                   <span class="trend-percentage">
                     {{ nextPriceDifference }}%
@@ -63,10 +59,7 @@
             <div class="card-header">
               <h3 class="card-title text-primary-100">Media Diaria</h3>
               <div class="comparison-badge text-primary-200">
-                <span :class="comparisonClass"
-                  >{{ comparisonPercentage }}%</span
-                >
-                vs. ayer
+                <span :class="comparisonClass">{{ comparisonPercentage }}%</span> vs. ayer
               </div>
             </div>
             <div class="card-content">
@@ -80,20 +73,11 @@
                 <template v-if="comparisonPercentage !== '--'">
                   <span v-if="Math.abs(comparisonPercentageValue) > 0">
                     Los precios están un
-                    <strong
-                      >{{
-                        Math.abs(comparisonPercentageValue).toFixed(1)
-                      }}%</strong
-                    >
-                    {{
-                      comparisonPercentageValue > 0 ? 'más altos' : 'más bajos'
-                    }}
-                    que ayer.<br />
-                    <!--  La media actual está al {{ averageProgressPercentage }}% del precio máximo diario. -->
+                    <strong>{{ Math.abs(comparisonPercentageValue).toFixed(1) }}%</strong>
+                    {{ comparisonPercentageValue > 0 ? 'más altos' : 'más bajos' }} que ayer.
                   </span>
                   <span v-else>
-                    Los precios se mantienen estables respecto a ayer.<br />
-                    <!-- La media actual está al {{ averageProgressPercentage }}% del precio máximo diario. -->
+                    Los precios se mantienen estables respecto a ayer.
                   </span>
                 </template>
                 <span v-else>Cargando datos históricos...</span>
@@ -107,7 +91,7 @@
               <h3 class="card-title text-primary-100">Mínimo Diario</h3>
               <div class="time-range text-primary-200">
                 <span class="text-primary-50">Desde</span>
-                {{ priceData.value.minPrice?.timeRange || '--:--' }}
+                {{ minTimeRange }}
               </div>
             </div>
             <div class="card-content">
@@ -115,8 +99,7 @@
                 {{ formattedMinPrice }}
               </p>
               <div class="savings-hint text-primary-50">
-                Ahorra hasta <strong>{{ formattedSavings }}</strong> por kWh si
-                programas tu consumo en la hora más barata.
+                Ahorra hasta <strong>{{ formattedSavings }}</strong> por kWh si programas tu consumo en la hora más barata.
               </div>
             </div>
           </div>
@@ -126,7 +109,7 @@
             <div class="card-header">
               <h3 class="card-title text-primary-100">Máximo Diario</h3>
               <div class="time-range text-primary-200">
-                {{ priceData.value.maxPrice?.timeRange || '--:--' }}
+                {{ maxTimeRange }}
               </div>
             </div>
             <div class="card-content">
@@ -145,142 +128,100 @@
 </template>
 
 <script setup>
-  import { computed, onMounted, onUnmounted, ref } from 'vue';
-  import { useStore } from '@nanostores/vue';
-  import { priceData } from '../stores/prices.js';
-  import TrendArrow from './TrendArrow.vue';
-  import GlobalPriceSwitch from './GlobalPriceSwitch.vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useStore } from '@nanostores/vue'
+import { priceData } from '../stores/prices.js'
+import TrendArrow from './TrendArrow.vue'
+import GlobalPriceSwitch from './GlobalPriceSwitch.vue'
 
-  const hydrated = ref(false);
-  const now = ref(Date.now());
-  let interval;
+const hydrated = ref(false)
+const now = ref(Date.now())
+let interval = null
 
-  // Reemplazo de usePriceData
-  const priceStore = useStore(priceData);
+const store = useStore(priceData)
 
-  // Formateador
-  const formatter = new Intl.NumberFormat('es-ES', {
-    style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 4,
-    maximumFractionDigits: 4,
-  });
+// Formatter
+const formatter = new Intl.NumberFormat('es-ES', {
+  style: 'currency', currency: 'EUR', minimumFractionDigits: 4, maximumFractionDigits: 4
+})
 
-  // Actualización de la hora
-  onMounted(() => {
-    hydrated.value = true;
-    interval = setInterval(() => {
-      now.value = Date.now();
-    }, 60000);
-  });
-  onUnmounted(() => clearInterval(interval));
+onMounted(() => {
+  hydrated.value = true
+  interval = setInterval(() => { now.value = Date.now() }, 60000)
+})
+onUnmounted(() => clearInterval(interval))
 
-  // Fecha de actualización
-  const formattedLastUpdated = computed(() => {
-    const date = new Date(priceStore.value.lastUpdated);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  });
+const formattedLastUpdated = computed(() => {
+  const d = new Date(store.value.lastUpdated)
+  return d.toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+})
+const currentHour = computed(() => new Date().getHours().toString().padStart(2,'0'))
 
-  // Datos actuales y próximos
-  const currentHour = computed(() =>
-    new Date().getHours().toString().padStart(2, '0')
-  );
+// Use dynamic prices array for all calculations
+const pricesArray = computed(() => store.value.prices || [])
 
-  const formattedCurrentPrice = computed(() =>
-    formatter.format(
-      priceStore.value.prices?.[new Date().getHours()]?.price ??
-        priceStore.value.currentPrice ??
-        0
-    )
-  );
+const formattedCurrentPrice = computed(() => {
+  const price = pricesArray.value[new Date().getHours()]?.price ?? store.value.currentPrice ?? 0
+  return formatter.format(price)
+})
+const formattedNextPrice = computed(() => {
+  const price = pricesArray.value[(new Date().getHours()+1)%24]?.price ?? 0
+  return formatter.format(price)
+})
+const minutesRemaining = computed(() => 60 - new Date().getMinutes() - 1)
 
-  const formattedNextPrice = computed(() =>
-    formatter.format(
-      priceStore.value.prices?.[(new Date().getHours() + 1) % 24]?.price ?? 0
-    )
-  );
+const nextPriceDifference = computed(() => {
+  const idx = new Date().getHours()
+  const cur = pricesArray.value[idx]?.price ?? 0
+  const nxt = pricesArray.value[(idx+1)%24]?.price ?? 0
+  return cur ? Number((((nxt-cur)/cur)*100).toFixed(1)) : 0
+})
+const trendExplanation = computed(() => {
+  const d = nextPriceDifference.value
+  if (d>0) return `El precio aumentará un ${d}% la próxima hora`
+  if (d<0) return `El precio disminuirá un ${Math.abs(d)}% la próxima hora`
+  return 'El precio se mantendrá estable en la próxima hora'
+})
 
-  const minutesRemaining = computed(() => 60 - new Date().getMinutes() - 1);
+// Recalcular agregados dinámicamente
+const averagePriceValue = computed(() => {
+  const arr = pricesArray.value.map(s => s.price)
+  return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : store.value.averagePrice
+})
+const formattedAveragePrice = computed(() => formatter.format(averagePriceValue.value))
+const maxPriceSlot = computed(() => pricesArray.value.reduce((prev,c)=>(c.price>prev.price?c:prev), {price:0, timeRange:''}))
+const minPriceSlot = computed(() => pricesArray.value.reduce((prev,c)=>(c.price<prev.price?c:prev), {price:Infinity, timeRange:''}))
 
-  // Diferencia con la próxima hora
-  const nextPriceDifference = computed(() => {
-    const hour = new Date().getHours();
-    const cur = priceStore.value.prices?.[hour]?.price ?? 0;
-    const nxt = priceStore.value.prices?.[(hour + 1) % 24]?.price ?? 0;
-    if (!cur) return 0;
-    return Number((((nxt - cur) / cur) * 100).toFixed(1));
-  });
+const formattedMaxPrice = computed(() => formatter.format(maxPriceSlot.value.price))
+const maxTimeRange = computed(() => maxPriceSlot.value.timeRange || store.value.maxPrice?.timeRange || '--:--')
 
-  const trendExplanation = computed(() => {
-    const d = nextPriceDifference.value;
-    if (d > 0) return `El precio aumentará un ${d}% la próxima hora`;
-    if (d < 0) return `El precio disminuirá un ${Math.abs(d)}% la próxima hora`;
-    return 'El precio se mantendrá estable en la próxima hora';
-  });
+// Progress bar for average price
+const averageProgressPercentage = computed(() => {
+  const maxVal = maxPriceSlot.value.price ?? store.value.maxPrice?.value ?? 1
+  const avgVal = averagePriceValue.value
+  return Math.round((avgVal / maxVal) * 100)
+})
+const averageProgressStyle = computed(() => ({ width: `${averageProgressPercentage.value}%` }))
+const formattedMinPrice = computed(() => formatter.format(minPriceSlot.value.price))
+const minTimeRange = computed(() => minPriceSlot.value.timeRange || store.value.minPrice?.timeRange || '--:--')
 
-  // Media diaria
-  const averageProgressPercentage = computed(() => {
-    const max = priceStore.value.maxPrice?.value ?? 1;
-    const avg = priceStore.value.averagePrice ?? 0;
-    return Math.round((avg / max) * 100);
-  });
+const comparisonPercentageValue = computed(() => {
+  const prevAvg = store.value.previousAverage ?? 0
+  if (!prevAvg) return 0
+  return ((averagePriceValue.value - prevAvg)/prevAvg)*100
+})
+const comparisonPercentage = computed(() => `${comparisonPercentageValue.value>=0?'+':''}${comparisonPercentageValue.value.toFixed(1)}`)
+const comparisonClass = computed(() => comparisonPercentageValue.value>0?'positive':comparisonPercentageValue.value<0?'negative':'neutral')
 
-  const averageProgressStyle = computed(() => ({
-    width: `${averageProgressPercentage.value}%`,
-  }));
-
-  const formattedAveragePrice = computed(() =>
-    formatter.format(priceStore.value.averagePrice ?? 0)
-  );
-
-  const formattedMinPrice = computed(() =>
-    priceStore.value.minPrice?.value
-      ? formatter.format(priceStore.value.minPrice.value)
-      : ''
-  );
-
-  const formattedMaxPrice = computed(() =>
-    priceStore.value.maxPrice?.value
-      ? formatter.format(priceStore.value.maxPrice.value)
-      : ''
-  );
-
-  // Comparación diaria
-  const comparisonPercentage = computed(() => {
-    const cur = priceStore.value.averagePrice ?? 0;
-    const prev = priceStore.value.previousAverage ?? 0;
-    if (prev === 0) return cur ? '+0.0' : '--';
-    const pct = ((cur - prev) / prev) * 100;
-    return `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}`;
-  });
-
-  const comparisonPercentageValue = computed(
-    () => parseFloat(comparisonPercentage.value) || 0
-  );
-
-  const comparisonClass = computed(() => {
-    const val = comparisonPercentageValue.value;
-    return val > 0 ? 'positive' : val < 0 ? 'negative' : 'neutral';
-  });
-
-  // Ahorro
-  const savingPerKWh = computed(() => {
-    const current =
-      priceStore.value.currentPrice ??
-      priceStore.value.prices?.[new Date().getHours()]?.price ??
-      0;
-    const min = priceStore.value.minPrice?.value ?? current;
-    return Math.max(0, current - min);
-  });
-
-  const formattedSavings = computed(() => formatter.format(savingPerKWh.value));
+const savingPerKWh = computed(() => {
+  const cur = pricesArray.value[new Date().getHours()]?.price ?? 0
+  const min = minPriceSlot.value.price ?? cur
+  return Math.max(0, cur-min)
+})
+const formattedSavings = computed(() => formatter.format(savingPerKWh.value))
 </script>
+
+
 
 <style scoped>
   .skeleton {

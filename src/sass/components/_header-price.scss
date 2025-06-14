@@ -1,6 +1,13 @@
+@use '../abstracts/' as *;
 .header-price{
     --horizontal-alignment:center;
-    --gutter:var(--space-3xs);
+    --gutter:var(--space-s);
+    @include breakpoint(md){
+        --gutter:var(--space-l);
+    }
+    &__now{
+        --gutter:var(--space-2xs);
+    }
     &__price{
        color: var(--accent-500);
     }
