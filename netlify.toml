@@ -15,26 +15,3 @@
     Content-Encoding = "br"
     Cache-Control = "public, max-age=31536000, immutable"
     Access-Control-Allow-Origin = "*"
-
-# ✅ Optimizar fuentes web
-[[headers]]
-  for = "/fonts/*.woff2"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    Content-Type = "font/woff2"
-
-# ✅ Preload imágenes críticas si se conocen (ejemplo: hero image)
-[[headers]]
-  for = "/imgs/calculator.webp"
-  [headers.values]
-    Link = "</imgs/calculator.webp>; rel=preload; as=image"
-
-# ✅ CSS y JS deben tener caching fuerte
-[[headers]]
-  for = "/assets/*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-[[headers]]
-  for = "/assets/*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
