@@ -9,9 +9,3 @@
 [dev]
   functions = "dist/functions"
 
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Content-Encoding = "br"
-    Cache-Control = "public, max-age=31536000, immutable"
-    Access-Control-Allow-Origin = "*"
