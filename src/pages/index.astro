@@ -1,4 +1,5 @@
 ---
+export const prerender = true
 import Layout from '../layouts/Layout.astro';
 import Calculator from '../components/Calculator.vue';
 import Faq from '../components/Faq.astro';
@@ -27,13 +28,16 @@ import heroImg from '../assets/imgs/calculator.png';
       </div>
       <img
         src={heroImg.src}
-        width={heroImg.width/1.8}
+        width={heroImg.width/1.5}
+        height="426" 
+        loading="eager"
+        fetchpriority="high"
         alt="Calculadora de consumo eléctrico"
         class="mt-space-m mb-space-l w-full max-w-2xl rounded-md shadow-lg">
     </div>
    
     <div class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50 bg-texture">
-      <Calculator client:load />
+      <Calculator client:idle />
     </div>
     <hr class="text-neutral-400 my-space-2xl" />
      <h2 id="como-funciona-calculadora" class="text-neutral-50 mt-space-xl">
@@ -112,7 +116,7 @@ import heroImg from '../assets/imgs/calculator.png';
       <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
       <ListNewsletter/>
       <div class="mt-space-m">
-        <SubscribeForm client:load/>
+        <SubscribeForm client:visible/>
       </div>
     </div>
   </div>
@@ -144,6 +148,7 @@ import heroImg from '../assets/imgs/calculator.png';
   display: grid;
     & img{
     display: block;
+    height: auto;
   }
   }
 }

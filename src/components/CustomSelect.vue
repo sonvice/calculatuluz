@@ -1,7 +1,7 @@
 <template>
-  <div class="custom-select text-primary-200" ref="dropdown">
+  <div class="custom-select" ref="dropdown">
     <div class="select-header" @click="toggleDropdown">
-      <div v-if="!selectedLabel" class="placeholder d-flex">
+      <div v-if="!selectedLabel" class="placeholder text-primary-900 d-flex">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="18"
@@ -28,7 +28,7 @@
         :key="appliance.value"
         class="dropdown-option"
         @click="selectAppliance(appliance.value)">
-        <img :src="appliance.image" alt="icono" width="24" />
+        <img :src="appliance.image" alt="icono" width="24" height="24" />
         <div class="option-details d-flex">
           <span class="appliance-name">{{ appliance.label }}</span>
           <span class="power-consumption">{{ appliance.watts }}</span>

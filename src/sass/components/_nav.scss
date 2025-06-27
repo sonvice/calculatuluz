@@ -1,6 +1,10 @@
 .nav {
   --horizontal-alignment: space-between;
   --gutter: var(--space-l);
+  &__list{
+    list-style: none;
+    padding-left: 0;
+  }
   &__link {
     text-decoration: none;
   }

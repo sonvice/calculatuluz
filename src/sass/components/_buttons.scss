@@ -61,11 +61,11 @@
   }
   &[data-type="accent"] {
    --button-bg-color:var(--accent-500);
-   --button-color-text:var(--neutral-50);
+   --button-color-text:var(--primary-900);
    --button-border-color:var(--accent-500);
    --button-border-color-hover:var(--button-bg-color-hover);
    --button-bg-color-hover:var(--accent-400);
-   --button-color-text-hover:var(--neutral-50);
+   --button-color-text-hover:var(--primary-800);
    --button-outline-color:var(--button-bg-color-hover);
   }
 

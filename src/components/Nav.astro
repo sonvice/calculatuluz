@@ -1,12 +1,12 @@
 ---
-import { navigation as navDefault } from '../constant';
-import Logo from '../assets/logo-calcula-tu-luz.svg';
+import { navigation as navDefault } from "../constant";
+import Logo from "../assets/logo-calcula-tu-luz.svg";
 // Obtenemos la ruta actual
 const currentPath = Astro.url.pathname;
 
 const navigation = navDefault.filter((item) => {
   // Mostrar la Calculadora en todas las rutas excepto "/"
-  if (item.onlyTips && currentPath === '/') {
+  if (item.onlyTips && currentPath === "/") {
     return false;
   }
   return true;
@@ -16,23 +16,35 @@ const navigation = navDefault.filter((item) => {
 <header>
   <div class="container">
     <div class="nav d-flex text-primary-100">
-      <div class="text-size-2"><a href="/"><Logo width={160}/></a></div>
-      <nav class="d-flex">
-        {
-          navigation.map((item) => {
-            const isActive =
-              item.url === '/'
-                ? currentPath === '/'
-                : currentPath.startsWith(item.url);
-            return (
-              <a
-                href={item.url}
-                class={`nav__link ${isActive ? 'nav__link--active fw-500' : ''} py-space-3xs text-neutral-50`}>
-                {item.title}
-              </a>
-            );
-          })
-        }
+      <div class="text-size-2">
+        <a aria-label="Logo de calculatuluz.es" href="/"
+          ><Logo width={160} /></a>
+      </div>
+      <nav aria-label="Main navigation">
+        <ul class="nav__list d-flex" role="menubar">
+          {
+            navigation.map((item) => {
+              const isActive =
+                item.url === "/"
+                  ? currentPath === "/"
+                  : currentPath.startsWith(item.url);
+              return (
+                <li role="none">
+                  <a
+                    href={item.url}
+                    role="menuitem"
+                    aria-current={isActive ? "page" : undefined}
+                    class={`nav__link py-space-3xs text-neutral-50 ${
+                      isActive ? "nav__link--active fw-500" : ""
+                    }`}
+                  >
+                    {item.title}
+                  </a>
+                </li>
+              );
+            })
+          }
+        </ul>
       </nav>
     </div>
   </div>

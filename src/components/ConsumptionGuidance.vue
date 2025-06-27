@@ -68,7 +68,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useStore } from '@nanostores/vue';
 import { priceData, loading } from '../stores/prices.js';
 import { BarChart2Icon, ZapIcon, RefreshCwIcon, InfoIcon } from 'lucide-vue-next';
-
+import { Check, Siren, ChartColumnBig } from '@lucide/astro';
 const store = useStore(priceData);
 const $loading = useStore(loading);
 const hydrated = ref(false);
