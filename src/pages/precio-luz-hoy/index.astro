@@ -1,49 +1,53 @@
 ---
-import ElectricityPriceCard from '../../components/ElectricityPriceCard.vue';
-import Layout from '../../layouts/Layout.astro';
-import ListNewsletter from '../../components/ListNewsletter.astro';
-import ComsumptionGuidance from '../../components/ConsumptionGuidance.vue';
-import PriceCards from '../../components/PriceCards.vue';
-import PriceChart from '../../components/PriceChart.vue';
-import PriceList from '../../components/PriceList.vue';
-import SubscribeForm from '../../components/SubscribeForm.vue';
-import GlobalPriceSwitch from '../../components/GlobalPriceSwitch.vue';
+import ElectricityPriceCard from "../../components/ElectricityPriceCard.vue";
+import Layout from "../../layouts/Layout.astro";
+import ListNewsletter from "../../components/ListNewsletter.astro";
+import ComsumptionGuidance from "../../components/ConsumptionGuidance.vue";
+import PriceCards from "../../components/PriceCards.vue";
+import PriceChart from "../../components/PriceChart.vue";
+import PriceList from "../../components/PriceList.vue";
+import SubscribeForm from "../../components/SubscribeForm.vue";
+import GlobalPriceSwitch from "../../components/GlobalPriceSwitch.vue";
 
 // Construir URL absoluta (funciona tanto en dev como en producción)
-const site = import.meta.env.SITE || 'http://localhost:4321';
-const apiUrl = new URL('/api/prices', site);
+const site = import.meta.env.SITE || "http://localhost:4321";
+const apiUrl = new URL("/api/prices", site);
 
 // Hacer fetch con URL absoluta
 const response = await fetch(apiUrl, {
-  headers: { Accept: 'application/json' },
+  headers: { Accept: "application/json" },
 });
 if (!response.ok) {
   throw new Error(`Error al cargar los datos: ${response.status}`);
 }
 
 // Formatear fecha
-const formattedDate = new Intl.DateTimeFormat('es-ES', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
+const formattedDate = new Intl.DateTimeFormat("es-ES", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Europe/Madrid",
 }).format(new Date());
 ---
 
 <Layout
   title="Precio de la luz hoy en España - Tarifas por hora actualizadas"
-  description="Consulta el precio de la luz por horas hoy en España. Ahorra planificando tus consumos con las tarifas más baratas del día.">
+  description="Consulta el precio de la luz por horas hoy en España. Ahorra planificando tus consumos con las tarifas más baratas del día."
+>
   <div class="hero-luz-day text-primary-100 mt-space-l">
     <h1 class="fw-700 text-neutral-50 d-block">
-      Precio de la luz hoy por horas en España  - <time datetime=`${formattedDate}`>{formattedDate}</time> 
+      Precio de la luz hoy por horas en España - <time
+        datetime=`${formattedDate}`>{formattedDate}</time
+      >
     </h1>
     <p class="mt-space-m">
       Consulta el precio de la luz hoy por horas en España. Te mostramos las
       franjas horarias más baratas y más caras para ayudarte a ahorrar en tu
       factura eléctrica.
     </p>
-    
+
     <h2 class="mt-space-xl text-neutral-50">
       ¿Quieres calcular cuánto te cuesta usar tus electrodomésticos hoy?
     </h2>
@@ -65,9 +69,9 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
           Evolución precio del kWh España
         </h2>
         <p class="mb-space-xl text-primary-100">
-          Consulta la evolución del precio del kWh por horas en España y descubre
-          cuáles son las franjas más económicas del día para ahorrar en tu consumo
-          eléctrico.
+          Consulta la evolución del precio del kWh por horas en España y
+          descubre cuáles son las franjas más económicas del día para ahorrar en
+          tu consumo eléctrico.
         </p>
       </div>
 
@@ -77,12 +81,14 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
     </div>
     <PriceCards client:load />
     <div
-      class="bg-primary-900 px-space-l py-space-l mt-space-s mb-space-3xl rounded-sm">
+      class="bg-primary-900 px-space-l py-space-l mt-space-s mb-space-3xl rounded-sm"
+    >
       <PriceChart client:load class="desktop-only" />
       <PriceList client:load class="mobile-only" />
     </div>
     <div
-      class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture">
+      class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture"
+    >
       <div class="newsletter-header text-primary-50">
         <h2>⚡¡No te pierdas las horas más baratas de luz!</h2>
         <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
@@ -98,14 +104,14 @@ const formattedDate = new Intl.DateTimeFormat('es-ES', {
     .hero-luz-day__subcribe {
       max-width: 600px;
     }
-    .hero-luz-day__price{
-       max-width: max-content;
+    .hero-luz-day__price {
+      max-width: max-content;
     }
-    .title-evolution{
-      --horizontal-alignment:space-between;
+    .title-evolution {
+      --horizontal-alignment: space-between;
     }
     .wrapper-switch {
-     --horizontal-alignment:flex-end;
+      --horizontal-alignment: flex-end;
       --vertical-alignment: center;
       margin-bottom: var(--space-m);
     }
