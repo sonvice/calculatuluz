@@ -83,7 +83,7 @@ const formattedDate = new Intl.DateTimeFormat("es-ES", {
     <div
       class="bg-primary-900 px-space-l py-space-l mt-space-s mb-space-3xl rounded-sm"
     >
-      <PriceChart client:load class="desktop-only" />
+      <PriceChart client:only="vue" class="desktop-only" />
       <PriceList client:load class="mobile-only" />
     </div>
     <div

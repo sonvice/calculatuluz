@@ -16,7 +16,7 @@ const { title, description } = Astro.props;
   <!-- Transfer slots to BaseLayout -->
   <slot name="head" slot="head" />
   <div class="header-nav-wrapper">
-    <ContractedPower client:only/>
+    <ContractedPower client:load/>
   </div>
   <div class="nav-wrapper py-space-m">
     <Nav />

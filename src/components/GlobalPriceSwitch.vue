@@ -3,16 +3,16 @@
   <div v-if="isHydrated" class="switch-container mt-space-2xs">
     <div class="switch-wrapper">
       <label class="switch" :class="{ disabled: !canToggle }">
-        <input 
-          type="checkbox"
-          class="switch-input"
-          :checked="isTomorrow"
-          :disabled="!canToggle"
-          @change="toggleDay"
-        >
+        <input type="checkbox" class="switch-input" :checked="isTomorrow" :disabled="!canToggle" @change="toggleDay">
         <div class="switch-track" :class="{ active: isTomorrow }">
           <div class="switch-handle" :class="{ tomorrow: isTomorrow }">
-            <Clock v-if="!canToggle" :size="16" class="clock-icon" />
+          
+            <svg v-if="!canToggle" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-clock-icon clock-icon lucide-clock">
+              <path d="M12 6v6l4 2" />
+              <circle cx="12" cy="12" r="10" />
+            </svg>
           </div>
         </div>
         <div class="switch-labels">
@@ -23,7 +23,12 @@
     </div>
 
     <div v-if="!canToggle" class="availability-message">
-      <Clock :size="18" class="clock-icon" />
+       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-clock-icon clock-icon lucide-clock">
+              <path d="M12 6v6l4 2" />
+              <circle cx="12" cy="12" r="10" />
+            </svg>
       <span>Disponible a las 20:25</span>
     </div>
   </div>
@@ -31,7 +36,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Clock } from 'lucide-vue-next'
 import { useStore } from '@nanostores/vue'
 import { day, priceData } from '../stores/prices.js'
 
@@ -47,11 +51,11 @@ const canToggle = computed(() => priceDataStore.value?.tomorrowAvailable)
 onMounted(() => {
   const savedDay = localStorage.getItem('selected-day')
   const initialDay = savedDay ? JSON.parse(savedDay) : 'today'
-  
+
   if (initialDay !== dayStore.value) {
     day.set(initialDay)
   }
-  
+
   // Forzar nuevo frame antes de mostrar el componente
   requestAnimationFrame(() => {
     isHydrated.value = true
@@ -116,7 +120,7 @@ function toggleDay() {
   height: 24px;
   background: white;
   border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;

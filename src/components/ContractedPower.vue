@@ -17,7 +17,13 @@
         <label for="contracted-power" class="text-neutral-50 d-flex mb-space-3xs text-size--1">
           ⚡ Potencia contratada (kW)
           <span class="tooltip-container">
-            <InfoIcon class="icon-small" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon-small text-primary-50 lucide lucide-info-icon lucide-info">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4" />
+              <path d="M12 8h.01" />
+            </svg>
             <div class="tooltip">
               Coste estimado por hora = Precio PVPC × Potencia contratada × 1 h.<br />
               Ej: 5,5 kW x 0,10 €/kWh = 0,55 €.<br />
@@ -46,7 +52,6 @@
 import { computed } from 'vue'
 import { useStore } from '@nanostores/vue'
 import { priceData, power, applied, applyPower, resetData } from '../stores/prices.js'
-import { InfoIcon } from 'lucide-vue-next'
 
 const $priceData = useStore(priceData)
 const $power = useStore(power)
@@ -93,14 +98,16 @@ const currentHourCost = computed(() => {
 
 
 <style scoped>
-  .contrated{
-    --horizontal-alignment: center;
-  --vertical-alignment:flex-end;
-  }
+.contrated {
+  --horizontal-alignment: center;
+  --vertical-alignment: flex-end;
+  min-height: 6.25rem;
+}
+
 .contracted-power {
   --horizontal-alignment: start;
   --gutter: var(--space-3xs);
-  --vertical-alignment:flex-end;
+  --vertical-alignment: flex-end;
 }
 
 .input-power {
@@ -118,7 +125,8 @@ const currentHourCost = computed(() => {
     border-radius: 4px;
     padding-inline: var(--space-xs);
   }
-  & input:disabled{
+
+  & input:disabled {
     color: var(--primary-100);
   }
 
@@ -126,7 +134,8 @@ const currentHourCost = computed(() => {
 
 .btn-power {
   --gutter: var(--space-xs);
-  & .btn{
+
+  & .btn {
     flex-grow: 1;
   }
 }
