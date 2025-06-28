@@ -14,7 +14,7 @@ export default defineConfig({
   site: 'https://calculatuluz.es',
 
   adapter: netlify({
-    edge: false, 
+    edge: true, 
   }),
 
   integrations: [vue(), partytown({
