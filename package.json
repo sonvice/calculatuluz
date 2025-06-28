@@ -21,7 +21,6 @@
     "@supabase/supabase-js": "^2.49.4",
     "astro": "^5.9.0",
     "chart.js": "^4.4.9",
-    "lucide-vue-next": "^0.503.0",
     "luxon": "^3.6.1",
     "nanostores": "^1.0.1",
     "next-tick": "^1.1.0",
