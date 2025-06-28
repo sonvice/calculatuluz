@@ -14,7 +14,6 @@
     "@astrojs/partytown": "^2.1.4",
     "@astrojs/sitemap": "^3.4.1",
     "@astrojs/vue": "^5.1.0",
-    "@fontsource-variable/montserrat": "^5.2.5",
     "@lucide/astro": "^0.511.0",
     "@nanostores/persistent": "^1.0.0",
     "@nanostores/vue": "^1.0.0",

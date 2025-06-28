@@ -101,6 +101,7 @@ const currentHourCost = computed(() => {
 .contrated {
   --horizontal-alignment: center;
   --vertical-alignment: flex-end;
+  min-height: 6.25rem;
 }
 
 .contracted-power {

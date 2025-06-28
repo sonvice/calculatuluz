@@ -54,14 +54,6 @@ const chartData = computed(() => {
   }
 })
 
-const formattedDate = computed(() => {
-  const lu = $data.value.lastUpdated
-  if (!lu) return 'Cargando...'
-  return new Date(lu).toLocaleString('es-ES', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
-  }).replace(/^\w/, c => c.toUpperCase())
-})
 
 const chartOptions = computed(() => ({
   responsive: true,
@@ -147,7 +139,7 @@ const chartOptions = computed(() => ({
   height: 500px;
 }
 .chart-content{
-min-height: 100%;}
+height: 100%;}
 @media (max-width: 768px) {
   .chart-container {
     height: 400px;

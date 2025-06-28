@@ -1,5 +1,5 @@
 body {
-  font-family: var(--ff-base);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   font-size: var(--size-0);
   background-color: var(--primary-800);
   color: var(--neutral-900);
@@ -23,10 +23,6 @@ h3 {
 h1 {
   font-size: var(--size-3);
   max-width: 28ch;
-}
-h1,
-h2 {
-  font-family: var(--ff-accent);
 }
 h2 {
   font-size: var(--size-2);
