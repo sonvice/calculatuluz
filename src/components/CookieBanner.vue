@@ -179,7 +179,7 @@ function closeAll() {
 .cookie-modal {
     background: var(--neutral-50);
     width: 90%;
-    max-width: 32rem;
+    max-width: 33rem;
     border-radius: var(--rounded-md);
     padding: var(--space-l);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
