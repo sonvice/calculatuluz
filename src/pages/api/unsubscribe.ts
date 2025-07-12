@@ -16,7 +16,6 @@ export const POST: APIRoute = async ({ request }) => {
     // Marcar confirmed = false
     const { data, error } = await supabaseAdmin!
       .from('subscribers')
-      .update({ confirmed: false, updated_at: new Date().toISOString() })
       .eq('email', email);
       
 
