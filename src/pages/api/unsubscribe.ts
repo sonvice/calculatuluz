@@ -26,7 +26,8 @@ export const POST: APIRoute = async ({ request }) => {
     const { data, error } = await supabaseAdmin
       .from('subscribers')
       .update({ confirmed: false })
-      .eq('email', email);
+      .eq('email', email)
+      .select();
 
     if (error) {
       console.error('[unsubscribe] supabase error:', error);
