@@ -25,6 +25,9 @@ const getServiceRole = () => {
   if (typeof process !== 'undefined' && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return process.env.SUPABASE_SERVICE_ROLE_KEY;
   }
+   if (typeof import.meta !== 'undefined' && import.meta.env?.SUPABASE_SERVICE_ROLE_KEY) {
+    return import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+  }
   return null;
 };
 

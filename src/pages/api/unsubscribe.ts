@@ -6,6 +6,7 @@ export const prerender = false;
 export const POST: APIRoute = async ({ request }) => {
   try {
     const { email } = await request.json();
+
     if (!email) {
       return new Response(
         JSON.stringify({ error: 'El campo email es obligatorio.' }),
@@ -13,11 +14,19 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Marcar confirmed = false
-    const { data, error } = await supabaseAdmin!
+    if (!supabaseAdmin) {
+      console.error('[unsubscribe] supabaseAdmin es null. Verifica la variable SUPABASE_SERVICE_ROLE_KEY');
+      return new Response(
+        JSON.stringify({ error: 'Error interno del servidor.' }),
+        { status: 500 }
+      );
+    }
+
+    // ✅ Actualiza el campo confirmed
+    const { data, error } = await supabaseAdmin
       .from('subscribers')
+      .update({ confirmed: false })
       .eq('email', email);
-      
 
     if (error) {
       console.error('[unsubscribe] supabase error:', error);
@@ -38,6 +47,7 @@ export const POST: APIRoute = async ({ request }) => {
       JSON.stringify({ message: 'Te has desuscrito correctamente.' }),
       { status: 200 }
     );
+
   } catch (err: any) {
     console.error('[unsubscribe] unexpected error:', err);
     return new Response(
