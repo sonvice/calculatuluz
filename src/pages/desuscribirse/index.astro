@@ -1,0 +1,74 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Desuscribirse de CalculaTuLuz" description="Formulario para darse de baja del correo diario">
+  <div class="text-neutral-50 py-space-l">
+    <h1 class="font-bold mb-space-m">Desuscribirse del correo diario</h1>
+    <p class="mb-space-m">Introduce tu correo y te eliminaremos de la lista de envíos de las horas de luz más baratas.</p>
+
+    <form id="unsubscribe-form" class="unsubscribe-form d-flex">
+      <input
+        type="email"
+        id="email"
+        placeholder="tú@ejemplo.com"
+        required
+        class="w-full p-2 border rounded-md"
+      />
+      <button
+        type="submit"
+        class="btn"
+      >
+        Desuscribirme
+      </button>
+    </form>
+
+    <p id="message" class="mt-space-m text-sm"></p>
+  </div>
+
+  <script type="module">
+    const form = document.querySelector('#unsubscribe-form');
+    const msg  = document.querySelector('#message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      const email = document.querySelector('#email').value;
+
+      try {
+        const res = await fetch('/api/unsubscribe', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ email })
+        });
+        const { error, message } = await res.json();
+
+        if (error) {
+          msg.textContent = error;
+          msg.className = 'text-red-500';
+        } else {
+          msg.textContent = message;
+          msg.className = 'text-accent-500';
+        }
+      } catch (err) {
+        msg.textContent = 'Error de red. Inténtalo de nuevo más tarde.';
+        msg.className = 'text-red-500';
+      }
+    });
+  </script>
+</Layout>
+
+
+<style>
+    input[type="email"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.unsubscribe-form{
+    --gutter:var(--space-2xs);
+    flex-wrap: nowrap;
+    max-width: 44rem;
+}
+</style>
