@@ -8,7 +8,8 @@ import PriceChart from "../../components/PriceChart.vue";
 import PriceList from "../../components/PriceList.vue";
 import SubscribeForm from "../../components/SubscribeForm.vue";
 import GlobalPriceSwitch from "../../components/GlobalPriceSwitch.vue";
-
+import Faq from "../../components/Faq.astro";
+import { faqDataLuzHoy } from "../../constant";
 // Construir URL absoluta (funciona tanto en dev como en producción)
 const site = import.meta.env.SITE || "http://localhost:4321";
 const apiUrl = new URL("/api/prices", site);
@@ -28,11 +29,14 @@ const formattedDate = new Intl.DateTimeFormat("es-ES", {
   year: "numeric",
   timeZone: "Europe/Madrid",
 }).format(new Date());
+
+const conical = 'https://calculatuluz.es/precio-luz-hoy'
 ---
 
 <Layout
-  title={`Precio de la luz hoy en España - ${formattedDate}`}
-  description="Consulta el precio de la luz por horas hoy en España. Ahorra planificando tus consumos con las tarifas más baratas del día."
+  title={`Precio de la luz hoy en España - ${formattedDate} | Tarifas por horas y hora más barata`}
+  description={`Consulta GRATIS el precio de la luz hoy en España por horas (${formattedDate}). Hora más barata, tramo económico, evolución y calculadora de consumo.`}
+  conical={conical}
 >
   <div class="hero-luz-day text-primary-100 mt-space-l">
     <h1 class="fw-700 text-neutral-50 d-block">
@@ -83,6 +87,9 @@ const formattedDate = new Intl.DateTimeFormat("es-ES", {
     >
       <PriceChart client:only="vue" class="desktop-only" />
       <PriceList client:load class="mobile-only" />
+    </div>
+    <div class="mt-space-xl">
+      <Faq data={faqDataLuzHoy} />
     </div>
     <div
       class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture"

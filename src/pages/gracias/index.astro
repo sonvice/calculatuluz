@@ -1,10 +1,11 @@
 ---
 export const prerender = true
 import Layout from '../../layouts/Layout.astro';
+const conical = 'https://calculatuluz.es/gracias'
 ---
 
 <Layout
   title="Gracias por suscribirte"
-  description="Gracias por unirte a nuestra comunidad. Aquí encontrarás recursos útiles para optimizar el consumo eléctrico de tu hogar.">
+  description="Gracias por unirte a nuestra comunidad. Aquí encontrarás recursos útiles para optimizar el consumo eléctrico de tu hogar." conical={conical}>
   <h1 class="fw-700 text-neutral-50 mt-space-2xl">Gracias por suscribirte</h1>
 </Layout>

@@ -3,11 +3,12 @@ import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 
 const tips = await getCollection('tipsyguias');
+const conical = 'https://calculatuluz.es/tips-y-guias'
 ---
 
 <Layout
   title="Tips y guías"
-  description="Guías y consejos para optimizar el consumo eléctrico de tu hogar.">
+  description="Guías y consejos para optimizar el consumo eléctrico de tu hogar." conical={conical}>
   <h1 class="fw-700 text-neutral-50 mt-space-2xl">Tips y guías</h1>
   <ul role="list" class="text-neutral-50 prose flow">
     {

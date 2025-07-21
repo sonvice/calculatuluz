@@ -1,38 +1,17 @@
 ---
-const faqData = [
-  {
-    question: '¿Cómo calculo el consumo de un electrodoméstico?',
-    answer: 'Multiplica la potencia en kW por las horas de uso. Ej.: 1,5 kW × 2 h = 3 kWh.'
-  },
-  {
-    question: '¿Qué significa kWh?',
-    answer: 'Es la unidad de energía: kilovatio (1 000 W) consumido en una hora.'
-  },
-  {
-    question: '¿Cómo ahorro usando esta calculadora?',
-    answer: 'Te ayuda a programar cargas en horas valle, donde el precio por kWh es más bajo.'
-  },
-  {
-    question: '¿Incluye IVA el coste calculado?',
-    answer: 'Sí, todos los precios muestran el total con IVA al 21 %.'
-  },
-  {
-    question: `Cómo saber cuánto consume mi electrodoméstico en 3 pasos:`,
-    answer: `
-      <ol>
-        <li>Localiza la potencia en vatios (W) en la etiqueta energética</li>
-        <li>Mide las <strong>horas reales de uso diario</strong></li>
-        <li>Usa nuestra calculadora con el precio actual de la luz</li>
-      </ol>
-    `
-  }
-];
+interface Props {
+  data: {
+    question: string;
+    answer: string;
+  }[];
+}
+const {data} = Astro.props
 
 ---
 
 <section class="faq-section text-neutral-50">
   <h2>Preguntas frecuentes</h2>
-  {faqData.map(({ question, answer }) => (
+  {data.map(({ question, answer }) => (
     <details class="faq-item mt-space-s">
       <summary class="faq-question"><Fragment set:html={question}/></summary>
       <div class="faq-answer text-primary-100">

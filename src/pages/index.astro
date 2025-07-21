@@ -5,11 +5,13 @@ import Faq from '../components/Faq.astro';
 import SubscribeForm from '../components/SubscribeForm.vue';
 import ListNewsletter from '../components/ListNewsletter.astro';
 import heroImg from '../assets/imgs/calculator.webp';
+import { faqData } from "../constant"
+const conical = 'https://calculatuluz.es/'
 ---
 
 <Layout
   title="⚡ Calculadora de kWh a euros | Gratis, calcula tu consumo eléctrico online"
-  description="Calcula el consumo eléctrico de tus electrodomésticos en kWh y euros. Descubre el precio del kWh por horas con nuestro gráfico actualizado y ahorra en tu factura.">
+  description="Calcula el consumo eléctrico de tus electrodomésticos en kWh y euros. Descubre el precio del kWh por horas con nuestro gráfico actualizado y ahorra en tu factura." conical={conical}>
   <div class="text-primary-100 mt-space-l">
     <div class="hero-wrapper">
       <div>
@@ -107,7 +109,7 @@ import heroImg from '../assets/imgs/calculator.webp';
     </ul>
   </div>
   <div class="mt-space-xl">
-    <Faq/>
+    <Faq data={faqData}/>
   </div>
   <div class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture">
     <div class="newsletter-header text-primary-50">
