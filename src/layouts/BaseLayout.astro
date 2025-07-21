@@ -40,7 +40,7 @@ const { title, description, conical, lang = "en" } = Astro.props;
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://calculatuluz.es" />
+    <meta property="og:url" content={conical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta
@@ -52,7 +52,7 @@ const { title, description, conical, lang = "en" } = Astro.props;
 
     <!-- Twitter / X -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://calculatuluz.es" />
+    <meta property="twitter:url" content={conical} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
     <meta
