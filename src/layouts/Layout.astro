@@ -8,13 +8,12 @@ import CookieBanner from '../components/CookieBanner.vue';
 interface Props {
   title: string;
   description: string;
-  conical:string;
 }
 
-const { title, description,conical } = Astro.props;
+const { title, description } = Astro.props;
 ---
 
-<BaseLayout title={title} lang="es" conical={conical} description={description}>
+<BaseLayout title={title} lang="es" description={description}>
   <!-- Transfer slots to BaseLayout -->
   <slot name="head" slot="head" />
   <div class="header-nav-wrapper">

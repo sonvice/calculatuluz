@@ -3,10 +3,10 @@ interface Props {
   title: string;
   description: string;
   lang?: string;
-  conical:string;
 }
 
-const { title, description, conical, lang = "en" } = Astro.props;
+const { title, description, lang = "en" } = Astro.props;
+const canonicalUrl = `https://calculatuluz.es${Astro.url.pathname}`;
 ---
 
 <!doctype html>
@@ -39,7 +39,7 @@ const { title, description, conical, lang = "en" } = Astro.props;
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={conical} />
+    <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta
@@ -51,7 +51,7 @@ const { title, description, conical, lang = "en" } = Astro.props;
 
     <!-- Twitter / X -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={conical} />
+    <meta property="twitter:url" content={canonicalUrl} />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
     <meta
@@ -59,7 +59,7 @@ const { title, description, conical, lang = "en" } = Astro.props;
       content="https://calculatuluz.es/calculatuluz.es.png"
     />
 
-    <link rel="canonical" href={conical} />
+    <link rel="canonical" href={canonicalUrl} />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
