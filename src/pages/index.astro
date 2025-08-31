@@ -1,79 +1,107 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Calculator from '../components/Calculator.vue';
-import Faq from '../components/Faq.astro';
-import SubscribeForm from '../components/SubscribeForm.vue';
-import ListNewsletter from '../components/ListNewsletter.astro';
-import heroImg from '../assets/imgs/calculator.webp';
-import { faqData } from "../constant"
-import TableConsumption from '../components/TableConsumption.astro';
-const conical = 'https://calculatuluz.es'
+import Layout from "../layouts/Layout.astro";
+import Calculator from "../components/Calculator.vue";
+import Faq from "../components/Faq.astro";
+import SubscribeForm from "../components/SubscribeForm.vue";
+import ListNewsletter from "../components/ListNewsletter.astro";
+import heroImg from "../assets/imgs/calculator.webp";
+import { faqData } from "../constant";
+import TableConsumption from "../components/TableConsumption.astro";
+import { Zap } from "@lucide/astro";
+const conical = "https://calculatuluz.es";
 ---
 
 <Layout
   title="⚡ Calculadora consumo eléctrico de electrodomésticos en kWh y euros | Gratis online"
-  description="Calcula gratis y online el consumo eléctrico de tus electrodomésticos en kWh y euros. Consulta el precio de la luz por horas en tiempo real y ahorra en tu factura de electricidad." conical={conical}>
+  description="Calcula gratis y online el consumo eléctrico de tus electrodomésticos en kWh y euros. Consulta el precio de la luz por horas en tiempo real y ahorra en tu factura de electricidad."
+  conical={conical}
+>
   <div class="text-primary-100 mt-space-l">
     <div class="hero-wrapper">
       <div>
-
         <h1 class="fw-700 text-neutral-50">
           Calculadora de consumo eléctrico de electrodomésticos en kWh y euros
         </h1>
         <p class="mt-space-m">
-          Con esta calculadora online de consumo eléctrico de electrodomésticos podrás saber en segundos cuántos kWh y euros consume tu lavadora, nevera u otros aparatos. 
-          Los cálculos se basan en el <strong>precio actual de la electricidad</strong>, actualizado en tiempo real según los datos oficiales de la <strong>red eléctrica de España</strong>. 
+          Con esta calculadora online de consumo eléctrico de electrodomésticos
+          podrás saber en segundos cuántos kWh y euros consume tu lavadora,
+          nevera u otros aparatos. Los cálculos se basan en el <strong
+            >precio actual de la electricidad</strong
+          >, actualizado en tiempo real según los datos oficiales de la <strong
+            >red eléctrica de España</strong
+          >.
         </p>
         <p class="mt-space-s">
-          Ideal para hogares y pequeños negocios que buscan ahorrar, planificar cargas en las horas más económicas y entender mejor su gasto energético.
+          Ideal para hogares y pequeños negocios que buscan ahorrar, planificar
+          cargas en las horas más económicas y entender mejor su gasto
+          energético.
         </p>
+        <!-- Form -->
+        <h2 class="d-inline-block mt-space-s">
+          <span class="d-inline-block"><Zap /></span> ¡No te pierdas las horas más baratas de luz!
+        </h2>
+        <p class="mt-space-xs">Recibe cada día un correo con:</p>
+        <ul role="list" class="mt-space-xs text-size--1 mb-space-xs">
+          <li>Las 3 horas clave para ahorrar en tu factura</li>
+          <li>Alertas de picos de precio que debes evitar</li>
+        </ul>
+        <SubscribeForm client:visible />
       </div>
       <img
         src={heroImg.src}
-        width={heroImg.width/2}
-        height="426" 
+        width={heroImg.width / 2}
+        height="426"
         loading="eager"
         fetchpriority="high"
         alt="Calculadora de consumo eléctrico"
-        class="mt-space-m mb-space-l w-full max-w-2xl rounded-md shadow-lg">
+        class="mt-space-m mb-space-l w-full max-w-2xl rounded-md shadow-lg"
+      />
     </div>
-   
-    <div class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50 bg-texture">
+
+    <div
+      class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50 bg-texture"
+    >
       <Calculator client:load />
     </div>
     <hr class="text-neutral-400 my-space-2xl" />
-     <h2 id="como-funciona-calculadora" class="text-neutral-50 mt-space-xl">
+    <h2 id="como-funciona-calculadora" class="text-neutral-50 mt-space-xl">
       Cómo calcula nuestra calculadora de consumo eléctrico en kWh y €
     </h2>
     <p class="mt-space-s">
-      ¿Quieres saber <strong>cuánto te cuesta usar tu electrodoméstico ahora mismo</strong>? Nuestra 
-      <strong>calculadora de consumo eléctrico en kWh y euros</strong> extrae el 
-      <strong>precio de la luz por hora</strong> directamente de  Red Eléctrica de España  para ofrecerte un resultado 
+      ¿Quieres saber <strong
+        >cuánto te cuesta usar tu electrodoméstico ahora mismo</strong
+      >? Nuestra
+      <strong>calculadora de consumo eléctrico en kWh y euros</strong> extrae el
+      <strong>precio de la luz por hora</strong> directamente de Red Eléctrica de
+      España para ofrecerte un resultado
       <em>en tiempo real</em>.
     </p>
     <p>El cálculo se realiza en dos pasos:</p>
     <ol class="flow mt-space-m">
       <li>
-        <strong class="text-neutral-50">Calculamos los kWh:</strong><br>
+        <strong class="text-neutral-50">Calculamos los kWh:</strong><br />
         <p class="mt-space-xs">
-
-          Multiplicamos la potencia del aparato (vatios, W) por las horas de uso y dividimos entre 1 000:<br>
+          Multiplicamos la potencia del aparato (vatios, W) por las horas de uso
+          y dividimos entre 1 000:<br />
           <code>kWh = (Potencia [W] x Horas de uso) ÷ 1 000</code>
         </p>
       </li>
       <li>
-        <strong class="text-neutral-50">Aplicamos el precio actual por hora:</strong><br>
+        <strong class="text-neutral-50"
+          >Aplicamos el precio actual por hora:</strong
+        ><br />
         <p class="mt-space-xs">
-          Multiplicamos esos kWh por el precio de la luz vigente en ese tramo (€/kWh) y sumamos el 21 % de IVA:<br>
+          Multiplicamos esos kWh por el precio de la luz vigente en ese tramo
+          (€/kWh) y sumamos el 21 % de IVA:<br />
           <code>Coste € = kWh x Precio actual por hora x 1,21</code>
         </p>
       </li>
     </ol>
     <p>
-      De este modo obtienes <strong>de inmediato</strong> el gasto diario de tu aparato en euros, ideal 
-      para programar su uso en las franjas más económicas.
+      De este modo obtienes <strong>de inmediato</strong> el gasto diario de tu aparato
+      en euros, ideal para programar su uso en las franjas más económicas.
     </p>
-    <TableConsumption/>
+    <TableConsumption />
     <h2 class="text-neutral-50 mt-space-xl">
       Diferencia entre vatios (W) y kilovatios hora (kWh)
     </h2>
@@ -111,15 +139,17 @@ const conical = 'https://calculatuluz.es'
     </ul>
   </div>
   <div class="mt-space-xl">
-    <Faq data={faqData}/>
+    <Faq data={faqData} />
   </div>
-  <div class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture">
+  <div
+    class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture"
+  >
     <div class="newsletter-header text-primary-50">
       <h2>⚡¡No te pierdas las horas más baratas de luz!</h2>
       <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
-      <ListNewsletter/>
+      <ListNewsletter />
       <div class="mt-space-m">
-        <SubscribeForm client:load/>
+        <SubscribeForm client:load />
       </div>
     </div>
   </div>
@@ -130,29 +160,29 @@ const conical = 'https://calculatuluz.es'
     opacity: 0.2;
   }
   code {
-  white-space: pre-wrap;
-}
-.newsletter-header {
-   max-width: 800px;
+    white-space: pre-wrap;
+  }
+  .newsletter-header {
+    max-width: 800px;
     border-radius: 8px;
   }
- .hero-wrapper{
-  display: block;
-  grid-template-columns: 1fr 1fr;
-  justify-items: center;
-  align-items: center;
-
-  & img{
-    display: none;
-  }
-}
-@media (min-width: 63.99875em) {
   .hero-wrapper {
-  display: grid;
-    & img{
     display: block;
-    height: auto;
+    grid-template-columns: 1fr 1fr;
+    justify-items: center;
+    align-items: center;
+
+    & img {
+      display: none;
+    }
   }
+  @media (min-width: 63.99875em) {
+    .hero-wrapper {
+      display: grid;
+      & img {
+        display: block;
+        height: auto;
+      }
+    }
   }
-}
 </style>
