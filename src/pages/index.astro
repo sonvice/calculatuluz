@@ -6,18 +6,19 @@ import SubscribeForm from '../components/SubscribeForm.vue';
 import ListNewsletter from '../components/ListNewsletter.astro';
 import heroImg from '../assets/imgs/calculator.webp';
 import { faqData } from "../constant"
+import TableConsumption from '../components/TableConsumption.astro';
 const conical = 'https://calculatuluz.es'
 ---
 
 <Layout
-  title="⚡ Calculadora de kWh a euros | Gratis, calcula tu consumo eléctrico online"
-  description="Calcula el consumo eléctrico de tus electrodomésticos en kWh y euros. Descubre el precio del kWh por horas con nuestro gráfico actualizado y ahorra en tu factura." conical={conical}>
+  title="⚡ Calculadora consumo eléctrico de electrodomésticos en kWh y euros | Gratis online"
+  description="Calcula gratis y online el consumo eléctrico de tus electrodomésticos en kWh y euros. Consulta el precio de la luz por horas en tiempo real y ahorra en tu factura de electricidad." conical={conical}>
   <div class="text-primary-100 mt-space-l">
     <div class="hero-wrapper">
       <div>
 
         <h1 class="fw-700 text-neutral-50">
-          Calcula cuántos euros estás pagando por tu consumo en kWh
+          Calculadora de consumo eléctrico de electrodomésticos en kWh y euros
         </h1>
         <p class="mt-space-m">
           Con esta calculadora online de consumo eléctrico de electrodomésticos podrás saber en segundos cuántos kWh y euros consume tu lavadora, nevera u otros aparatos. 
@@ -72,6 +73,7 @@ const conical = 'https://calculatuluz.es'
       De este modo obtienes <strong>de inmediato</strong> el gasto diario de tu aparato en euros, ideal 
       para programar su uso en las franjas más económicas.
     </p>
+    <TableConsumption/>
     <h2 class="text-neutral-50 mt-space-xl">
       Diferencia entre vatios (W) y kilovatios hora (kWh)
     </h2>
