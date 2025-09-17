@@ -12,6 +12,7 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   output: 'server',
   site: 'https://calculatuluz.es',
+  trailingSlash: "always", // fuerza URLs con / al final
 
   adapter: netlify({
     edge: true, 
