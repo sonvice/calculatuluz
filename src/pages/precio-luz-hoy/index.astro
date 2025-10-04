@@ -58,10 +58,10 @@ const conical = 'https://calculatuluz.es/precio-luz-hoy'
       para saber cuánto te cuesta usar tus electrodomésticos hoy.
     </p>
     <div>
-      <ElectricityPriceCard client:load />
+      <ElectricityPriceCard client:only="vue" />
     </div>
     <div>
-      <ComsumptionGuidance client:load />
+      <ComsumptionGuidance client:only="vue" />
     </div>
 
     <hr class="text-neutral-400 my-space-2xl" />
@@ -78,7 +78,7 @@ const conical = 'https://calculatuluz.es/precio-luz-hoy'
       </div>
 
       <div class="wrapper-switch d-flex">
-        <GlobalPriceSwitch client:load />
+        <GlobalPriceSwitch client:only="vue" />
       </div>
     </div>
     <PriceCards client:load />
@@ -86,7 +86,7 @@ const conical = 'https://calculatuluz.es/precio-luz-hoy'
       class="bg-primary-900 px-space-l py-space-l mt-space-s mb-space-3xl rounded-sm"
     >
       <PriceChart client:only="vue" class="desktop-only" />
-      <PriceList client:load class="mobile-only" />
+      <PriceList client:only="vue" class="mobile-only" />
     </div>
     <div class="mt-space-xl">
       <Faq data={faqDataLuzHoy} />
