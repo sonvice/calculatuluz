@@ -17,4 +17,6 @@ $enable-dark-theme: true; // Cambia esto a false si no quieres activar el modo o
   @if $enable-dark-theme {
     @include Mixins.generate-css-variables(MapTokens.$map-colors-dark, "");
   }
+
+  
 }
