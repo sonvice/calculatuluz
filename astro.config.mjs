@@ -9,6 +9,8 @@ import mdx from '@astrojs/mdx';
 
 import sitemap from '@astrojs/sitemap';
 
+import react from '@astrojs/react';
+
 export default defineConfig({
   output: 'server',
   site: 'https://calculatuluz.es',
@@ -27,5 +29,5 @@ export default defineConfig({
       'https://calculatuluz.es/tipsyguias',
       'https://calculatuluz.es/precio-luz-hoy',
     ],
-  })],
+  }), react()],
 });

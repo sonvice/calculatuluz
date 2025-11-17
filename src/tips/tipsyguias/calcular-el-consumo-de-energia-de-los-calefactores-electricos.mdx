@@ -6,6 +6,85 @@ image: './images/calefactores-electricos/calefactor-electrico.webp'
 date: "2025-11-02"
 ---
 
+import Table from '@/components/Table'
+
+
+export const columns = [
+  {
+    accessorKey: "tipo",
+    header: "Tipo de Calefactor",
+  },
+  {
+    accessorKey: "potencia",
+    header: "Potencia (W)",
+  },
+  {
+    accessorKey: "uso",
+    header: "Uso diario (h)",
+  },
+  {
+    accessorKey: "consumo",
+    header: "Consumo real (kWh/día)",
+  },
+  {
+    accessorKey: "coste",
+    header: "Coste mensual (€)",
+  },
+];
+
+export const data = [
+  {
+    tipo: "Radiador aceite 7 elem.",
+    potencia: 1500,
+    uso: 8,
+    consumo: 6.0,
+    coste: 68.40,
+  },
+  {
+    tipo: "Emisor térmico seco",
+    potencia: 1000,
+    uso: 10,
+    consumo: 5.0,
+    coste: 57.00,
+  },
+  {
+    tipo: "Convector con ventilador",
+    potencia: 2000,
+    uso: 6,
+    consumo: 7.2,
+    coste: 82.08,
+  },
+  {
+    tipo: "Panel radiante",
+    potencia: 800,
+    uso: 5,
+    consumo: 2.4,
+    coste: 27.36,
+  },
+  {
+    tipo: "Termoventilador",
+    potencia: 1800,
+    uso: 4,
+    consumo: 4.3,
+    coste: 49.02,
+  },
+  {
+    tipo: "Calefactor cerámico",
+    potencia: 1200,
+    uso: 7,
+    consumo: 5.0,
+    coste: 57.00,
+  },
+  {
+    tipo: "Radiador inercia fluida",
+    potencia: 1500,
+    uso: 9,
+    consumo: 8.1,
+    coste: 92.34,
+  },
+];
+
+
 ![Calculadora de consumo de calefacción](./images/calefactores-electricos/calefactor-electrico.webp)
 
 ¿Llega el invierno y te aterra pensar en la factura de la luz?  
@@ -15,7 +94,6 @@ En **CalculaTuLuz.es** sabemos que la calefacción eléctrica puede suponer hast
 
 Con esta herramienta podrás **anticipar tu gasto, optimizar el uso y reducir significativamente tu factura** este invierno 🌡️.
 
----
 
 ## ¿Qué es exactamente el kWh en calefacción eléctrica?
 
@@ -29,7 +107,6 @@ Un **kilovatio-hora (kWh)** es el consumo que genera un calefactor de 1000 vatio
 Si tienes un calefactor de 2000 W (2 kW) encendido durante 5 horas:  
 `2 kW × 5 h = 10 kWh consumidos`
 
----
 
 ## ¿Cómo funciona nuestra calculadora de calefacción?
 
@@ -47,7 +124,6 @@ El cálculo se basa en tres variables clave:
    - Precio medio: **0,35-0,40 €/kWh**
    - Varía según tu tarifa y compañía eléctrica
 
----
 
 ## Ejemplos prácticos: del consumo al coste real
 
@@ -62,7 +138,6 @@ El cálculo se basa en tres variables clave:
 - Coste diario: `6 × 0,38 = 2,28 €`  
 - Gasto mensual: **68,40 €**  
 
----
 
 ### Caso 2: Convector en salón – el gran consumidor  
 - Calefactor: Convector de 2000W  
@@ -75,7 +150,6 @@ El cálculo se basa en tres variables clave:
 - Coste diario: `14,4 × 0,38 = 5,47 €`  
 - Gasto mensual: **164,10 €**  
 
----
 
 ### Caso 3: Múltiples aparatos – el escenario real  
 ¿Tienes varios calefactores funcionando simultáneamente?
@@ -87,24 +161,9 @@ El cálculo se basa en tres variables clave:
 **Total diario:** 13,6 kWh  
 **Coste mensual:** `13,6 × 0,38 × 30 = 155,04 €`
 
----
-
 ## Tabla de consumo de calefactores eléctricos
 
-| Tipo de Calefactor      | Potencia (W) | Uso diario (h) | Consumo real* (kWh/día) | Coste mensual (€)** |
-|--------------------------|--------------|----------------|--------------------------|---------------------|
-| Radiador aceite 7 elem. | 1500         | 8              | 6,0                      | 68,40               |
-| Emisor térmico seco      | 1000         | 10             | 5,0                      | 57,00               |
-| Convector con ventilador | 2000         | 6              | 7,2                      | 82,08               |
-| Panel radiante           | 800          | 5              | 2,4                      | 27,36               |
-| Termoventilador          | 1800         | 4              | 4,3                      | 49,02               |
-| Calefactor cerámico      | 1200         | 7              | 5,0                      | 57,00               |
-| Radiador inercia fluida  | 1500         | 9              | 8,1                      | 92,34               |
-
-\*Considera funcionamiento con termostato (40-70% del tiempo)  
-\*\*Cálculo con 0,38 €/kWh y 30 días
-
----
+<Table columns={columns} data={data} />
 
 ## La trampa de la potencia contratada en invierno
 
@@ -117,7 +176,6 @@ Coste potencia: ~50 €/kW al año = **4,17 €/mes por kW**
 - Si aumentas a 5,75 kW: `5,75 × 4,17 = 23,98 €/mes`  
 - **Diferencia:** +4,80 €/mes (57,60 €/año) solo por tenerla disponible
 
----
 
 ## Consejos avanzados para ahorrar en calefacción
 
@@ -136,11 +194,10 @@ Coste potencia: ~50 €/kW al año = **4,17 €/mes por kW**
 - Habitación 12 m²: `12 × 100 = 1200 W`
 - Salón 25 m²: `25 × 100 = 2500 W` (mejor dos de 1200W)
 
----
 
 ## Métodos para medir tu consumo real
 
-### Método 1: Cálculo con contador inteligente
+## Método 1: Cálculo con contador inteligente
 1. Anota lectura del contador por la mañana
 2. Usa la calefacción con normalidad 24h
 3. Anota nueva lectura al día siguiente
@@ -151,9 +208,8 @@ Coste potencia: ~50 €/kW al año = **4,17 €/mes por kW**
 - Mide consumo otro día con calefacción
 - **Diferencia = coste atribuible a calefacción**
 
----
 
-## Accede a nuestra calculadora de consumo eléctrico 
+### Accede a nuestra calculadora de consumo eléctrico 
 
 Usa nuestra **[Calculadora de Consumo Eléctrico](https://calculatuluz.es/)** y descubre en segundos:
 
@@ -162,7 +218,6 @@ Usa nuestra **[Calculadora de Consumo Eléctrico](https://calculatuluz.es/)** y 
 - La potencia ideal para cada estancia de tu hogar
 - Recomendaciones personalizadas para tu caso
 
----
 
 ## Preguntas frecuentes
 
@@ -178,7 +233,6 @@ Una casa mal aislada puede aumentar tu consumo de calefacción hasta un 40%.
 **¿Debo preocuparme por la potencia contratada al usar calefacción?**  
 Sí, calcula la suma de potencias de aparatos que usas simultáneamente para evitar que salte el ICP.
 
----
 
 Toma el control de tu calefacción este invierno.  
 Con nuestra **calculadora especializada** pasarás del susto en la factura al ahorro inteligente.

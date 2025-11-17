@@ -9,6 +9,58 @@ date: "2025-04-17"
 import { Picture } from 'astro:assets';
 import image from './images/electrodomesticos-que-menos-consumen/electrodomesticos.jpg';
 
+import Table from '@/components/Table'
+
+export const columns = [
+  {
+    accessorKey: "electrodomestico",
+    header: "Electrodoméstico",
+  },
+  {
+    accessorKey: "consumoAnual",
+    header: "Consumo anual aprox.",
+  },
+  {
+    accessorKey: "tipoUso",
+    header: "Tipo de uso",
+  },
+];
+
+
+export const data = [
+  {
+    electrodomestico: "Frigorífico",
+    consumoAnual: "662 kWh",
+    tipoUso: "Continuo",
+  },
+  {
+    electrodomestico: "Congelador",
+    consumoAnual: "563 kWh",
+    tipoUso: "Continuo",
+  },
+  {
+    electrodomestico: "Televisor",
+    consumoAnual: "263 kWh",
+    tipoUso: "Stand-by",
+  },
+  {
+    electrodomestico: "Lavadora",
+    consumoAnual: "255 kWh",
+    tipoUso: "Puntual",
+  },
+  {
+    electrodomestico: "Secadora",
+    consumoAnual: "255 kWh",
+    tipoUso: "Puntual",
+  },
+  {
+    electrodomestico: "Lavavajillas",
+    consumoAnual: "246 kWh",
+    tipoUso: "Puntual",
+  },
+];
+
+
 <Picture src={image} widths={[720, image.width]}  sizes={`(min-width: 39.9em) 720px`} alt="EElectrodomésticos de bajo consumo"/>
 
 
@@ -29,14 +81,7 @@ Algunos dispositivos del hogar destacan por su bajo consumo y eficiencia, permit
 
 Según la OCU y el IDAE, estos son los aparatos que representan el mayor gasto eléctrico anual en una vivienda:
 
-| Electrodoméstico     | Consumo anual aprox. | Tipo de uso     |
-|------------------------|----------------------|-----------------|
-| Frigorífico            | 662 kWh              | Continuo        |
-| Congelador            | 563 kWh              | Continuo        |
-| Televisor             | 263 kWh              | Stand-by        |
-| Lavadora              | 255 kWh              | Puntual         |
-| Secadora              | 255 kWh              | Puntual         |
-| Lavavajillas          | 246 kWh              | Puntual         |
+<Table columns={columns} data={data} />
 
 ### Frigorífico
 Es el aparato con mayor consumo por su uso constante. Representa el 14% de la factura eléctrica total. Para reducir su gasto:
