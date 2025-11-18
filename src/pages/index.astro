@@ -68,15 +68,9 @@ import Table from "@/components/Table";
           energético.
         </p>
         <!-- Form -->
-        <h2 class="d-inline-block mt-space-s">
-          <span class="d-inline-block"><Zap /></span> ¡No te pierdas las horas más baratas de luz!
-        </h2>
-        <p class="mt-space-xs">Recibe cada día un correo con:</p>
-        <ul role="list" class="mt-space-xs text-size--1 mb-space-xs">
-          <li>Las 3 horas clave para ahorrar en tu factura</li>
-          <li>Alertas de picos de precio que debes evitar</li>
-        </ul>
-        <SubscribeForm client:visible />
+         <div class="mt-space-l">
+           <SubscribeForm client:visible />
+         </div>
       </div>
       <img
         src={heroImg.src}
