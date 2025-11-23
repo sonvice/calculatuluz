@@ -10,6 +10,10 @@ $enable-dark-theme: true; // Cambia esto a false si no quieres activar el modo o
   @include Mixins.generate-css-variables(MapTokens.$map-fonts, "");
   @include Mixins.generate-css-variables(MapTokens.$map-font-weights, "");
   @include Mixins.generate-css-variables(MapTokens.$map-radius, "rounded-");
+  --esmerald-green: #10b981;
+  --amber:#f59e0b;
+  --orange:#f97316;
+  --red:#ef4444;
 }
 
 // Solo generar las variables para el modo oscuro si está habilitado

@@ -9,10 +9,10 @@ const priceStore = useStore(priceData);
 
 // Mantenemos los mismos colores y categorías que el gráfico
 const categoryColors = {
-  'Muy bajo': '#4CAF50',
-  'Bajo': '#FFC107',
-  'Medio': '#FF9800',
-  'Alto': '#F44336'
+  'Muy bajo': '#10b981', // Verde esmeralda
+  'Bajo':     '#f59e0b', // Ámbar
+  'Medio':    '#f97316', // Naranja
+  'Alto':     '#ef4444'  // Rojo
 };
 
 // Agrupamos los precios por categoría (usando la store)
