@@ -193,7 +193,6 @@ const hasChanges = computed(() => tempPotencia.value !== potencia.value)
 .power-input-group {
   display: flex;
   gap: 8px;
-  align-items: flex-start;
 }
 
 /* Ajustes para que InputField funcione bien en el grupo */

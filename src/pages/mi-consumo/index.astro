@@ -83,7 +83,7 @@ const structuredData = {
             ⚡ FIX HIDRATACIÓN: Componentes con localStorage usan client:only
             Esto evita SSR y elimina hydration mismatch
           -->
-          <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+          <div class="card bg-primary-800 p-space-s rounded-md mb-space-l">
             <h2 class="fw-600 text-size-2 mb-space-s">Tarifa y potencia</h2>
             <p class="text-primary-100 mb-space-s">
               Selecciona tu tarifa y potencia contratada para calcular términos
@@ -93,7 +93,7 @@ const structuredData = {
             <ConsumptionForm client:only="vue" />
           </div>
 
-          <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+          <div class="card bg-primary-800 p-space-s rounded-md mb-space-l">
             <h2 class="fw-600 text-size-2 mb-space-s">Mis electrodomésticos</h2>
             <p class="text-primary-100 mb-space-s">
               Añade los aparatos que usas y cuántas horas al día o usos por
@@ -103,12 +103,12 @@ const structuredData = {
             <AppliancesList client:only="vue" />
           </div>
 
-          <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+          <div class="card bg-primary-800 p-space-s rounded-md mb-space-l">
             <!-- ⚡ client:idle porque depende de stores pero no localStorage -->
             <ConsumptionSummary client:only="vue" />
           </div>
 
-          <div class="card bg-primary-900 p-space-l rounded-md mb-space-l">
+          <div class="card bg-primary-900 p-space-s rounded-md mb-space-l">
             <h3 class="fw-600 text-size-1 mb-space-s">
               Optimización y consejos
             </h3>
@@ -118,7 +118,7 @@ const structuredData = {
         </div>
 
         <aside class="right-col">
-          <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+          <div class="card bg-primary-800 p-space-s rounded-md mb-space-l">
             <h3 class="fw-600 text-size-2 mb-space-s">Horas más baratas hoy</h3>
             <p class="text-primary-100 mb-space-s">
               Detectamos las franjas más económicas según el PVPC.
@@ -130,7 +130,7 @@ const structuredData = {
             />
           </div>
 
-          <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+          <div class="card bg-primary-800 p-space-s rounded-md mb-space-l">
             <h3 class="fw-600 text-size-2 mb-space-s">
               Alertas y recordatorios
             </h3>
@@ -144,7 +144,7 @@ const structuredData = {
             />
           </div>
 
-          <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+          <div class="card bg-primary-800 p-space-s rounded-md mb-space-l">
             <h3 class="fw-600 text-size-2 mb-space-s">Guardar perfil</h3>
             <p class="text-primary-100 mb-space-s">
               Guarda tu perfil en el navegador o exporta tus datos.
@@ -160,7 +160,7 @@ const structuredData = {
       </section>
 
       <div
-        class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture"
+        class="mt-space-xl text-neutral-50 bg-primary-900 p-space-s rounded-md bg-texture"
       >
         <div class="newsletter-header text-primary-50">
           <h2>⚡¡No te pierdas las horas más baratas de luz!</h2>
@@ -197,6 +197,7 @@ const structuredData = {
       background: var(--primary-900);
       border-radius: var(--radius-md);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: var(--rounded-md);
     }
 
     .btn {
@@ -238,6 +239,10 @@ const structuredData = {
       .grid--2cols {
         grid-template-columns: 1fr;
       }
+      .left-col, 
+.right-col {
+  min-width: 0; 
+}
       .right-col {
         order: 2;
       }
