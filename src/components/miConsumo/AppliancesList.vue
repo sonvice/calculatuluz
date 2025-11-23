@@ -511,6 +511,7 @@ function calculateDailyConsumption(watts, hours) {
 }
 
 .empty-state {
+  flex-direction: column;
   border: 1px dashed var(--primary-700);
   border-radius: 8px;
   --horizontal-alignment: center;

@@ -4,6 +4,7 @@ import { useStore } from '@nanostores/vue'
 import { profile } from '../../stores/consumptionStore'
 import { priceData, power as powerStore, applied, applyPower, resetData } from '../../stores/prices'
 import { Zap, Check, RotateCcw, Info } from 'lucide-vue-next'
+import InputField from '../InputField.vue'
 
 const $prices = useStore(priceData)
 const $applied = useStore(applied)
@@ -76,17 +77,18 @@ const hasChanges = computed(() => tempPotencia.value !== potencia.value)
       </label>
       
       <div class="power-input-group">
-        <input 
-          class="form-input" 
-          type="number" 
-          step="0.1" 
-          min="0.1" 
-          max="15" 
-          v-model.number="tempPotencia" 
+        <InputField
+          v-model="tempPotencia"
+          label="Potencia contratada"
+          placeholder="Ej: 4.6"
+          :min="0.1"
+          :max="15"
+          :step="0.1"
         />
         
         <button 
-          class="btn-apply"
+          class="btn"
+          data-type="accent"
           :class="{ 'has-changes': hasChanges }"
           :disabled="!hasChanges || tempPotencia <= 0"
           @click="handleApply"
@@ -97,7 +99,7 @@ const hasChanges = computed(() => tempPotencia.value !== potencia.value)
         
         <button 
           v-if="isApplied"
-          class="btn-reset"
+          class="btn"
           @click="handleReset"
           title="Resetear cálculo"
         >
@@ -191,11 +193,16 @@ const hasChanges = computed(() => tempPotencia.value !== potencia.value)
 .power-input-group {
   display: flex;
   gap: 8px;
-  align-items: stretch;
+  align-items: flex-start;
 }
 
-.form-input {
+/* Ajustes para que InputField funcione bien en el grupo */
+.power-input-group :deep(.box-input) {
   flex: 1;
+  min-width: 0;
+}
+
+.power-input-group :deep(.form-input) {
   padding: 12px;
   border-radius: 8px;
   border: 1px solid var(--primary-700);
@@ -205,9 +212,25 @@ const hasChanges = computed(() => tempPotencia.value !== potencia.value)
   transition: border-color 0.2s;
 }
 
-.form-input:focus {
-  outline: none;
+.power-input-group :deep(.form-input:focus) {
   border-color: var(--accent-500);
+}
+
+.power-input-group :deep(.input-controls) {
+  background-color: var(--primary-900);
+}
+
+.power-input-group :deep(.btn-control) {
+  color: var(--neutral-400);
+}
+
+.power-input-group :deep(.btn-control:hover:not(:disabled)) {
+  background-color: var(--primary-800);
+  color: var(--accent-500);
+}
+
+.power-input-group :deep(.controls-divider) {
+  background-color: var(--primary-700);
 }
 
 .btn-apply {
@@ -223,6 +246,7 @@ const hasChanges = computed(() => tempPotencia.value !== potencia.value)
   display: flex;
   align-items: center;
   gap: 6px;
+  height: fit-content;
 }
 
 .btn-apply:disabled {
@@ -254,6 +278,7 @@ const hasChanges = computed(() => tempPotencia.value !== potencia.value)
   display: flex;
   align-items: center;
   justify-content: center;
+  height: fit-content;
 }
 
 .btn-reset:hover {
@@ -302,8 +327,13 @@ const hasChanges = computed(() => tempPotencia.value !== potencia.value)
     flex-wrap: wrap;
   }
   
-  .form-input {
-    min-width: 0;
+  .power-input-group :deep(.box-input) {
+    width: 100%;
+  }
+  
+  .btn-apply,
+  .btn-reset {
+    flex: 1;
   }
   
   .form-label {

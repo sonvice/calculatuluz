@@ -15,7 +15,19 @@ import SubscribeForm from "../../components/SubscribeForm.vue";
 import { faqDataConsumo } from "@/constant";
 import Faq from "@/components/Faq.astro";
 
-// Fecha formateada
+// ⚡ PREFETCH: Obtener datos de precios en el servidor
+let initialPriceData = null;
+try {
+  const apiUrl = new URL('/api/prices', Astro.url.origin);
+  const response = await fetch(apiUrl.toString());
+  
+  if (response.ok) {
+    initialPriceData = await response.json();
+  }
+} catch (error) {
+  console.error('Error prefetching prices:', error);
+}
+
 const formattedDate = new Intl.DateTimeFormat("es-ES", {
   day: "2-digit",
   month: "long",
@@ -24,6 +36,26 @@ const formattedDate = new Intl.DateTimeFormat("es-ES", {
 }).format(new Date());
 
 const canonical = "https://calculatuluz.es/mi-consumo";
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Calculadora de Consumo Eléctrico",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "description": "Calcula tu consumo eléctrico real, recibe alertas de precios bajos y optimiza tu factura de luz.",
+  "featureList": [
+    "Cálculo de consumo por electrodomésticos",
+    "Precios PVPC en tiempo real",
+    "Alertas de precio bajo",
+    "Recomendaciones personalizadas"
+  ]
+};
 ---
 
 <Layout
@@ -31,69 +63,73 @@ const canonical = "https://calculatuluz.es/mi-consumo";
   description="Crea tu perfil de consumo: añade electrodomésticos, guarda tu potencia contratada, recibe recomendaciones y las horas más baratas cada día."
   canonical={canonical}
 >
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  <link rel="prefetch" href="/api/prices" as="fetch" crossorigin />
+
   <main class="text-neutral-50 py-space-l">
     <div>
-      <!-- Título -->
       <section class="page-hero mt-space-l mb-space-m">
         <h1 class="fw-700 text-size-4">Mi Consumo</h1>
         <p class="mt-space-s text-primary-100">
           Crea tu perfil de consumo para ver cuánto pagas realmente, cuáles son
           las horas más baratas y cómo ahorrar. Datos actualizados en tiempo
-          real — {formattedDate}.
+          real — <strong>{formattedDate}</strong>.
         </p>
       </section>
 
-      <!-- GRID principal 60/40 -->
       <div class="grid grid--2cols mt-space-l">
-        <!-- LEFT (form + lista + resumen) -->
         <div class="left-col">
-          <!-- Tarifa y potencia -->
+          <!-- 
+            ⚡ FIX HIDRATACIÓN: Componentes con localStorage usan client:only
+            Esto evita SSR y elimina hydration mismatch
+          -->
           <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
             <h2 class="fw-600 text-size-2 mb-space-s">Tarifa y potencia</h2>
             <p class="text-primary-100 mb-space-s">
               Selecciona tu tarifa y potencia contratada para calcular términos
               fijos y coste real.
             </p>
-            <!-- Las stores se sincronizan automáticamente, no necesita props -->
+            <!-- ⚡ client:only porque usa localStorage -->
             <ConsumptionForm client:only="vue" />
           </div>
 
-          <!-- Mis electrodomésticos -->
           <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
             <h2 class="fw-600 text-size-2 mb-space-s">Mis electrodomésticos</h2>
             <p class="text-primary-100 mb-space-s">
               Añade los aparatos que usas y cuántas horas al día o usos por
               semana.
             </p>
+            <!-- ⚡ client:only porque usa localStorage -->
             <AppliancesList client:only="vue" />
           </div>
 
-          <!-- Estimación de consumo -->
           <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+            <!-- ⚡ client:idle porque depende de stores pero no localStorage -->
             <ConsumptionSummary client:only="vue" />
           </div>
 
-          <!-- Consejos y optimización -->
           <div class="card bg-primary-900 p-space-l rounded-md mb-space-l">
             <h3 class="fw-600 text-size-1 mb-space-s">
               Optimización y consejos
             </h3>
+            <!-- ⚡ client:visible porque no es crítico -->
             <ConsumptionTips client:only="vue" />
           </div>
         </div>
 
-        <!-- RIGHT (horas baratas, alertas, guardar perfil) -->
         <aside class="right-col">
-          <!-- Horas más baratas -->
           <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
             <h3 class="fw-600 text-size-2 mb-space-s">Horas más baratas hoy</h3>
             <p class="text-primary-100 mb-space-s">
               Detectamos las franjas más económicas según el PVPC.
             </p>
-            <PriceHours client:only="vue" />
+            <!-- ⚡ client:load con datos pre-fetched -->
+            <PriceHours 
+              client:only="vue"
+              initialData={initialPriceData}
+            />
           </div>
 
-          <!-- Alertas y recordatorios -->
           <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
             <h3 class="fw-600 text-size-2 mb-space-s">
               Alertas y recordatorios
@@ -101,40 +137,52 @@ const canonical = "https://calculatuluz.es/mi-consumo";
             <p class="text-primary-100 mb-space-s">
               Crea alertas para que te avisemos cuando el kWh baje de X €/kWh.
             </p>
-            <AlertsForm client:only="vue" />
+            <!-- ⚡ client:only porque usa localStorage + estado reactivo complejo -->
+            <AlertsForm 
+              client:only="vue"
+              initialData={initialPriceData}
+            />
           </div>
 
-          <!-- Guardar perfil -->
           <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
             <h3 class="fw-600 text-size-2 mb-space-s">Guardar perfil</h3>
             <p class="text-primary-100 mb-space-s">
               Guarda tu perfil en el navegador o exporta tus datos.
             </p>
+            <!-- ⚡ client:only porque usa localStorage -->
             <SaveProfile client:only="vue" />
           </div>
         </aside>
       </div>
 
-      <!-- FAQs -->
       <section class="mt-space-2xl">   
-      <Faq data={faqDataConsumo} />
+        <Faq data={faqDataConsumo} />
       </section>
 
-      <!-- Newsletter -->
-    <div
-      class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture"
-    >
-      <div class="newsletter-header text-primary-50">
-        <h2>⚡¡No te pierdas las horas más baratas de luz!</h2>
-        <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
-        <ListNewsletter />
-        <div class="mt-space-m">
-          <SubscribeForm client:load />
+      <div
+        class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture"
+      >
+        <div class="newsletter-header text-primary-50">
+          <h2>⚡¡No te pierdas las horas más baratas de luz!</h2>
+          <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
+          <ListNewsletter />
+          <div class="mt-space-m">
+            <SubscribeForm client:idle />
+          </div>
         </div>
       </div>
     </div>
-    </div>
   </main>
+
+    <script>
+    // Preload de stores después de idle
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        import('../../stores/prices');
+        import('../../stores/consumptionStore');
+      });
+    }
+  </script>
 
   <style>
     .newsletter-header {

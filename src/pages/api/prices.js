@@ -3,11 +3,16 @@
 import { getCachedData, updateCache } from '../../lib/cache';
 import { DateTime } from 'luxon';
 
-// Configuración principal (SIN CAMBIOS)
-const CACHE_TTL      = 3600;    // segundos
-const STALE_TTL      = 300;     // segundos
+// ⚡ OPTIMIZACIÓN: Configuración mejorada
+const CACHE_TTL      = 3600;    // 1 hora - datos estables
+const STALE_TTL      = 7200;    // 2 horas - permite usar datos obsoletos
 const INDICATOR_ID   = 1001;
 const FALLBACK_PRICE = 0.15;
+
+// ⚡ OPTIMIZACIÓN: Cache en memoria para requests concurrentes
+let inFlightRequest = null;
+let lastFetchTime = 0;
+const MIN_FETCH_INTERVAL = 10000; // 10 segundos entre fetches
 
 /** Convierte una Date local a ISO UTC */
 function toISOUTC(date) {
@@ -30,8 +35,11 @@ async function fetchEsiosRaw(startDate, endDate) {
       'Accept': 'application/json; application/vnd.esios-api-v1+json',
       'Content-Type': 'application/json',
       'x-api-key': import.meta.env.ESIOS_TOKEN
-    }
+    },
+    // ⚡ OPTIMIZACIÓN: Timeout para evitar requests colgados
+    signal: AbortSignal.timeout(10000) // 10 segundos timeout
   });
+  
   if (!resp.ok) throw new Error(`ESIOS HTTP ${resp.status}`);
   return await resp.json();
 }
@@ -55,8 +63,10 @@ async function getHistoricalAverage() {
       headers: {
         'Accept': 'application/json',
         'x-api-key': import.meta.env.ESIOS_TOKEN
-      }
+      },
+      signal: AbortSignal.timeout(5000)
     });
+    
     if (!resp.ok) throw new Error('Error histórico');
     const data = await resp.json();
     const val  = data.indicator.values[0]?.value;
@@ -162,86 +172,157 @@ function getFallbackData() {
 export async function GET(context) {
   const url        = new URL(context.request.url);
   const isTomorrow = url.searchParams.get('day') === 'tomorrow';
-  // 1. Manejo de caché (igual que siempre)
+  
+  // ⚡ OPTIMIZACIÓN 1: Request deduplication
+  const now = Date.now();
+  if (inFlightRequest && (now - lastFetchTime) < MIN_FETCH_INTERVAL) {
+    console.log('⚡ Reutilizando request en vuelo');
+    return inFlightRequest;
+  }
+
+  // ⚡ OPTIMIZACIÓN 2: Caché agresivo para hoy
   const cached = await getCachedData();
   const ageMs  = cached
     ? Date.now() - new Date(cached.lastUpdated).getTime()
     : (CACHE_TTL + 1) * 1000;
 
+  // Servir caché inmediatamente si es válida
   if (ageMs < CACHE_TTL * 1000) {
+    const remainingTTL = Math.floor((CACHE_TTL * 1000 - ageMs) / 1000);
+    
     return new Response(JSON.stringify(cached), {
       headers: {
         'Content-Type': 'application/json',
         'X-Data-Source': 'cache',
-        'Cache-Control': `public, max-age=${Math.floor((CACHE_TTL*1000 - ageMs)/1000)}, stale-while-revalidate=${STALE_TTL}`
+        'X-Cache-Age': Math.floor(ageMs / 1000).toString(),
+        // ⚡ OPTIMIZACIÓN: Cache más agresivo en el navegador
+        'Cache-Control': `public, max-age=${remainingTTL}, stale-while-revalidate=${STALE_TTL}`,
+        // ⚡ OPTIMIZACIÓN: ETag para validación condicional
+        'ETag': `"${cached.lastUpdated}"`
       }
     });
   }
 
-  try {
-    // 2. Definir ventana (hoy ó mañana) en UTC
-    const refDate = isTomorrow
-      ? DateTime.now().plus({ days: 1 }).startOf('day')
-      : DateTime.now().startOf('day');
+  // ⚡ OPTIMIZACIÓN 3: Servir stale si fetch falla
+  const fetchPromise = (async () => {
+    try {
+      lastFetchTime = Date.now();
 
-    const startDate = refDate.toJSDate();
-    const endDate   = refDate.plus({ days: 1 }).toJSDate();
+      // Definir ventana (hoy ó mañana) en UTC
+      const refDate = isTomorrow
+        ? DateTime.now().plus({ days: 1 }).startOf('day')
+        : DateTime.now().startOf('day');
 
-    // 3. Llamada a ESIOS y procesado
-    const rawData  = await fetchEsiosRaw(startDate, endDate);
-    const processed = processData(rawData, cached);
+      const startDate = refDate.toJSDate();
+      const endDate   = refDate.plus({ days: 1 }).toJSDate();
 
-    // 4. Añadir promedio histórico (día anterior)
-    processed.previousAverage = Number((await getHistoricalAverage()).toFixed(4));
+      // Llamada a ESIOS y procesado
+      const rawData  = await fetchEsiosRaw(startDate, endDate);
+      const processed = processData(rawData, cached);
 
-    // 5. Bandera para front: precios de mañana disponibles tras 20:25 CET/CEST
-    const nowMadrid = DateTime.now().setZone('Europe/Madrid');
-    const cutoff = nowMadrid.startOf('day').plus({ 
-      hours: 20, 
-      minutes: 25,
-      seconds: 0 
-    })
-    const tomorrowAvailable = isTomorrow 
-  ? nowMadrid >= cutoff.minus({ days: 1 })  
-  : nowMadrid >= cutoff;
+      // Añadir promedio histórico (día anterior) - sin bloquear
+      getHistoricalAverage()
+        .then(avg => {
+          processed.previousAverage = Number(avg.toFixed(4));
+          updateCache(processed); // Actualizar con promedio histórico
+        })
+        .catch(() => {
+          processed.previousAverage = FALLBACK_PRICE;
+        });
 
-  if (isTomorrow && !tomorrowAvailable) {
-    // MODIFICAR PARA MANTENER DATOS EXISTENTES:
-    return new Response(JSON.stringify({
-      ...(cached || getFallbackData()),  // Mantener datos previos
-      prices: [],
-      tomorrowAvailable: false,
-      debugInfo: {  // Agregar para debug
-        nowMadrid: nowMadrid.toISO(),
-        cutoff: cutoff.toISO(),
-        isAfterCutoff: nowMadrid >= cutoff,
-        isTomorrowRequest: isTomorrow
-      }
-    }), {
-        headers: { 'Content-Type': 'application/json', 'X-Data-Source': 'no-tomorrow-yet' }
+      // Bandera para front: precios de mañana disponibles tras 20:25 CET/CEST
+      const nowMadrid = DateTime.now().setZone('Europe/Madrid');
+      const cutoff = nowMadrid.startOf('day').plus({ 
+        hours: 20, 
+        minutes: 25,
+        seconds: 0 
       });
-    }
+      
+      const tomorrowAvailable = isTomorrow 
+        ? nowMadrid >= cutoff.minus({ days: 1 })  
+        : nowMadrid >= cutoff;
 
-    processed.tomorrowAvailable = tomorrowAvailable;
-
-    // 6. Actualizar caché si cambió algo esencial
-    if (!cached || processed.maxPrice.value !== (cached.maxPrice?.value ?? cached.maxPrice)) {
-      await updateCache(processed);
-    }
-
-    return new Response(JSON.stringify(processed), {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Data-Source': 'live',
-        'Cache-Control': `public, max-age=${CACHE_TTL}, stale-while-revalidate=${STALE_TTL}`
+      if (isTomorrow && !tomorrowAvailable) {
+        return new Response(JSON.stringify({
+          ...(cached || getFallbackData()),
+          prices: [],
+          tomorrowAvailable: false
+        }), {
+          headers: { 
+            'Content-Type': 'application/json', 
+            'X-Data-Source': 'no-tomorrow-yet',
+            'Cache-Control': `public, max-age=300` // 5 minutos
+          }
+        });
       }
-    });
 
-  } catch (err) {
-    console.error('API Error:', err);
-    const fallback = cached || getFallbackData();
-    return new Response(JSON.stringify(fallback), {
-      headers: { 'X-Data-Source': cached ? 'stale-cache' : 'fallback' }
-    });
+      processed.tomorrowAvailable = tomorrowAvailable;
+
+      // Actualizar caché si cambió algo esencial
+      if (!cached || processed.maxPrice.value !== (cached.maxPrice?.value ?? cached.maxPrice)) {
+        await updateCache(processed);
+      }
+
+      return new Response(JSON.stringify(processed), {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Data-Source': 'live',
+          'X-Fetch-Time': (Date.now() - lastFetchTime).toString() + 'ms',
+          'Cache-Control': `public, max-age=${CACHE_TTL}, stale-while-revalidate=${STALE_TTL}`,
+          'ETag': `"${processed.lastUpdated}"`
+        }
+      });
+
+    } catch (err) {
+      console.error('⚠️ API Error:', err);
+      
+      // ⚡ OPTIMIZACIÓN: Servir caché obsoleta antes que fallback
+      if (cached && ageMs < (STALE_TTL * 1000)) {
+        console.log('⚡ Sirviendo caché obsoleta por error');
+        return new Response(JSON.stringify(cached), {
+          status: 200,
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Data-Source': 'stale-cache',
+            'X-Error': err.message,
+            'Cache-Control': `public, max-age=60` // Reintentar en 1 minuto
+          }
+        });
+      }
+
+      // Último recurso: fallback
+      const fallback = cached || getFallbackData();
+      return new Response(JSON.stringify(fallback), {
+        status: 503, // Service Unavailable
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Data-Source': cached ? 'stale-cache-error' : 'fallback',
+          'X-Error': err.message,
+          'Cache-Control': 'no-cache',
+          'Retry-After': '60' // Reintentar en 60 segundos
+        }
+      });
+    } finally {
+      inFlightRequest = null;
+    }
+  })();
+
+  inFlightRequest = fetchPromise;
+  return fetchPromise;
+}
+
+// ⚡ OPTIMIZACIÓN: Pre-warm cache (opcional)
+// Si quieres precalentar el cache al iniciar el servidor
+export async function warmCache() {
+  try {
+    const cached = await getCachedData();
+    if (!cached) {
+      console.log('🔥 Pre-warming cache...');
+      const request = new Request('http://localhost/api/prices');
+      await GET({ request });
+      console.log('✅ Cache pre-warmed');
+    }
+  } catch (error) {
+    console.error('❌ Cache pre-warm failed:', error);
   }
 }

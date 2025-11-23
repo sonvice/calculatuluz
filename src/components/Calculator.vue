@@ -43,7 +43,7 @@
             max="3500"
             step="50"
             :error="errors.power"
-            note="Máx. recomendado: 3500 W"
+           
           />
         </div>
         <div>
@@ -57,7 +57,7 @@
             max="24"
             step="0.5"
             :error="errors.hours"
-            note="Usa punto decimal (ej: 1.5)"
+          
           />
         </div>
       </div>

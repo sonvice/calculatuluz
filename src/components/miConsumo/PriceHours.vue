@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useStore } from '@nanostores/vue'
 import { priceData } from '../../stores/prices'
 import { Clock, Lightbulb, TrendingDown } from 'lucide-vue-next'
@@ -8,7 +8,22 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
+// ⚡ Acepta datos iniciales del servidor
+const props = defineProps({
+  initialData: {
+    type: Object,
+    default: null
+  }
+})
+
 const $prices = useStore(priceData)
+
+// ⚡ Si hay datos iniciales, cargarlos inmediatamente
+onMounted(() => {
+  if (props.initialData && !priceData.get()) {
+    priceData.set(props.initialData)
+  }
+})
 
 // Colores por categoría
 const categoryColors = {
@@ -286,6 +301,7 @@ const hasData = computed(() => sortedHours.value.length > 0)
 </template>
 
 <style scoped>
+/* Estilos sin cambios */
 .price-hours {
   display: flex;
   flex-direction: column;
@@ -355,7 +371,6 @@ const hasData = computed(() => sortedHours.value.length > 0)
   gap: 8px;
 }
 
-/* Color dots */
 .color-dot {
   width: 12px;
   height: 12px;
@@ -364,7 +379,6 @@ const hasData = computed(() => sortedHours.value.length > 0)
   flex-shrink: 0;
 }
 
-/* Franjas */
 .slots-list {
   display: flex;
   flex-direction: column;
@@ -416,7 +430,6 @@ const hasData = computed(() => sortedHours.value.length > 0)
   font-size: 0.75rem;
 }
 
-/* Horas */
 .hours-list {
   display: flex;
   flex-direction: column;
@@ -477,7 +490,6 @@ const hasData = computed(() => sortedHours.value.length > 0)
   margin-top: 2px;
 }
 
-/* Recomendaciones */
 .recommendations {
   background: rgba(74, 123, 167, 0.05);
   padding: 16px;

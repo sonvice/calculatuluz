@@ -9,17 +9,34 @@ import ConfirmDialog from './ConfirmDialog.vue'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler)
 
-const $prices = useStore(priceData)
-const confirmDialog = ref(null)
+const props = defineProps({
+  initialData: {
+    type: Object,
+    default: null
+  }
+})
 
+const confirmDialog = ref(null)
+const $prices = useStore(priceData)
+
+// ⚡ FIX HIDRATACIÓN: Valores por defecto consistentes
 const threshold = ref(0.12)
 const notificationsEnabled = ref(false)
 const alertsActive = ref(false)
 const serviceWorkerSupported = ref(false)
 const serviceWorkerRegistered = ref(false)
 
-// Cargar configuración guardada
-if (typeof window !== 'undefined') {
+// ⚡ FIX: Flag para saber si ya se hidrato
+const isHydrated = ref(false)
+
+// ⚡ FIX: Cargar localStorage SOLO después de montar (cliente)
+onMounted(async () => {
+  // 1. Cargar datos iniciales si existen
+  if (props.initialData && !priceData.get()) {
+    priceData.set(props.initialData)
+  }
+
+  // 2. Cargar configuración desde localStorage
   const savedThreshold = localStorage.getItem('alert-threshold')
   const savedActive = localStorage.getItem('alerts-active')
 
@@ -28,18 +45,23 @@ if (typeof window !== 'undefined') {
 
   notificationsEnabled.value = 'Notification' in window && Notification.permission === 'granted'
   serviceWorkerSupported.value = 'serviceWorker' in navigator
-}
 
-onMounted(async () => {
-  // Verificar si hay Service Worker registrado
+  // 3. Verificar Service Worker
   if (serviceWorkerSupported.value) {
     const registration = await navigator.serviceWorker.getRegistration()
     serviceWorkerRegistered.value = !!registration
   }
+
+  // 4. Marcar como hidratado
+  isHydrated.value = true
 })
 
 const currentPrice = computed(() => $prices.value?.currentPrice || 0)
-const isBelowThreshold = computed(() => currentPrice.value > 0 && currentPrice.value < threshold.value)
+const isBelowThreshold = computed(() => {
+  // ⚡ FIX: Solo calcular después de hidratar
+  if (!isHydrated.value) return false
+  return currentPrice.value > 0 && currentPrice.value < threshold.value
+})
 
 // Datos para el gráfico
 const chartData = computed(() => {
@@ -128,7 +150,6 @@ async function requestNotifications() {
   notificationsEnabled.value = permission === 'granted'
 
   if (permission === 'granted') {
-    // Registrar Service Worker si está disponible
     if (serviceWorkerSupported.value && !serviceWorkerRegistered.value) {
       try {
         const registration = await navigator.serviceWorker.register('/sw.js')
@@ -186,7 +207,6 @@ function toggleAlerts() {
           icon: '/favicon.svg'
         })
 
-        // Enviar mensaje al Service Worker si está registrado
         if (serviceWorkerRegistered.value && navigator.serviceWorker.controller) {
           navigator.serviceWorker.controller.postMessage({
             type: 'CHECK_PRICE',
@@ -203,9 +223,8 @@ function updateThreshold(e) {
   localStorage.setItem('alert-threshold', threshold.value.toString())
 }
 
-// Vigilar el precio y enviar alertas
 watch(currentPrice, (newPrice) => {
-  if (!alertsActive.value || !notificationsEnabled.value) return
+  if (!alertsActive.value || !notificationsEnabled.value || !isHydrated.value) return
 
   if (newPrice > 0 && newPrice < threshold.value) {
     const lastAlert = localStorage.getItem('last-alert-time')
@@ -224,7 +243,6 @@ watch(currentPrice, (newPrice) => {
   }
 })
 
-// Actualizar Service Worker cuando cambia el umbral
 watch(threshold, (newThreshold) => {
   if (alertsActive.value && serviceWorkerRegistered.value && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({
@@ -237,87 +255,97 @@ watch(threshold, (newThreshold) => {
 
 <template>
   <div class="alerts-form">
-    <!-- Componente de confirmación -->
     <ConfirmDialog ref="confirmDialog" />
 
-    <!-- Estado actual -->
-    <div class="status-card" :class="{ active: isBelowThreshold }">
-      <div class="status-header">
-        <Check v-if="isBelowThreshold" :size="28" class="status-icon success" />
-        <AlertCircle v-else :size="28" class="status-icon waiting" />
-        <div class="status-text">
-          <strong>Precio actual</strong>
-          <span class="price">{{ currentPrice.toFixed(4) }} €/kWh</span>
+    <!-- ⚡ FIX: Mostrar skeleton mientras se hidrata -->
+    <div v-if="!isHydrated" class="skeleton-state">
+      <div class="skeleton-card"></div>
+      <div class="skeleton-chart"></div>
+      <div class="skeleton-input"></div>
+      <div class="skeleton-button"></div>
+    </div>
+
+    <!-- ⚡ FIX: Solo renderizar después de hidratar -->
+    <template v-else>
+      <!-- Estado actual -->
+      <div class="status-card" :class="{ active: isBelowThreshold }">
+        <div class="status-header">
+          <Check v-if="isBelowThreshold" :size="28" class="status-icon success" />
+          <AlertCircle v-else :size="28" class="status-icon waiting" />
+          <div class="status-text">
+            <strong>Precio actual</strong>
+            <span class="price">{{ currentPrice.toFixed(4) }} €/kWh</span>
+          </div>
+        </div>
+        <p v-if="isBelowThreshold" class="status-message success">
+          ¡El precio está por debajo de tu umbral!
+        </p>
+        <p v-else class="status-message">
+          Esperando precio bajo...
+        </p>
+      </div>
+
+      <!-- Gráfico de precios -->
+      <div v-if="$prices?.prices?.length" class="chart-container">
+        <h4 class="chart-title">Precios del día y tu umbral</h4>
+        <div class="chart-wrapper">
+          <Line :data="chartData" :options="chartOptions" />
         </div>
       </div>
-      <p v-if="isBelowThreshold" class="status-message success">
-        ¡El precio está por debajo de tu umbral!
-      </p>
-      <p v-else class="status-message">
-        Esperando precio bajo...
-      </p>
-    </div>
 
-    <!-- Gráfico de precios -->
-    <div v-if="$prices?.prices?.length" class="chart-container">
-      <h4 class="chart-title">Precios del día y tu umbral</h4>
-      <div class="chart-wrapper">
-        <Line :data="chartData" :options="chartOptions" />
+      <!-- Configuración del umbral -->
+      <div class="form-group">
+        <label class="form-label">
+          Umbral de precio (€/kWh)
+          <span class="help-icon" title="Recibirás una alerta cuando el precio baje de este valor">
+            <AlertCircle :size="16" />
+          </span>
+        </label>
+        <input 
+          class="form-input" 
+          type="number" 
+          step="0.001" 
+          min="0.05" 
+          max="0.50" 
+          :value="threshold"
+          @input="updateThreshold" 
+        />
+        <p class="help-text">Ejemplo: 0.120 €/kWh para alertas en precios bajos</p>
       </div>
-    </div>
 
-    <!-- Configuración del umbral -->
-    <div class="form-group">
-      <label class="form-label">
-        Umbral de precio (€/kWh)
-        <span class="help-icon" title="Recibirás una alerta cuando el precio baje de este valor">
-          <AlertCircle :size="16" />
-        </span>
-      </label>
-      <input 
-        class="form-input" 
-        type="number" 
-        step="0.001" 
-        min="0.05" 
-        max="0.50" 
-        :value="threshold"
-        @input="updateThreshold" 
-      />
-      <p class="help-text">Ejemplo: 0.120 €/kWh para alertas en precios bajos</p>
-    </div>
+      <!-- Botón de activar/desactivar -->
+      <button 
+        class="btn btn-toggle"
+        :class="{ active: alertsActive }"
+        @click="toggleAlerts"
+      >
+        <Bell v-if="!alertsActive" :size="18" />
+        <BellOff v-else :size="18" />
+        <span>{{ alertsActive ? 'Alertas activas' : 'Activar alertas' }}</span>
+      </button>
 
-    <!-- Botón de activar/desactivar -->
-    <button 
-      class="btn btn-toggle"
-      :class="{ active: alertsActive }"
-      @click="toggleAlerts"
-    >
-      <Bell v-if="!alertsActive" :size="18" />
-      <BellOff v-else :size="18" />
-      <span>{{ alertsActive ? 'Alertas activas' : 'Activar alertas' }}</span>
-    </button>
+      <!-- Información sobre permisos -->
+      <div v-if="!notificationsEnabled" class="info-box warning">
+        <AlertCircle :size="18" />
+        <p>Necesitas permitir notificaciones en tu navegador</p>
+      </div>
 
-    <!-- Información sobre permisos -->
-    <div v-if="!notificationsEnabled" class="info-box warning">
-      <AlertCircle :size="18" />
-      <p>Necesitas permitir notificaciones en tu navegador</p>
-    </div>
+      <!-- Info Service Worker -->
+      <div v-if="serviceWorkerRegistered" class="info-box success">
+        <Check :size="18" />
+        <p>Notificaciones en segundo plano activadas</p>
+      </div>
 
-    <!-- Info Service Worker -->
-    <div v-if="serviceWorkerRegistered" class="info-box success">
-      <Check :size="18" />
-      <p>Notificaciones en segundo plano activadas</p>
-    </div>
-
-    <div class="info-box">
-      <Info :size="18" />
-      <ul class="info-list">
-        <li>Las alertas se envían cuando el precio baja de tu umbral</li>
-        <li>Máximo una notificación cada 30 minutos</li>
-        <li v-if="serviceWorkerRegistered">Funciona incluso con el navegador cerrado</li>
-        <li v-else>Funciona con la pestaña cerrada (navegador abierto)</li>
-      </ul>
-    </div>
+      <div class="info-box">
+        <Info :size="18" />
+        <ul class="info-list">
+          <li>Las alertas se envían cuando el precio baja de tu umbral</li>
+          <li>Máximo una notificación cada 30 minutos</li>
+          <li v-if="serviceWorkerRegistered">Funciona incluso con el navegador cerrado</li>
+          <li v-else>Funciona con la pestaña cerrada (navegador abierto)</li>
+        </ul>
+      </div>
+    </template>
   </div>
 </template>
 
