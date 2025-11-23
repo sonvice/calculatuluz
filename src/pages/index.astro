@@ -6,8 +6,6 @@ import SubscribeForm from "../components/SubscribeForm.vue";
 import ListNewsletter from "../components/ListNewsletter.astro";
 import heroImg from "../assets/imgs/calculator.webp";
 import { faqData } from "../constant";
-import TableConsumption from "../components/TableConsumption.astro";
-import { Zap } from "@lucide/astro";
 const conical = "https://calculatuluz.es";
 
 
@@ -79,7 +77,7 @@ import Table from "@/components/Table";
         loading="eager"
         fetchpriority="high"
         alt="Calculadora de consumo eléctrico"
-        class="mt-space-m mb-space-l w-full max-w-2xl rounded-md shadow-lg"
+        class="mt-space-m mb-space-l rounded-md"
       />
     </div>
 
@@ -188,7 +186,7 @@ import Table from "@/components/Table";
     white-space: pre-wrap;
   }
   .newsletter-header {
-    max-width: 800px;
+    max-width: 48rem;
     border-radius: 8px;
   }
   .hero-wrapper {

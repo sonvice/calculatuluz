@@ -1,0 +1,205 @@
+---
+// src/pages/mi-consumo/index.astro
+import Layout from "../../layouts/Layout.astro";
+
+// Componentes Vue islands
+import ConsumptionForm from "../../components/miConsumo/ConsumptionForm.vue";
+import AppliancesList from "../../components/miConsumo/AppliancesList.vue";
+import ConsumptionSummary from "../../components/miConsumo/ConsumptionSummary.vue";
+import PriceHours from "../../components/miConsumo/PriceHours.vue";
+import SaveProfile from "../../components/miConsumo/SaveProfile.vue";
+import AlertsForm from "../../components/miConsumo/AlertsForm.vue";
+import ConsumptionTips from "../../components/miConsumo/ConsumptionTips.vue";
+import ListNewsletter from "../../components/ListNewsletter.astro";
+import SubscribeForm from "../../components/SubscribeForm.vue";
+import { faqDataConsumo } from "@/constant";
+import Faq from "@/components/Faq.astro";
+
+// Fecha formateada
+const formattedDate = new Intl.DateTimeFormat("es-ES", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+  timeZone: "Europe/Madrid",
+}).format(new Date());
+
+const canonical = "https://calculatuluz.es/mi-consumo";
+---
+
+<Layout
+  title={`Mi Consumo - Calcula y guarda tu perfil de consumo | ${formattedDate}`}
+  description="Crea tu perfil de consumo: añade electrodomésticos, guarda tu potencia contratada, recibe recomendaciones y las horas más baratas cada día."
+  canonical={canonical}
+>
+  <main class="text-neutral-50 py-space-l">
+    <div>
+      <!-- Título -->
+      <section class="page-hero mt-space-l mb-space-m">
+        <h1 class="fw-700 text-size-4">Mi Consumo</h1>
+        <p class="mt-space-s text-primary-100">
+          Crea tu perfil de consumo para ver cuánto pagas realmente, cuáles son
+          las horas más baratas y cómo ahorrar. Datos actualizados en tiempo
+          real — {formattedDate}.
+        </p>
+      </section>
+
+      <!-- GRID principal 60/40 -->
+      <div class="grid grid--2cols mt-space-l">
+        <!-- LEFT (form + lista + resumen) -->
+        <div class="left-col">
+          <!-- Tarifa y potencia -->
+          <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+            <h2 class="fw-600 text-size-2 mb-space-s">Tarifa y potencia</h2>
+            <p class="text-primary-100 mb-space-s">
+              Selecciona tu tarifa y potencia contratada para calcular términos
+              fijos y coste real.
+            </p>
+            <!-- Las stores se sincronizan automáticamente, no necesita props -->
+            <ConsumptionForm client:only="vue" />
+          </div>
+
+          <!-- Mis electrodomésticos -->
+          <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+            <h2 class="fw-600 text-size-2 mb-space-s">Mis electrodomésticos</h2>
+            <p class="text-primary-100 mb-space-s">
+              Añade los aparatos que usas y cuántas horas al día o usos por
+              semana.
+            </p>
+            <AppliancesList client:only="vue" />
+          </div>
+
+          <!-- Estimación de consumo -->
+          <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+            <ConsumptionSummary client:only="vue" />
+          </div>
+
+          <!-- Consejos y optimización -->
+          <div class="card bg-primary-900 p-space-l rounded-md mb-space-l">
+            <h3 class="fw-600 text-size-1 mb-space-s">
+              Optimización y consejos
+            </h3>
+            <ConsumptionTips client:only="vue" />
+          </div>
+        </div>
+
+        <!-- RIGHT (horas baratas, alertas, guardar perfil) -->
+        <aside class="right-col">
+          <!-- Horas más baratas -->
+          <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+            <h3 class="fw-600 text-size-2 mb-space-s">Horas más baratas hoy</h3>
+            <p class="text-primary-100 mb-space-s">
+              Detectamos las franjas más económicas según el PVPC.
+            </p>
+            <PriceHours client:only="vue" />
+          </div>
+
+          <!-- Alertas y recordatorios -->
+          <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+            <h3 class="fw-600 text-size-2 mb-space-s">
+              Alertas y recordatorios
+            </h3>
+            <p class="text-primary-100 mb-space-s">
+              Crea alertas para que te avisemos cuando el kWh baje de X €/kWh.
+            </p>
+            <AlertsForm client:only="vue" />
+          </div>
+
+          <!-- Guardar perfil -->
+          <div class="card bg-primary-800 p-space-l rounded-md mb-space-l">
+            <h3 class="fw-600 text-size-2 mb-space-s">Guardar perfil</h3>
+            <p class="text-primary-100 mb-space-s">
+              Guarda tu perfil en el navegador o exporta tus datos.
+            </p>
+            <SaveProfile client:only="vue" />
+          </div>
+        </aside>
+      </div>
+
+      <!-- FAQs -->
+      <section class="mt-space-2xl">   
+      <Faq data={faqDataConsumo} />
+      </section>
+
+      <!-- Newsletter -->
+    <div
+      class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture"
+    >
+      <div class="newsletter-header text-primary-50">
+        <h2>⚡¡No te pierdas las horas más baratas de luz!</h2>
+        <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
+        <ListNewsletter />
+        <div class="mt-space-m">
+          <SubscribeForm client:load />
+        </div>
+      </div>
+    </div>
+    </div>
+  </main>
+
+  <style>
+    .newsletter-header {
+      max-width: 48rem;
+    }
+
+    .container {
+      width: 100%;
+    }
+
+    .card {
+      background: var(--primary-900);
+      border-radius: var(--radius-md);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn {
+      padding: var(--space-s) var(--space-l);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary-500);
+      color: var(--neutral-50);
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-600);
+      transform: translateY(-1px);
+    }
+
+    .grid--2cols {
+      display: grid;
+      grid-template-columns: 1fr 520px;
+      gap: var(--space-l);
+      align-items: start;
+    }
+
+    .cta-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-m);
+    }
+
+    @media (max-width:75rem) {
+      .grid--2cols {
+        grid-template-columns: 1fr;
+      }
+      .right-col {
+        order: 2;
+      }
+      .left-col {
+        order: 1;
+      }
+      .cta-section {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</Layout>

@@ -73,5 +73,53 @@ const canonicalUrl = `https://calculatuluz.es${Astro.url.pathname}`;
   </head>
   <body>
     <slot />
+
+  <!-- Registrar Service Worker -->
+  <script is:inline>
+    // Solo registrar en producción y con HTTPS
+    if ('serviceWorker' in navigator) {
+      // Esperar a que la página cargue completamente
+      window.addEventListener('load', async () => {
+        try {
+          // Verificar que estamos en HTTPS o localhost
+          if (location.protocol === 'https:' || location.hostname === 'localhost') {
+            const registration = await navigator.serviceWorker.register('/sw.js', {
+              scope: '/'
+            });
+            
+            console.log('Service Worker registrado:', registration.scope);
+            
+            // Escuchar actualizaciones del SW
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              console.log('Nueva versión del Service Worker encontrada');
+              
+              newWorker?.addEventListener('statechange', () => {
+                if (newWorker.state === 'activated') {
+                  console.log('Service Worker actualizado');
+                  // Opcional: mostrar notificación de actualización
+                }
+              });
+            });
+          } else {
+            console.warn('Service Worker requiere HTTPS');
+          }
+        } catch (error) {
+          console.error('Error al registrar Service Worker:', error);
+        }
+      });
+      
+      // Manejar mensajes del Service Worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        console.log('Mensaje del SW:', event.data);
+        
+        if (event.data.type === 'NOTIFICATION_SENT') {
+          // El SW envió una notificación
+          console.log('Notificación enviada por el SW');
+        }
+      });
+    }
+    
+  </script>
   </body>
 </html>
