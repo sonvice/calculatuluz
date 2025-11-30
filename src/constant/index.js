@@ -3,6 +3,7 @@ export const navigation = [
   { title: 'Precio luz hoy', url: '/precio-luz-hoy' },
   { title: 'Tips & Guías', url: '/tipsyguias' },
   { title: 'Mi consumo', url: '/mi-consumo' },
+  { title: 'Contacto', url: '/contacto' },
 ];
 
 

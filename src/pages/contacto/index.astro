@@ -1,0 +1,236 @@
+---
+// src/pages/contacto.astro
+import Layout from "../../layouts/Layout.astro";
+import ContactForm from "../../components/ContactForm.astro";
+
+const canonical = "https://calculatuluz.es/contacto";
+import { ChartColumnIcon,Lightbulb,Zap,lightbulb} from '@lucide/astro';
+---
+
+<Layout
+    title="📧 Contacto - Calcula tu Luz | Contáctanos para resolver tus dudas"
+    description="¿Tienes dudas sobre el precio de la luz o nuestra calculadora? Ponte en contacto con nosotros y te ayudaremos con cualquier pregunta sobre tarifas eléctricas."
+    canonical={canonical}
+>
+    <div class="contact-page-wrapper">
+        <div class="contact-container">
+            <!-- Columna izquierda: Información -->
+            <div class="contact-info-section">
+                <h1 class="fw-700 text-neutral-50">Formulario de Contacto</h1>
+                <p class="mt-space-s text-neutral-300">
+                    ¿Tienes alguna pregunta o comentario? Envíanos un mensaje y
+                    te responderemos lo antes posible.
+                </p>
+
+                <div class="contact-info-cards mt-space-xl">
+                    <!-- Email -->
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                ></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-neutral-50 fw-700">Email</h3>
+                            <a
+                                href="mailto:info@calculatuluz.es"
+                                class="text-primary-400 contact-link"
+                            >
+                                info@calculatuluz.es
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Ubicación -->
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                ></path>
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-neutral-50 fw-700">Ubicación</h3>
+                            <p class="text-neutral-300">Madrid, España</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recursos adicionales -->
+                <div class="mt-space-2xl">
+                    <h3 class="text-neutral-50 fw-700">Recursos útiles</h3>
+                    <ul role="list" class="flow mt-space-m resources-list text-primary-50">
+                        <li class="d-flex">
+                            <ChartColumnIcon/> <a href="/" class="text-primary-50 contact-link"
+                                >Calculadora de consumo eléctrico</a
+                            >
+                        </li>
+                        <li class="d-flex">
+                            <Zap/> <a
+                                href="/precio-luz-hoy"
+                                class="text-primary-50 contact-link"
+                                >Precio de la luz por horas</a
+                            >
+                        </li>
+                        <li class="d-flex">
+                            <Lightbulb/> <a
+                                href="/mi-consumo"
+                                class="text-primary-50 contact-link"
+                                >Crea tu perfil de consumo para ver cuánto pagas</a
+                            >
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Columna derecha: Formulario -->
+            <div class="contact-form-section">
+                <ContactForm />
+            </div>
+        </div>
+    </div>
+</Layout>
+
+<style>
+    .contact-page-wrapper {
+        padding-block: var(--space-xl);
+        min-height: 100vh;
+    }
+
+    .contact-container {
+        margin: 0 auto;
+        gap: var(--space-xl);
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 64em) {
+        .contact-container {
+            grid-template-columns: 40% 1fr;
+        }
+    }
+
+    /* Sección de información */
+    .contact-info-section h1 {
+        font-size: var(--size-3);
+        line-height: 1.2;
+    }
+
+    .contact-info-cards {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-l);
+    }
+
+    .info-item {
+        display: flex;
+        gap: var(--space-m);
+        align-items: flex-start;
+        padding: var(--space-m);
+        background-color: var(--primary-900);
+        border-radius: var(--rounded-lg);
+        border: 1px solid var(--primary-500);
+        transition: all 0.2s ease;
+    }
+
+    .info-item:hover {
+        border-color: var(--primary-600);
+        transform: translateX(4px);
+    }
+
+    [data-theme="dark"] .info-item {
+        background-color: var(--neutral-800);
+        border-color: var(--neutral-700);
+    }
+
+    [data-theme="dark"] .info-item:hover {
+        border-color: var(--primary-500);
+    }
+
+    .info-icon {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        padding: var(--space-xs);
+        background-color: var(--primary-800);
+        color: var(--primary-400);
+        border-radius: var(--rounded-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .info-icon svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .info-item h3 {
+        font-size: var(--size-0);
+        margin-bottom: var(--space-3xs);
+    }
+
+    .info-item p,
+    .info-item a {
+        font-size: var(--size-0);
+        color: var(--neutral-300);
+    }
+
+    .contact-link {
+        transition: opacity 0.2s;
+    }
+
+    .contact-link:hover {
+        opacity: 0.8;
+        text-decoration: none;
+    }
+
+    .resources-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .resources-list li {
+        padding: var(--space-xs) 0;
+        border-bottom: 1px solid var(--primary-500);
+    }
+
+    .resources-list li:last-child {
+        border-bottom: none;
+    }
+
+    /* Sección del formulario */
+    .contact-form-section {
+        position: relative;
+    }
+
+    @media (min-width: 64em) {
+        .contact-form-section {
+            position: sticky;
+            top: var(--space-l);
+            height: fit-content;
+        }
+    }
+</style>

@@ -1,0 +1,398 @@
+---
+// src/components/ContactForm.astro
+import { actions } from 'astro:actions';
+
+// Obtener el resultado de la acción si existe
+const result = Astro.getActionResult(actions.sendContactEmail);
+---
+
+<section class="contact-form-section">
+ 
+    <div class="contact-form-wrapper">
+
+      {result?.data && (
+        <div class="alert alert-success">
+          <svg class="alert-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <p>{result.data.message}</p>
+        </div>
+      )}
+
+      {result?.error && (
+        <div class="alert alert-error">
+          <svg class="alert-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          <div>
+            <p class="alert-title">Error al enviar el mensaje</p>
+            {result.error.fields && (
+              <ul class="error-list">
+                {Object.entries(result.error.fields).map(([field, errors]) => (
+                  <li>{field}: {errors?.join(', ')}</li>
+                ))}
+              </ul>
+            )}
+            {!result.error.fields && (
+              <p>{result.error.message || 'Por favor, intenta nuevamente.'}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      <form method="POST" action={actions.sendContactEmail} class="contact-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="name" class="form-label">
+              Nombre completo <span class="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              class="form-input"
+              placeholder="Tu nombre"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="form-label">
+              Email <span class="required">*</span>
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="form-input"
+              placeholder="tu@email.com"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="subject" class="form-label">
+            Asunto <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            id="subject"
+            name="subject"
+            class="form-input"
+            placeholder="¿En qué podemos ayudarte?"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="message" class="form-label">
+            Mensaje <span class="required">*</span>
+          </label>
+          <textarea
+            id="message"
+            name="message"
+            rows="6"
+            class="form-textarea"
+            placeholder="Escribe tu mensaje aquí..."
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" data-type="accent" class="btn">
+          <svg class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Enviar mensaje
+        </button>
+      </form>
+    </div>
+</section>
+
+<style>
+
+  .contact-form-wrapper {
+    background-color: var(--neutral-900);
+    padding: var(--space-xl);
+    border-radius: var(--rounded-lg);
+    border: 1px solid var(--neutral-700);
+  }
+
+ .contact-form-wrapper {
+    background-color: var(--primary-900);
+    border-color: var(--primary-500);
+  }
+
+  .contact-form-title {
+    font-size: var(--size-2);
+    font-weight: var(--bold);
+    color: var(--neutral-50);
+    margin-bottom: var(--space-xs);
+  }
+
+  .contact-form-description {
+    font-size: var(--size-0);
+    color: var(--neutral-300);
+    margin-bottom: var(--space-l);
+  }
+
+  /* Alertas */
+  .alert {
+    display: flex;
+    gap: var(--space-xs);
+    padding: var(--space-m);
+    border-radius: var(--rounded-md);
+    margin-bottom: var(--space-l);
+  }
+
+  .alert-success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+  }
+
+  .alert-error {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+  }
+
+  [data-theme="dark"] .alert-success {
+    background-color: #064e3b;
+    color: #6ee7b7;
+  }
+
+  [data-theme="dark"] .alert-error {
+    background-color: #7f1d1d;
+    color: #fca5a5;
+  }
+
+  .alert-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .alert-title {
+    font-weight: var(--semi-bold);
+    margin-bottom: var(--space-2xs);
+  }
+
+  .error-list {
+    margin-top: var(--space-2xs);
+    padding-left: var(--space-m);
+  }
+
+  .error-list li {
+    margin-bottom: var(--space-3xs);
+  }
+
+  /* Formulario */
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-m);
+  }
+
+  @media (min-width: 768px) {
+    .form-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .form-label {
+    font-size: var(--size-0);
+    font-weight: var(--semi-bold);
+    color: var(--primary-50);
+  }
+
+  [data-theme="dark"] .form-label {
+    color: var(--neutral-300);
+  }
+
+  .required {
+    color: var(--red-500);
+  }
+
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    padding: var(--space-xs) var(--space-s);
+    font-size: var(--size-0);
+    color: var(--neutral-50);
+    background-color: var(--primary-50);
+    border: 2px solid var(--neutral-700);
+    border-radius: var(--rounded-md);
+    transition: all 0.2s;
+  }
+
+  .form-input:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: var(--accent-400);
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: var(--neutral-400);
+  }
+
+  /* Honeypot - Campo invisible para bots */
+  .honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .character-count {
+    font-size: var(--size--1);
+    color: var(--neutral-400);
+    text-align: right;
+    margin-top: var(--space-3xs);
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  /* Botón */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2xs);
+    padding: var(--space-s) var(--space-l);
+    font-size: var(--size-0);
+    font-weight: var(--semi-bold);
+    border: none;
+    border-radius: var(--rounded-md);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    color: white;
+    background-color: var(--primary-600);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--primary-700);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  [data-theme="dark"] .btn-primary {
+    background-color: var(--primary-600);
+    color: var(--neutral-900);
+  }
+
+  [data-theme="dark"] .btn-primary:hover {
+    background-color: var(--primary-500);
+  }
+
+  .btn-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Loading state */
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  const form = document.getElementById('contactForm') as HTMLFormElement;
+  const submitButton = form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+  const messageTextarea = document.getElementById('message') as HTMLTextAreaElement;
+  const charCount = document.getElementById('charCount');
+  const timestampInput = document.getElementById('formStartTime') as HTMLInputElement;
+
+  // Establecer timestamp cuando se carga el formulario
+  if (timestampInput) {
+    timestampInput.value = Date.now().toString();
+  }
+
+  // Contador de caracteres
+  if (messageTextarea && charCount) {
+    messageTextarea.addEventListener('input', () => {
+      const length = messageTextarea.value.length;
+      charCount.textContent = `${length} / 5000 caracteres`;
+      
+      if (length > 4800) {
+        charCount.style.color = 'var(--orange)';
+      } else {
+        charCount.style.color = 'var(--neutral-400)';
+      }
+    });
+  }
+
+  // Loading state en el submit
+  form?.addEventListener('submit', () => {
+    if (submitButton) {
+      submitButton.disabled = true;
+      const originalContent = submitButton.innerHTML;
+      submitButton.innerHTML = `
+        <svg class="btn-icon animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Enviando...
+      `;
+
+      // Restaurar botón después de 10 segundos por si hay error
+      setTimeout(() => {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalContent;
+      }, 10000);
+    }
+  });
+</script>
+
+<style is:global>
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+</style>

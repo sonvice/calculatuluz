@@ -239,13 +239,12 @@ label {
   }
   .wrapper-inputs {
     display: grid;
-    gap: var(--space-l);
+    gap: var(--space-s);
     grid-template-columns: 1fr;
   }
   @media (min-width: 768px) {
     .wrapper-inputs {
       grid-template-columns: 1fr 1fr;
-      gap: var(--space-s);
     }
   }
 </style>
