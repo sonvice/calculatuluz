@@ -1,11 +1,12 @@
 ---
 import { navigation as navDefault } from "../constant";
 import Logo from "../assets/logo-calcula-tu-luz.svg";
-// Obtenemos la ruta actual
+import LogoMobile from "../assets/logo-mobile.svg";
+import { Menu, X } from "@lucide/astro";
+
 const currentPath = Astro.url.pathname;
 
 const navigation = navDefault.filter((item) => {
-  // Mostrar la Calculadora en todas las rutas excepto "/"
   if (item.onlyTips && currentPath === "/") {
     return false;
   }
@@ -13,39 +14,342 @@ const navigation = navDefault.filter((item) => {
 });
 ---
 
-<header>
-  <div class="container">
-    <div class="nav d-flex text-primary-100">
-      <div class="text-size-2">
-        <a aria-label="Logo de calculatuluz.es" href="/"
-          ><Logo width={160} /></a>
+<header class="header">
+  <div class="header__bar">
+    <div class="container">
+      <div class="nav d-flex text-primary-100">
+        <!-- Logo -->
+        <div class="text-size-2 logo-wrapper">
+          <a aria-label="Logo de calculatuluz.es" href="/">
+            <span class="logo-desktop">
+              <Logo width={160} />
+            </span>
+            <span class="logo-mobile">
+              <LogoMobile width={45} />
+            </span>
+          </a>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <nav aria-label="Main navigation" class="nav-desktop">
+          <ul class="nav__list d-flex" role="menubar">
+            {
+              navigation.map((item) => {
+                const isActive =
+                  item.url === "/"
+                    ? currentPath === "/"
+                    : currentPath.startsWith(item.url);
+                return (
+                  <li role="none">
+                    <a
+                      href={item.url}
+                      role="menuitem"
+                      aria-current={isActive ? "page" : undefined}
+                      class={`nav__link py-space-3xs text-neutral-50 ${
+                        isActive ? "nav__link--active fw-500" : ""
+                      }`}
+                    >
+                      {item.title}
+                    </a>
+                  </li>
+                );
+              })
+            }
+          </ul>
+        </nav>
+
+        <!-- Mobile Menu Button -->
+        <button
+          class="mobile-menu-btn"
+          id="mobileMenuBtn"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+          aria-controls="mobileMenu"
+        >
+          <Menu class="menu-icon" size={28} />
+          <X class="close-icon" size={28} />
+        </button>
       </div>
-      <nav aria-label="Main navigation">
-        <ul class="nav__list d-flex" role="menubar">
-          {
-            navigation.map((item) => {
-              const isActive =
-                item.url === "/"
-                  ? currentPath === "/"
-                  : currentPath.startsWith(item.url);
-              return (
-                <li role="none">
-                  <a
-                    href={item.url}
-                    role="menuitem"
-                    aria-current={isActive ? "page" : undefined}
-                    class={`nav__link py-space-3xs text-neutral-50 ${
-                      isActive ? "nav__link--active fw-500" : ""
-                    }`}
-                  >
-                    {item.title}
-                  </a>
-                </li>
-              );
-            })
-          }
-        </ul>
-      </nav>
     </div>
   </div>
+
+  <!-- Mobile Navigation -->
+  <nav
+    class="mobile-menu"
+    id="mobileMenu"
+    aria-label="Mobile navigation"
+    aria-hidden="true"
+  >
+    <div class="mobile-menu__content">
+      <ul class="mobile-menu__list" role="menubar">
+        {
+          navigation.map((item) => {
+            const isActive =
+              item.url === "/"
+                ? currentPath === "/"
+                : currentPath.startsWith(item.url);
+            return (
+              <li role="none">
+                <a
+                  href={item.url}
+                  role="menuitem"
+                  aria-current={isActive ? "page" : undefined}
+                  class={`mobile-menu__link text-neutral-50 ${
+                    isActive ? "mobile-menu__link--active fw-500" : ""
+                  }`}
+                >
+                  {item.title}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </div>
+  </nav>
 </header>
+
+<style>
+  .header {
+    position: relative;
+  }
+
+  /* Header Bar - Barra fija superior */
+  .header__bar {
+    position: relative;
+    z-index: 1001;
+    background-color: var(--primary-900);
+    padding-block: var(--space-s);
+  }
+
+  .nav {
+    --horizontal-alignment: space-between;
+    --vertical-alignment: center;
+  }
+
+  /* Logo responsivo */
+  .logo-desktop {
+    display: inline-block;
+  }
+
+  .logo-mobile {
+    display: none;
+  }
+
+  .logo-wrapper a {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .logo-wrapper svg {
+    height: auto;
+  }
+
+  /* Desktop Navigation */
+  .nav-desktop {
+    display: block;
+  }
+
+  .nav__list {
+    --gutter: var(--space-m);
+    --horizontal-alignment: flex-end;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .nav__link {
+    text-decoration: none;
+    padding-inline: var(--space-xs);
+    transition: color 0.2s ease;
+    white-space: nowrap;
+  }
+
+  /* Mobile Menu Button */
+  .mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--accent-400);
+    cursor: pointer;
+    padding: var(--space-2xs);
+    transition: color 0.2s ease;
+    line-height: 1;
+  }
+
+  .mobile-menu-btn:hover {
+    color: var(--accent-500);
+  }
+
+  .mobile-menu-btn:active {
+    transform: scale(0.95);
+  }
+
+  .close-icon {
+    display: none;
+  }
+
+  .mobile-menu-btn[aria-expanded="true"] .menu-icon {
+    display: none;
+  }
+
+  .mobile-menu-btn[aria-expanded="true"] .close-icon {
+    display: block;
+  }
+
+  /* Mobile Navigation */
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--primary-900);
+    z-index: 1000;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(100%);
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease,
+      visibility 0s linear 0.3s;
+  }
+
+  .mobile-menu[aria-hidden="false"] {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease,
+      visibility 0s linear 0s;
+  }
+
+  .mobile-menu__content {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: calc(60px + var(--space-l)); /* Espacio para el header */
+  }
+
+  .mobile-menu__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    padding-inline: var(--space-l);
+  }
+
+  .mobile-menu__link {
+    display: block;
+    padding: var(--space-m);
+    text-decoration: none;
+    font-size: var(--size-1);
+    border-bottom: 1px solid var(--primary-800);
+    transition: all 0.2s ease;
+  }
+
+  .mobile-menu__link:hover,
+  .mobile-menu__link:focus {
+    color: var(--primary-400);
+    padding-left: var(--space-l);
+  }
+
+  .mobile-menu__link--active {
+    color: var(--primary-400);
+    border-left: 4px solid var(--primary-400);
+    padding-left: var(--space-l);
+  }
+
+  /* Mobile Breakpoint */
+  @media (max-width: 63.99875em) {
+    /* Header bar más compacto en mobile */
+    .header__bar {
+      padding-block: var(--space-xs);
+    }
+
+    /* Mostrar logo mobile */
+    .logo-desktop {
+      display: none;
+    }
+
+    .logo-mobile {
+      display: inline-block;
+    }
+
+    /* Ocultar nav desktop */
+    .nav-desktop {
+      display: none;
+    }
+
+    /* Mostrar botón hamburguesa */
+    .mobile-menu-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Habilitar menu mobile */
+    .mobile-menu {
+      display: block;
+    }
+  }
+
+  /* Prevenir shift de layout cuando se abre el menú */
+  body:has(.mobile-menu[aria-hidden="false"]) {
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+  const mobileMenu = document.getElementById("mobileMenu");
+  let isOpen = false;
+
+  function toggleMenu() {
+    isOpen = !isOpen;
+
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.setAttribute("aria-expanded", String(isOpen));
+      mobileMenu.setAttribute("aria-hidden", String(!isOpen));
+
+      // Prevenir scroll del body cuando el menú está abierto
+      document.body.style.overflow = isOpen ? "hidden" : "";
+    }
+  }
+
+  // Toggle al hacer click en el botón
+  mobileMenuBtn?.addEventListener("click", toggleMenu);
+
+  // Cerrar menú al hacer click en un link
+  const mobileLinks = document.querySelectorAll(".mobile-menu__link");
+  mobileLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      if (isOpen) {
+        toggleMenu();
+      }
+    });
+  });
+
+  // Cerrar menú con la tecla Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isOpen) {
+      toggleMenu();
+    }
+  });
+
+  // Cerrar menú al redimensionar a desktop
+  let previousWidth = window.innerWidth;
+  window.addEventListener("resize", () => {
+    const currentWidth = window.innerWidth;
+
+    // Si se redimensiona a desktop (>1024px) y el menú está abierto
+    if (previousWidth <= 1024 && currentWidth > 1024 && isOpen) {
+      toggleMenu();
+    }
+
+    previousWidth = currentWidth;
+  });
+</script>

@@ -3,22 +3,37 @@
 ---
 
 <footer
-  class="text-neutral-50 text-size--1 p-space-l mt-space-2xl rounded-sm bg-primary-900">
+  class="text-neutral-50 text-size--1 p-space-l mt-space-2xl rounded-sm bg-primary-900"
+>
   <div class="container">
-    <div class="d-flex">
+    <div class="d-flex derechos gap-space-s">
+      <!-- © DERECHOS -->
       <p>© 2025 Calculatuluz. Todos los derechos reservados.</p>
+      <div>
+      <!-- FUENTE DE DATOS -->
       <p class="data-source">
-        Datos proporcionados por <a
-          href="https://www.ree.es/es"
-          target="_blank"
-          rel="noopener">Red Eléctrica de España</a
+        Datos proporcionados por
+        <a href="https://www.ree.es/es" target="_blank" rel="noopener"
+          >Red Eléctrica de España</a
         >
-        a través de la <a
-          href="https://api.esios.ree.es/"
-          target="_blank"
-          rel="noopener">API pública de e·sios</a
+        a través de la
+        <a href="https://api.esios.ree.es/" target="_blank" rel="noopener"
+          >API pública de e·sios</a
         >.
       </p>
+  </div>
+      <!-- ENLACES LEGALES -->
+      <nav class="legal-links d-flex gap-space-m mt-space-xs">
+        <a href="/aviso-legal" class="text-neutral-200 hover:text-neutral-50">
+          Aviso legal
+        </a>
+        <a href="/privacidad" class="text-neutral-200 hover:text-neutral-50">
+          Política de privacidad
+        </a>
+        <a href="/politica-de-cookies" class="text-neutral-200 hover:text-neutral-50">
+          Política de cookies
+        </a>
+      </nav>
     </div>
   </div>
 </footer>
@@ -26,17 +41,22 @@
 <style>
   footer {
     --horizontal-alignment: center;
+
+    & .derechos{
+      flex-direction: column;
+    }
   }
+
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const updateElement = document.getElementById('updateTime');
+  document.addEventListener("DOMContentLoaded", () => {
+    const updateElement = document.getElementById("updateTime");
     if (updateElement) {
-      updateElement.textContent = new Date().toLocaleDateString('es-ES', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
+      updateElement.textContent = new Date().toLocaleDateString("es-ES", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
       });
     }
   });

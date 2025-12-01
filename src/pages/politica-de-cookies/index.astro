@@ -1,0 +1,73 @@
+---
+export const prerender = true;
+import Layout from "../../layouts/Layout.astro";
+const conical = "https://calculatuluz.es/politica-de-cookies";
+---
+
+<Layout
+  title="Política de Cookies"
+  description="Información sobre el uso de cookies en calculatuluz.es según GDPR."
+  conical={conical}
+>
+  <h1 class="fw-700 text-neutral-50 mt-space-xl mb-space-l">
+    Política de Cookies
+  </h1>
+
+  <p class="mb-space-m text-primary-100">
+    En esta web utilizamos cookies propias y de terceros con fines técnicos,
+    analíticos y, en caso de activarse, publicitarios. Puedes aceptar, rechazar
+    o configurar tus preferencias desde el banner de consentimiento.
+  </p>
+
+  <h2 class="fw-700 mt-space-lg mb-space-s text-neutral-50">
+    ¿Qué son las cookies?
+  </h2>
+  <p class="mb-space-m text-primary-100">
+    Las cookies son pequeños archivos que se almacenan en tu dispositivo y
+    contienen información que mejora tu experiencia de navegación, analiza el
+    uso del sitio o personaliza contenido y anuncios.
+  </p>
+
+  <h2 class="fw-700 mt-space-lg mb-space-l text-neutral-50">
+    Tipos de cookies utilizadas
+  </h2>
+
+  <h3 class="fw-700 mt-space-md mb-space-xs text-neutral-50">
+    1. Cookies técnicas
+  </h3>
+  <p class="mb-space-m text-primary-100">
+    Necesarias para el funcionamiento del sitio. No requieren consentimiento.
+  </p>
+
+  <h3 class="fw-700 mt-space-md mb-space-xs text-neutral-50">
+    2. Cookies de análisis
+  </h3>
+  <p class="mb-space-m text-primary-100">
+    Usamos Google Analytics o herramientas equivalentes para mejorar la
+    experiencia del usuario.
+  </p>
+
+  <h3 class="fw-700 mt-space-md mb-space-xs text-neutral-50">
+    3. Cookies de publicidad (Google AdSense)
+  </h3>
+  <p class="mb-space-m text-primary-100">
+    Estas cookies solo se activarán si otorgas consentimiento explícito. Se
+    utilizan para mostrar anuncios personalizados o no personalizados.
+  </p>
+
+  <h2 class="fw-700 mt-space-lg mb-space-xs text-neutral-50">
+    Cómo gestionar o desactivar las cookies
+  </h2>
+  <p class="mb-space-m text-primary-100">
+    Puedes cambiar tus preferencias desde el banner de configuración, o
+    desactivar cookies desde la configuración de tu navegador.
+  </p>
+
+  <h2 class="fw-700 mt-space-lg mb-space-xs text-neutral-50">
+    Cambios en la política
+  </h2>
+  <p class="mb-space-m text-primary-100">
+    Esta política puede actualizarse para ajustarse a cambios normativos o
+    técnicos.
+  </p>
+</Layout>
