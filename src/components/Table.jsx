@@ -42,8 +42,7 @@ export default function Table({ columns, data }) {
       <style jsx>{`
   .table-container {
     overflow-x: auto;
-    margin-top: var(--space-m);
-    max-width: 42rem;    
+    margin-top: var(--space-m); 
   }
 
   .custom-table {
