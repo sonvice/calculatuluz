@@ -107,19 +107,13 @@ const priceStore = useStore(priceData);
 const actualPrice = computed(() => priceStore.value?.currentPrice ?? 0);
 
 onMounted(() => {
-  // Si la página padre (slug) nos manda una potencia...
   if (props.initialPower) {
-    // 1. Seteamos la potencia manualmente
     power.value = props.initialPower;
-
-    // 2. Intentamos buscar el objeto en tu lista 'appliances' para que el Select se pinte bonito
-    // (Opcional, pero queda bien si el dropdown muestra "Nevera" en vez de "Selecciona...")
     const found = appliances.find(a => a.label === props.initialApplianceName);
     if (found) {
-      selectedAppliance.value = found.value; // Esto activará tu watcher existente
+      // Ahora seteamos el SLUG, no el value numérico
+      selectedAppliance.value = found.slug; 
     } else {
-      // Si no lo encuentra (caso raro), al menos ponemos la potencia
-      // Podrías poner selectedAppliance.value = 'custom' si quieres
       selectedAppliance.value = 'custom';
     }
   }
@@ -128,7 +122,13 @@ onMounted(() => {
 // Actualizar potencia si se selecciona electrodoméstico
 watch(selectedAppliance, (newVal) => {
   if (newVal && newVal !== 'custom') {
-    power.value = newVal;
+    // 1. Buscamos el aparato en la lista usando el SLUG (que es único)
+    const foundAppliance = appliances.find(app => app.slug === newVal);
+    
+    // 2. Si lo encontramos, extraemos su valor numérico para el input
+    if (foundAppliance) {
+       power.value = foundAppliance.value;
+    }
   }
 });
 

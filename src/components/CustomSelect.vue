@@ -1,7 +1,7 @@
 <template>
   <div class="custom-select-wrapper">
     <select :id="id" :name="name" ref="selectElement" :aria-describedby="ariaDescribedby">
-      </select>
+    </select>
   </div>
 </template>
 
@@ -45,12 +45,15 @@ let slimSelect = null;
 
 // Transformar appliances a formato SlimSelect (USANDO EL ICONO SVG)
 const transformApplianceToOption = (appliance) => {
-  // Buscamos el SVG en el mapa, si no existe usamos Settings por defecto
   const iconSvg = iconMap[appliance.icon] || iconMap['Settings'];
+
+  // --- CORRECCIÓN AQUÍ ---
+  // Usamos 'slug' como ID único. Si es 'custom' (que no tiene slug), usamos su value.
+  const uniqueId = appliance.slug || appliance.value;
 
   return {
     text: appliance.label,
-    value: appliance.value.toString(),
+    value: uniqueId.toString(), // Ahora el value es 'lavadora', 'radiador', etc.
     html: `
       <div class="slim-option-content d-flex align-items-center">
         <span class="appliance-icon text-accent-500">${iconSvg}</span>
