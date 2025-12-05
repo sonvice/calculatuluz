@@ -8,17 +8,130 @@ export const navigation = [
 
 
 export const appliances = [
-  { value: 50, label: 'Bombilla LED', watts: '50W', image: '/images/bombilla.jpg' },
-  { value: 150, label: 'Portátil', watts: '150W', image: '/images/laptop.jpg' },
-  { value: 300, label: 'Televisor 50"', watts: '300W', image: '/images/tv.jpg' },
-  { value: 800, label: 'Microondas', watts: '800W', image: '/images/microwave.jpg' },
-  { value: 900, label: 'Aire acondicionado', watts: '900W', image: '/images/aire-acondicionado.jpg' },
-  { value: 1200, label: 'Horno', watts: '1.200W', image: '/images/horno.jpg' },
-  { value: 1200, label: 'Secador de pelo', watts: '1.200W', image: '/images/hair-dryer.jpg' },
-  { value: 1800, label: 'Lavaplatos', watts: '1.800W', image: '/images/lavaplatos.jpg' },
-  { value: 2000, label: 'Lavadora', watts: '2.000W', image: '/images/washing-machine.jpg' },
-  { value: 2000, label: 'Radiador eléctrico', watts: '2.000W', image: '/images/radiador-electrico.jpg' },
-  { value: 'custom', label: 'Personalizado', watts: '', image: '/images/personalizado.jpg' },
+  // --- ILUMINACIÓN Y OFICINA ---
+  {
+    value: 50, label: 'Bombilla LED', watts: '50W', icon: 'Lightbulb', slug: 'bombilla-led',
+    seo: {
+      description: 'Aunque una bombilla LED gasta muy poco, el ahorro real está en sustituir todas las de la casa. Consumen hasta un 80% menos que las incandescentes.',
+      tips: ['Usa luz cálida (2700K) para salones y fría (4000K) para cocina.', 'Aprovecha la luz natural con espejos estratégicos.', 'Instala sensores de movimiento en pasillos.']
+    }
+  },
+  {
+    value: 150, label: 'Portátil', watts: '150W', icon: 'Laptop', slug: 'ordenador-portatil',
+    seo: {
+      description: 'El consumo de un portátil varía mucho según la carga de trabajo. Si solo navegas gasta menos (30-50W), pero renderizando vídeo sube al máximo.',
+      tips: ['Desconecta el cargador cuando la batería esté al 100%.', 'Baja el brillo de la pantalla para ahorrar hasta un 20%.', 'Cierra pestañas de navegador en segundo plano.']
+    }
+  },
+  {
+    value: 450, label: 'PC Gaming', watts: '450W', icon: 'MonitorPlay', slug: 'pc-gaming',
+    seo: {
+      description: 'Un PC Gaming es de los "vampiros" modernos. La tarjeta gráfica y el monitor de alta tasa de refresco son los mayores consumidores.',
+      tips: ['Limita los FPS en juegos que no requieran máximo rendimiento.', 'Apaga el monitor si te levantas más de 10 minutos.', 'Configura el modo suspensión para que salte a los 5 minutos.']
+    }
+  },
+
+  // --- SALÓN ---
+  {
+    value: 300, label: 'Televisor 50"', watts: '300W', icon: 'Tv', slug: 'televisor',
+    seo: {
+      description: 'Las pantallas OLED y QLED modernas tienen picos de consumo altos con el HDR activado. El tamaño de la pantalla influye directamente en el gasto.',
+      tips: ['Desactiva el modo "Tienda" o "Vívido", usa el modo "Eco" o "Cine".', 'No la uses de ruido de fondo si no estás mirando.', 'Si es Smart TV, asegúrate de que no se queda procesando en standby.']
+    }
+  },
+  {
+    value: 60, label: 'Ventilador', watts: '60W', icon: 'Fan', slug: 'ventilador',
+    seo: {
+      description: 'El ventilador es el rey del ahorro en verano. Consume casi 15 veces menos que un aire acondicionado, aunque no enfría el aire, solo lo mueve.',
+      tips: ['Úsalo combinado con el aire acondicionado para subir el termostato de este.', 'Limpia las aspas regularmente para mejorar la aerodinámica.', 'Apágalo si no hay nadie en la habitación (no baja la temperatura).']
+    }
+  },
+
+  // --- COCINA ---
+  {
+    value: 250, label: 'Nevera', watts: '250W', icon: 'Refrigerator', slug: 'nevera',
+    seo: {
+      description: 'La nevera es responsable de hasta el 30% de la factura porque funciona 24/7. Su consumo depende del aislamiento y de cuántas veces abras la puerta.',
+      tips: ['Mantén la temperatura a 4ºC y el congelador a -18ºC.', 'No metas comida caliente; deja que se enfríe fuera.', 'Limpia la rejilla trasera una vez al año para que respire bien.']
+    }
+  },
+  {
+    value: 1500, label: 'Freidora de Aire', watts: '1.500W', icon: 'Utensils', slug: 'freidora-aire',
+    seo: {
+      description: 'Aunque tiene mucha potencia, la Air Fryer ahorra dinero porque cocina mucho más rápido que un horno y no necesita precalentamiento largo.',
+      tips: ['No la abras constantemente para mirar, pierdes calor.', 'Aprovecha el calor residual apagándola 2 minutos antes.', 'Llena la cesta adecuadamente sin bloquear el flujo de aire.']
+    }
+  },
+  {
+    value: 1800, label: 'Vitrocerámica', watts: '1.800W', icon: 'CookingPot', slug: 'vitroceramica',
+    seo: {
+      description: 'La vitrocerámica tradicional es menos eficiente que la inducción. Tarda más en calentar y pierde energía en forma de calor residual.',
+      tips: ['Usa tapas en las ollas: cocinas 3 veces más rápido.', 'Apaga el fuego 5 minutos antes y termina con el calor residual.', 'Usa sartenes con fondo difusor plano.']
+    }
+  },
+  {
+    value: 800, label: 'Microondas', watts: '800W', icon: 'Microwave', slug: 'microondas',
+    seo: {
+      description: 'Es el método más eficiente para calentar comida. Calienta directamente las moléculas de agua, evitando desperdiciar energía en calentar el aire.',
+      tips: ['Corta los alimentos en trozos pequeños para calentar antes.', 'Mantenlo limpio: la suciedad absorbe ondas y resta eficiencia.', 'Desenchúfalo si tiene reloj digital y no lo usas (consumo fantasma).']
+    }
+  },
+  {
+    value: 1200, label: 'Horno', watts: '1.200W', icon: 'Heater', slug: 'horno', // Heater se parece a un horno/radiador
+    seo: {
+      description: 'El horno es un gran consumidor. Cada vez que abres la puerta pierde el 20% del calor acumulado, obligando a la resistencia a trabajar al máximo.',
+      tips: ['Cocina varios platos a la vez (Batch Cooking).', 'Evita precalentar para cocciones largas superiores a 1 hora.', 'Verifica que la goma de la puerta cierra herméticamente.']
+    }
+  },
+  {
+    value: 1800, label: 'Lavavajillas', watts: '1.800W', icon: 'Droplets', slug: 'lavavajillas',
+    seo: {
+      description: 'Gasta menos agua y energía que fregar a mano con agua caliente. El mayor pico de consumo se produce al calentar el agua.',
+      tips: ['Usa siempre el modo ECO: tarda más pero calienta el agua más despacio (ahorra luz).', 'Espera a llenarlo por completo.', 'Limpia el filtro regularmente.']
+    }
+  },
+
+  // --- LIMPIEZA Y HOGAR ---
+  {
+    value: 2000, label: 'Lavadora', watts: '2.000W', icon: 'WashingMachine', slug: 'lavadora',
+    seo: {
+      description: 'El 90% del consumo de la lavadora se usa para calentar el agua. Lavar en frío es la medida de ahorro más potente que existe.',
+      tips: ['Lava a 30ºC o con agua fría siempre que sea posible.', 'Usa programas cortos si la ropa no tiene manchas difíciles.', 'Centrifuga a altas revoluciones para que la secadora gaste menos después.']
+    }
+  },
+  {
+    value: 2500, label: 'Secadora', watts: '2.500W', icon: 'Shirt', slug: 'secadora',
+    seo: {
+      description: 'Uno de los aparatos que más potencia demanda. Las de bomba de calor son mucho más eficientes que las de condensación o evacuación.',
+      tips: ['Limpia el filtro de pelusas tras CADA uso (vital para eficiencia).', 'Introduce la ropa bien centrifugada.', 'Separa tejidos pesados de los ligeros para un secado uniforme.']
+    }
+  },
+
+  // --- CLIMATIZACIÓN ---
+  {
+    value: 900, label: 'Aire acondicionado', watts: '900W', icon: 'AirVent', slug: 'aire-acondicionado',
+    seo: {
+      description: 'Por cada grado que bajas la temperatura, el consumo sube un 8%. La clave no es enfriar rápido, sino mantener una temperatura estable.',
+      tips: ['Mantén la temperatura a 24-26ºC en verano.', 'Usa el modo "Dry" o deshumidificador si hay mucha humedad.', 'Cierra persianas en las horas centrales del día.']
+    }
+  },
+  {
+    value: 2000, label: 'Radiador eléctrico', watts: '2.000W', icon: 'ThermometerSun', slug: 'radiador',
+    seo: {
+      description: 'La calefacción eléctrica directa es cara. Los radiadores con termostato preciso ayudan a evitar que se dispare la factura.',
+      tips: ['No cubras nunca el radiador con ropa húmeda.', 'Usa paneles reflectantes detrás para proyectar el calor a la sala.', 'Un buen aislamiento en ventanas ahorra más que cambiar de radiador.']
+    }
+  },
+  {
+    value: 1500, label: 'Termo Eléctrico', watts: '1.500W', icon: 'Waves', slug: 'termo-electrico',
+    seo: {
+      description: 'Mantener agua caliente 24h es costoso. Si tienes tarifa con discriminación horaria, un temporizador en el enchufe es tu mejor inversión.',
+      tips: ['Instala un temporizador para que caliente solo antes de las duchas.', 'Baja la temperatura del termostato a 60ºC.', 'Aisla el termo si está en un lugar frío.']
+    }
+  },
+
+  // Custom
+  { value: 'custom', label: 'Personalizado', watts: '', icon: 'Settings', image: '/images/personalizado.jpg' },
 ];
 
 export const faqData = [

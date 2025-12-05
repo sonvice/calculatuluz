@@ -12,9 +12,32 @@ interface Props {
 }
 
 const { title, description, conical } = Astro.props;
+
+const schema = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Calculadora de Consumo Eléctrico",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "url": "https://calculatuluz.es",
+  "description": description,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+  },
+  "featureList": "Cálculo de kWh, Coste en euros, Precio luz tiempo real",
+  "author": {
+      "@type": "Organization",
+      "name": "CalculaTuLuz"
+  }
+});
 ---
 
 <BaseLayout title={title} lang="es" description={description}>
+  <slot name="head-schema" slot="head-schema">
+     <script type="application/ld+json" set:html={schema} />
+  </slot>
   <!-- Transfer slots to BaseLayout -->
   <slot name="head" slot="head" />
   <div class="header-nav-wrapper">

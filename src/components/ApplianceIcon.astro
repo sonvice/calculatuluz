@@ -1,0 +1,21 @@
+---
+// Importamos TODOS los iconos que usamos en constant/index.js
+import { 
+  Lightbulb, Laptop, MonitorPlay, Tv, Fan, 
+  Refrigerator, Utensils, CookingPot, Microwave, Heater, Droplets,
+  WashingMachine, Shirt, AirVent, ThermometerSun, Waves, Settings
+} from '@lucide/astro';
+
+const { icon, size = 24, class: className } = Astro.props;
+
+// Mapeo de String -> Componente
+const icons = {
+  Lightbulb, Laptop, MonitorPlay, Tv, Fan, 
+  Refrigerator, Utensils, CookingPot, Microwave, Heater, Droplets,
+  WashingMachine, Shirt, AirVent, ThermometerSun, Waves, Settings
+};
+
+const IconComponent = icons[icon] || Settings; // Fallback a Settings si falla
+---
+
+<IconComponent size={size} class={className} />

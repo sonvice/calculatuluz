@@ -6,6 +6,7 @@ import SubscribeForm from "../components/SubscribeForm.vue";
 import ListNewsletter from "../components/ListNewsletter.astro";
 import heroImg from "../assets/imgs/calculator.webp";
 import { faqData } from "../constant";
+import ApplianceGrid from "../components/ApplianceGrid.astro";
 const conical = "https://calculatuluz.es";
 
 
@@ -85,6 +86,15 @@ import Table from "@/components/Table";
       class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50 bg-texture"
     >
       <Calculator client:load />
+    </div>
+    <div class="mt-space-2xl">
+      <h2 class="text-neutral-50 mb-space-m text-center">
+        O selecciona tu electrodoméstico
+      </h2>
+      <p class="text-neutral-300 mb-space-l max-w-prose mx-auto">
+        ¿Buscas un cálculo más preciso? Elige directamente el aparato para ver consejos de ahorro específicos y datos pre-configurados.
+      </p>
+      <ApplianceGrid />
     </div>
     <hr class="text-neutral-400 my-space-2xl" />
     <h2 id="como-funciona-calculadora" class="text-neutral-50 mt-space-xl">

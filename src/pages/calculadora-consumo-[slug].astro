@@ -1,0 +1,235 @@
+---
+// src/pages/calculadora-consumo-[slug].astro
+export const prerender = true;
+
+import Layout from "../layouts/Layout.astro";
+import Calculator from "../components/Calculator.vue";
+import ApplianceIcon from "../components/ApplianceIcon.astro";
+import { appliances } from "../constant/index.js";
+
+export async function getStaticPaths() {
+    const cleanAppliances = appliances.filter((app) => app.slug);
+
+    return cleanAppliances.map((app) => ({
+        params: { slug: app.slug },
+        props: { app },
+    }));
+}
+
+const { app } = Astro.props;
+
+// Convertimos el valor de potencia a número seguro
+const powerNumeric =
+    typeof app.value === "number" ? app.value : parseInt(app.value);
+
+// SEO: Constantes para la tabla estática
+const PRECIO_MEDIO = 0.15;
+const costoHora = ((powerNumeric * PRECIO_MEDIO) / 1000).toFixed(3);
+const costoMes = (((powerNumeric * PRECIO_MEDIO) / 1000) * 30).toFixed(2);
+
+const titleSEO = `Cuánto consume una ${app.label} | Calculadora Gasto Luz`;
+const descSEO = `Descubre el gasto real de tu ${app.label} (${app.watts}). Calculadora online actualizada, consejos de ahorro y tabla de costes.`;
+---
+
+<Layout title={titleSEO} description={descSEO}>
+    <div class="slug-container mt-space-xl">
+        <div class="info-title mb-space-l d-flex">
+            <div
+                class="icon-wrapper p-space-s bg-primary-100 rounded-full mt-space-s text-primary-900"
+            >
+                <ApplianceIcon icon={app.icon} size={64} />
+            </div>
+            <div>
+                <h1 class="text-neutral-50">
+                    Calculadora de consumo: <span class="text-accent-400"
+                        >{app.label}</span
+                    >
+                </h1>
+                <p class="text-neutral-200 mt-space-s">
+                    {
+                        app.seo?.description ||
+                            `Descubre cuánto pagas realmente por usar tu ${app.label}.`
+                    }
+                </p>
+            </div>
+        </div>
+
+        <div
+            class="bg-primary-900 p-space-l rounded-md text-neutral-50 bg-texture shadow-lg border border-primary-800"
+        >
+            <Calculator
+                client:load
+                initialPower={powerNumeric}
+                initialApplianceName={app.label}
+            />
+        </div>
+
+        <article class="mt-space-2xl text-neutral-100 flow">
+            <h2>📊 Tabla de consumo orientativo: {app.label}</h2>
+            <p>
+                Estimación rápida basada en una potencia de <strong
+                    >{app.watts}</strong
+                > y un precio medio de <strong>{PRECIO_MEDIO} €/kWh</strong>.
+            </p>
+
+            <div class="table-wrapper mt-space-m">
+                <table class="">
+                    <thead>
+                        <tr
+                            class="text-neutral-300 border-b border-neutral-700"
+                        >
+                            <th class="p-space-xs">Tiempo de uso</th>
+                            <th class="p-space-xs">Consumo (kWh)</th>
+                            <th class="p-space-xs">Coste Estimado*</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-neutral-50">
+                        <tr class="border-b border-neutral-800">
+                            <td class="p-space-xs">1 Hora</td>
+                            <td class="p-space-xs"
+                                >{(powerNumeric / 1000).toFixed(2)} kWh</td
+                            >
+                            <td class="p-space-xs font-bold text-accent-400"
+                                >{costoHora} €</td
+                            >
+                        </tr>
+                        <tr class="border-b border-neutral-800">
+                            <td class="p-space-xs">2 Horas</td>
+                            <td class="p-space-xs"
+                                >{((powerNumeric * 2) / 1000).toFixed(2)} kWh</td
+                            >
+                            <td class="p-space-xs font-bold text-accent-400"
+                                >{(parseFloat(costoHora) * 2).toFixed(3)} €</td
+                            >
+                        </tr>
+                        <tr class="border-b border-neutral-800">
+                            <td class="p-space-xs">Uso Mensual (1h/día)</td>
+                            <td class="p-space-xs"
+                                >{((powerNumeric * 30) / 1000).toFixed(2)} kWh</td
+                            >
+                            <td class="p-space-xs font-bold text-accent-400"
+                                >{costoMes} €</td
+                            >
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="text-size--1 text-neutral-400 mt-space-xs">
+                    *Cálculo aproximado con impuestos incluidos. Usa la
+                    calculadora superior para el precio real exacto de ahora
+                    mismo.
+                </p>
+            </div>
+
+            <h2 class="mt-space-xl">
+                Consejos para ahorrar con tu {app.label}
+            </h2>
+
+            {
+                app.seo?.tips && app.seo.tips.length > 0 ? (
+                    <ul role="list" class="custom-list mt-space-s">
+                        {app.seo.tips.map((tip) => (
+                            <li class="mb-space-s flex gap-s items-start">
+                                <span class="text-accent-400 mt-1">✓</span>
+                                <span class="text-neutral-200">{tip}</span>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p>
+                        Utiliza este electrodoméstico en horas valle para
+                        maximizar tu ahorro.
+                    </p>
+                )
+            }
+
+            <div class="mt-space-2xl py-space-m bg-primary-800 rounded">
+                <h3 class="text-size-1 mb-space-s">
+                    ¿Quieres saber el precio de la luz ahora?
+                </h3>
+                <p class="mb-space-m text-neutral-300">
+                    Antes de encender tu {app.label.toLowerCase()}, revisa si es
+                    buena hora.
+                </p>
+                <a href="/precio-luz-hoy" class="btn" data-type="accent"
+                    >Ver Precio de la Luz Hoy →</a
+                >
+            </div>
+
+            <div class="mt-space-xl">
+                <a
+                    href="/"
+                    class="btn-link text-neutral-400 hover:text-white transition"
+                    >← Volver al inicio</a
+                >
+            </div>
+        </article>
+    </div>
+</Layout>
+
+<style>
+    h1 {
+        display: block;
+        text-align: left;
+        max-width: 34ch;
+    }
+    p {
+        text-align: left;
+    }
+    .max-w-prose {
+        max-width: 65ch;
+    }
+    .mx-auto {
+        margin-inline: auto;
+    }
+    .text-center {
+        text-align: center;
+    }
+
+    .shadow-lg {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    .icon-wrapper {
+        display: inline-flex;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(4px);
+        margin-bottom: 0;
+    }
+    .info-title{
+        --vertical-alignment: start;
+    }
+
+    /* Estilos Tabla SEO */
+    .table-wrapper {
+        overflow-x: auto;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        padding: var(--space-s);
+        max-width: 56rem;
+    }
+    th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+    }
+
+    /* Reutiliza tus variables CSS existentes */
+    h2 {
+        font-size: var(--text-size-2);
+        color: var(--neutral-50);
+        margin-top: var(--space-xl);
+        margin-bottom: var(--space-m);
+        font-weight: 700;
+    }
+    h3 {
+        font-size: var(--text-size-1);
+        color: var(--neutral-50);
+        font-weight: 600;
+    }
+
+    .btn-link {
+        text-decoration: none;
+        border-bottom: 1px dashed currentColor;
+    }
+</style>

@@ -1,98 +1,69 @@
 <template>
-  <form
-    role="form"
-    aria-labelledby="calc-title"
-    @submit.prevent="handleCalculate"
-  >
+  <form role="form" aria-labelledby="calc-title" @submit.prevent="handleCalculate">
     <fieldset>
+      <div class="price-indicator mb-space-m">
+        <span class="text-size--1">Precio de la luz ahora mismo:</span>
+        <div class="d-flex align-items-center gap-xs">
+          <span class="text-weight-bold text-size-1">{{ actualPrice ? actualPrice.toFixed(4) : '...' }} €/kWh</span>
+          <span class="badge" :class="actualPrice < 0.15 ? 'bg-success' : 'bg-warning'">
+            {{ actualPrice < 0.15 ? 'Barato ✅' : 'Normal ⚠️' }} </span>
+        </div>
+      </div>
       <legend id="calc-title" class="visually-hidden">
         Calculadora de consumo eléctrico
       </legend>
-      <div     class="form-calculator">
+      <div class="form-calculator">
 
-      <!-- Selección de Electrodoméstico -->
-      <div>
-        <label
-          for="appliance"
-          class="text-size--1 mb-space-3xs"
-        >
-          Selecciona un electrodoméstico
-        </label>
-        <CustomSelect
-          id="appliance"
-          name="appliance"
-          :appliances="appliances"
-          v-model="selectedAppliance"
-          aria-describedby="appliance-help"
-        />
-        <p id="appliance-help" class="visually-hidden">
-          Elige un electrodoméstico de la lista o introduce potencia manualmente.
-        </p>
-      </div>
-
-      <!-- Inputs de potencia y horas -->
-      <div class="wrapper-inputs">
+        <!-- Selección de Electrodoméstico -->
         <div>
-          <label for="power" class="text-size--1 mb-space-3xs">Potencia Eléctrica (W)</label>
-          <InputField
-            id="power"
-            name="power"
-            placeholder="Ej: 1500"
-            v-model="power"
-            min="0"
-            max="3500"
-            step="50"
-            :error="errors.power"
-           
-          />
+          <label for="appliance" class="text-size--1 mb-space-3xs">
+            Selecciona un electrodoméstico
+          </label>
+          <CustomSelect id="appliance" name="appliance" :appliances="appliances" v-model="selectedAppliance"
+            aria-describedby="appliance-help" />
+          <p id="appliance-help" class="visually-hidden">
+            Elige un electrodoméstico de la lista o introduce potencia manualmente.
+          </p>
         </div>
-        <div>
-          <label for="hours" class="text-size--1 mb-space-3xs">Horas de uso diaria</label>
-          <InputField
-            id="hours"
-            name="hours"
-            placeholder="Ej: 2.5"
-            v-model="hours"
-            min="0.5"
-            max="24"
-            step="0.5"
-            :error="errors.hours"
-          
-          />
+
+        <!-- Inputs de potencia y horas -->
+        <div class="wrapper-inputs">
+          <div>
+            <label for="power" class="text-size--1 mb-space-3xs">Potencia Eléctrica (W)</label>
+            <InputField id="power" name="power" placeholder="Ej: 1500" v-model="power" min="0" max="3500" step="50"
+              :error="errors.power" />
+          </div>
+          <div>
+            <label for="hours" class="text-size--1 mb-space-3xs">Horas de uso diaria</label>
+            <InputField id="hours" name="hours" placeholder="Ej: 2.5" v-model="hours" min="0.5" max="24" step="0.5"
+              :error="errors.hours" />
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="button-group d-flex">
+          <button type="submit" class="btn" data-type="accent">
+            Calcular consumo
+          </button>
+          <button type="button" class="btn" @click="resetForm">
+            Reiniciar
+          </button>
         </div>
       </div>
-
-      <!-- Botones -->
-      <div class="button-group d-flex">
-        <button
-          type="submit"
-          class="btn"
-          data-type="accent"
-        >
-          Calcular consumo
-        </button>
-        <button
-          type="button"
-          class="btn"
-          @click="resetForm"
-        >
-          Reiniciar
-        </button>
-      </div>
-    </div>
       <!-- Resultados -->
-      <ResultsDisplay
-        :results="results"
-        :lastUpdated="priceData.lastUpdated"
-        :currentPrice="actualPrice"
-      />
+      <ResultsDisplay :results="results" :lastUpdated="priceData.lastUpdated" :currentPrice="actualPrice" />
+      <div v-if="results.dailyCost > 0" class="mt-space-m fade-in">
+        <h3 class="text-size-0 mb-space-xs text-center">Proyección de Gasto</h3>
+        <ConsumptionChart :dailyCost="results.dailyCost" :monthlyCost="results.monthlyCost"
+          :annualCost="results.annualCost" />
+      </div>
     </fieldset>
   </form>
 </template>
 
 
 <script setup>
-import { ref, watch, reactive, computed } from 'vue';
+import { ref, watch, reactive, computed, onMounted } from 'vue';
 import { useStore } from '@nanostores/vue';
 import { priceData } from '../stores/prices.js';
 
@@ -100,6 +71,20 @@ import { appliances } from '../constant/index.js';
 import CustomSelect from './CustomSelect.vue';
 import InputField from './InputField.vue';
 import ResultsDisplay from './ResultsDisplay.vue';
+import ConsumptionChart from './ConsumptionChart.vue';
+
+
+const props = defineProps({
+  initialPower: {
+    type: [Number, String],
+    default: ''
+  },
+  initialApplianceName: {
+    type: String,
+    default: ''
+  }
+});
+
 
 const selectedAppliance = ref('');
 const power = ref('');
@@ -120,6 +105,25 @@ const results = ref({
 // Nanostore
 const priceStore = useStore(priceData);
 const actualPrice = computed(() => priceStore.value?.currentPrice ?? 0);
+
+onMounted(() => {
+  // Si la página padre (slug) nos manda una potencia...
+  if (props.initialPower) {
+    // 1. Seteamos la potencia manualmente
+    power.value = props.initialPower;
+
+    // 2. Intentamos buscar el objeto en tu lista 'appliances' para que el Select se pinte bonito
+    // (Opcional, pero queda bien si el dropdown muestra "Nevera" en vez de "Selecciona...")
+    const found = appliances.find(a => a.label === props.initialApplianceName);
+    if (found) {
+      selectedAppliance.value = found.value; // Esto activará tu watcher existente
+    } else {
+      // Si no lo encuentra (caso raro), al menos ponemos la potencia
+      // Podrías poner selectedAppliance.value = 'custom' si quieres
+      selectedAppliance.value = 'custom';
+    }
+  }
+});
 
 // Actualizar potencia si se selecciona electrodoméstico
 watch(selectedAppliance, (newVal) => {
@@ -207,44 +211,51 @@ const resetForm = () => {
 
 
 <style scoped>
-
 form fieldset {
-  border: none;    
-  margin: 0;      
-  padding: 0;     
+  border: none;
+  margin: 0;
+  padding: 0;
 }
+
 label {
-  display:inline-block;
+  display: inline-block;
 }
+
+.form-calculator {
+  display: grid;
+  gap: var(--space-m);
+}
+
+@media (min-width: 64em) {
   .form-calculator {
-    display: grid;
-    gap: var(--space-m);
+    grid-template-columns: 1fr 1fr;
   }
-  @media (min-width: 64em) {
-    .form-calculator {
-      grid-template-columns: 1fr 1fr;
-    }
+}
+
+@media (min-width: 90em) {
+  .form-calculator {
+    grid-template-columns: 1fr 1fr 1fr;
   }
-  @media (min-width: 90em) {
-    .form-calculator {
-      grid-template-columns: 1fr 1fr 1fr;
-    }
-  }
-  .button-group {
-    margin-top: var(--space-m);
-  }
-  .button-group .btn {
-    flex-grow: 1;
-    justify-content: center;
-  }
+}
+
+.button-group {
+  margin-top: var(--space-m);
+}
+
+.button-group .btn {
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.wrapper-inputs {
+  display: grid;
+  gap: var(--space-s);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
   .wrapper-inputs {
-    display: grid;
-    gap: var(--space-s);
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
-  @media (min-width: 768px) {
-    .wrapper-inputs {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
+}
 </style>

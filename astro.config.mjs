@@ -23,11 +23,5 @@ export default defineConfig({
     config: {
       forward: ['dataLayer.push']
     }
-  }), mdx(), sitemap({
-    customPages: [
-      'https://calculatuluz.es/',
-      'https://calculatuluz.es/tipsyguias',
-      'https://calculatuluz.es/precio-luz-hoy',
-    ],
-  }), react()],
+  }), mdx(), sitemap(), react()],
 });

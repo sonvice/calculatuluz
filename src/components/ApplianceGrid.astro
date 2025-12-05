@@ -1,0 +1,83 @@
+---
+import { appliances } from '../constant/index.js';
+import ApplianceIcon from './ApplianceIcon.astro';
+
+// Filtramos el "custom" y nos quedamos solo con los que tienen slug
+const items = appliances.filter(app => app.slug);
+---
+
+<section class="appliance-grid-wrapper">
+  <div class="grid-container">
+    {items.map((app) => (
+      <a 
+        href={`/calculadora-consumo-${app.slug}`} 
+        class="appliance-card"
+        title={`Calcular consumo de ${app.label}`}
+      >
+        <div class="icon-box">
+          <ApplianceIcon icon={app.icon} size={28} />
+        </div>
+        <span class="appliance-name">{app.label}</span>
+      </a>
+    ))}
+  </div>
+</section>
+
+<style>
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas en móvil */
+    gap: var(--space-s);
+  }
+
+  @media (min-width: 768px) {
+    .grid-container {
+      grid-template-columns: repeat(4, 1fr); /* 4 en tablet */
+      gap: var(--space-m);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-container {
+      grid-template-columns: repeat(6, 1fr); /* 6 en escritorio */
+    }
+  }
+
+  .appliance-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    text-decoration: none;
+    background-color: var(--primary-800);
+    border: 1px solid var(--primary-700);
+    padding: var(--space-s);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    height: 100%;
+  }
+
+  .appliance-card:hover {
+    background-color: var(--primary-700);
+    transform: translateY(-3px);
+    border-color: var(--accent-500);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .icon-box {
+    color: var(--accent-400);
+    margin-bottom: var(--space-xs);
+    transition: color 0.2s;
+  }
+
+  .appliance-card:hover .icon-box {
+    color: var(--accent-300);
+  }
+
+  .appliance-name {
+    color: var(--neutral-100);
+    font-size: var(--text-size--1);
+    font-weight: 500;
+  }
+</style>

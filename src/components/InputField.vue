@@ -219,7 +219,7 @@ const decrement = () => {
   background-color: var(--neutral-50, #fafafa);
   font-size: var(--text-size-0, 1rem);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  
+  min-height: 48px;
   /* Ocultar spinners nativos */
   -moz-appearance: textfield;
 }
