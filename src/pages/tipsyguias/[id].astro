@@ -1,25 +1,21 @@
 ---
-// 1. OBLIGATORIO: Convertimos esta página a estática para que salga en el sitemap
 export const prerender = true;
 
 import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 
-// 2. OBLIGATORIO: Decimos a Astro qué rutas generar
 export async function getStaticPaths() {
   const allTips = await getCollection('tipsyguias');
   
-  // Devolvemos un array con los params (id) y props (post) para cada artículo
   return allTips.map((post) => ({
     params: { id: post.id },
     props: { post },
   }));
 }
 
-// 3. Ya no buscamos por ID, recibimos el post directamente de getStaticPaths
+// Ya no buscamos por ID, recibimos el post directamente de getStaticPaths
 const { post } = Astro.props;
 
-// Si por alguna razón fallara (no debería), redirigimos
 if (!post) {
   return Astro.redirect('/404');
 }
@@ -49,13 +45,3 @@ const options: Intl.DateTimeFormatOptions = {
     </div>
   </div>
 </Layout>
-
-<style>
-    /* Ajustes básicos para que se vea centrado y legible */
-    .m-space-auto { margin-inline: auto; }
-    .post-tips-guias { max-width: 65ch; }
-    
-    /* Estilos para el contenido Markdown (opcional si usas Tailwind typography) */
-    .content-body h2 { color: white; margin-top: 2rem; font-size: 1.5rem; font-weight: bold; }
-    .content-body p { margin-bottom: 1rem; line-height: 1.6; }
-</style>
