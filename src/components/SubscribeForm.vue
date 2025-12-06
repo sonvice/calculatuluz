@@ -2,6 +2,16 @@
   <div class="subscribe-container">
     <form v-if="!success" @submit.prevent="handleSubmit" class="form-wrapper">
       <div class="form-group d-flex">
+
+        <div class="visually-hidden" aria-hidden="true">
+        <input 
+          type="text" 
+          name="website_url_trap" 
+          v-model="honeypot" 
+          tabindex="-1" 
+          autocomplete="off"
+        />
+      </div>
         <input
           id="email"
           v-model.trim="email"
@@ -49,7 +59,7 @@
 
 <script setup>
 import { ref } from 'vue';
-
+const honeypot = ref('');
 const email = ref('');
 const acceptedTerms = ref(false);
 const loading = ref(false);
@@ -64,7 +74,7 @@ const handleSubmit = async () => {
     const response = await fetch('/api/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value })
+      body: JSON.stringify({ email: email.value,trap: honeypot.value })
     });
 
     const result = await response.json();
@@ -120,6 +130,10 @@ const resetForm = () => {
   background: var(--primary-800);
   border: 1px solid var(--accent-500);
   border-radius: 8px;
+
+  h3{
+    display: block;
+  }
 }
 .icon-check {
   background: var(--accent-500);
