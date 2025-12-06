@@ -1,38 +1,61 @@
 ---
+// 1. OBLIGATORIO: Convertimos esta página a estática para que salga en el sitemap
+export const prerender = true;
+
 import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 
-const { id } = Astro.params;
-
-// Obtener todas las entradas de la colección tipsyguias
-const allTips = await getCollection('tipsyguias');
-// Buscar la entrada que coincida con el slug
-const post = allTips.find((entry) => entry.id === id);
-
-// Si no se encuentra el post, lanzar un error o redirigir
-if (!post) {
-  return Astro.redirect('/404'); // O puedes lanzar un error aquí, como prefieras
+// 2. OBLIGATORIO: Decimos a Astro qué rutas generar
+export async function getStaticPaths() {
+  const allTips = await getCollection('tipsyguias');
+  
+  // Devolvemos un array con los params (id) y props (post) para cada artículo
+  return allTips.map((post) => ({
+    params: { id: post.id },
+    props: { post },
+  }));
 }
 
-//Options
+// 3. Ya no buscamos por ID, recibimos el post directamente de getStaticPaths
+const { post } = Astro.props;
+
+// Si por alguna razón fallara (no debería), redirigimos
+if (!post) {
+  return Astro.redirect('/404');
+}
+
+const { Content } = await render(post);
+
 const options: Intl.DateTimeFormatOptions = {
   weekday: "long",
   year: "numeric",
   month: "long",
   day: "numeric",
 };
-
-const { Content } = await render(post);
 ---
 
 <Layout title={post.data.title} description={post.data.description ?? ''}>
   <div class="post-tips-guias | mt-space-3xl prose flow text-neutral-50 m-space-auto">
-      <a href="/tipsyguias" class="d-block mb-space-l"> ← Volver</a>
-      <time datetime={post.data.date?.toISOString()}>
-        {post.data.date?.toLocaleDateString(undefined, options)}
-    </time>
+      <a href="/tipsyguias" class="d-block mb-space-l text-accent-400 no-underline hover:underline"> ← Volver a Guías</a>
+      
+      <time datetime={post.data.date?.toISOString()} class="text-neutral-400 text-size--1">
+        {post.data.date?.toLocaleDateString('es-ES', options)}
+      </time>
 
-    <h1 class="text-neutral-50">{post.data.title}</h1>
-    <Content />
+    <h1 class="text-neutral-50 mt-space-s">{post.data.title}</h1>
+    
+    <div class="content-body text-neutral-200">
+        <Content />
+    </div>
   </div>
 </Layout>
+
+<style>
+    /* Ajustes básicos para que se vea centrado y legible */
+    .m-space-auto { margin-inline: auto; }
+    .post-tips-guias { max-width: 65ch; }
+    
+    /* Estilos para el contenido Markdown (opcional si usas Tailwind typography) */
+    .content-body h2 { color: white; margin-top: 2rem; font-size: 1.5rem; font-weight: bold; }
+    .content-body p { margin-bottom: 1rem; line-height: 1.6; }
+</style>
