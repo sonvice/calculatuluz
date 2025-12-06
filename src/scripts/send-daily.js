@@ -5,14 +5,21 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function main() {
   try {
+    console.log('🚀 Iniciando script diario...');
+
     // 1. Obtener precios
     const priceResponse = await fetch(
       'https://calculatuluz.es/api/prices?day=tomorrow'
     );
-    if (!priceResponse.ok) throw new Error('Error fetching prices');
+    
+    if (!priceResponse.ok) {
+        // Si falla la API de precios, paramos todo
+        throw new Error(`Error fetching prices: ${priceResponse.statusText}`);
+    }
+    
     const { prices, maxPrice } = await priceResponse.json();
 
-    // 2. Filtrar horas
+    // 2. Filtrar horas baratas
     const bestHours = prices
       .sort((a, b) => a.price - b.price)
       .slice(0, 3)
@@ -30,14 +37,20 @@ async function main() {
         priceFormatted: h.price.toFixed(4).replace('.', ',') + '€/kWh',
       }));
 
-    // 4. Obtener suscriptores
+    // 4. Obtener suscriptores confirmados
     const { data: subscribers, error } = await supabase
       .from('subscribers')
       .select('email')
       .eq('confirmed', true);
 
     if (error) throw error;
-    if (!subscribers.length) return;
+    
+    if (!subscribers || subscribers.length === 0) {
+        console.log('⚠️ No hay suscriptores activos.');
+        return;
+    }
+
+    console.log(`📨 Preparando envío para ${subscribers.length} suscriptores...`);
 
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -47,85 +60,118 @@ async function main() {
       year: 'numeric',
     });
 
-    // 5. Construir email
+    // 5. Construir email (El HTML se genera una sola vez)
     const emailHtml = `
-  <div style="max-width: 600px; margin: 20px auto; font-family: Arial, sans-serif;">
-    <img src="https://calculatuluz.es/logo.png" alt="Logo" style="height: 32px;">
-    <h2 style="color: #2c3e50;">
-      ⚡ Horas más económicas para mañana (${fmtTomorrow})
-    </h2>
+      <div style="max-width: 600px; margin: 20px auto; font-family: Arial, sans-serif;">
+        <img src="https://calculatuluz.es/logo.png" alt="CalculaTuLuz" style="height: 32px;">
+        <h2 style="color: #2c3e50;">
+          ⚡ Horas más económicas para mañana (${fmtTomorrow})
+        </h2>
 
-    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
-      <h3 style="margin-top: 0;">Top 3 horas baratas (mañana):</h3>
-      <table style="width: 100%; border-collapse: collapse;">
-        ${bestHours
-          .map(
-            (h) => `
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 10px;">${h.hour}</td>
-            <td style="text-align: right; color: #4CAF50; font-weight: bold;">
-              ${h.priceFormatted}
-            </td>
-          </tr>
-        `
-          )
-          .join('')}
-      </table>
-    </div>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+          <h3 style="margin-top: 0;">Top 3 horas baratas (mañana):</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            ${bestHours
+              .map(
+                (h) => `
+              <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px;">${h.hour}</td>
+                <td style="text-align: right; color: #4CAF50; font-weight: bold;">
+                  ${h.priceFormatted}
+                </td>
+              </tr>
+            `
+              )
+              .join('')}
+          </table>
+        </div>
 
-    <div style="background: #ffe6e6; padding: 20px; border-radius: 10px; margin-top: 20px;">
-      <h3 style="margin-top: 0; color: #c0392b;">
-        🔔 Picos de precio mañana que debes evitar:
-      </h3>
-      <table style="width: 100%; border-collapse: collapse;">
-        ${worstHours
-          .map(
-            (h) => `
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 10px;">${h.hour}</td>
-            <td style="text-align: right; color: #c0392b; font-weight: bold;">
-              ${h.priceFormatted}
-            </td>
-          </tr>
-        `
-          )
-          .join('')}
-      </table>
-    </div>
+        <div style="background: #ffe6e6; padding: 20px; border-radius: 10px; margin-top: 20px;">
+          <h3 style="margin-top: 0; color: #c0392b;">
+            🔔 Picos de precio mañana que debes evitar:
+          </h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            ${worstHours
+              .map(
+                (h) => `
+              <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 10px;">${h.hour}</td>
+                <td style="text-align: right; color: #c0392b; font-weight: bold;">
+                  ${h.priceFormatted}
+                </td>
+              </tr>
+            `
+              )
+              .join('')}
+          </table>
+        </div>
+       
+        <p style="font-size: 14px; margin-top: 25px;">
+          💡 Precio máximo mañana: ${maxPrice.value.toFixed(4)}€/kWh (${maxPrice.timeRange})
+        </p>
+       
+        <a href="https://calculatuluz.es" 
+           style="display: inline-block; margin: 25px 0; padding: 12px 25px;
+                  background: #2c3e50; color: white; text-decoration: none; border-radius: 5px;">
+          Calcular consumo ahora
+        </a>
 
-   
-    <p style="font-size: 14px; margin-top: 25px;">
-      💡 Precio máximo mañana: ${maxPrice.value.toFixed(4)}€/kWh (${maxPrice.timeRange})
-    </p>
+        <p style="font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 20px;">
+          Has recibido este correo porque te suscribiste a las alertas de CalculaTuLuz.
+          <br>
+          <a href="https://calculatuluz.es/desuscribirse" style="color: #666; text-decoration: underline;">
+            Darse de baja
+          </a> | 
+          <a href="https://calculatuluz.es/privacidad" style="color: #666; text-decoration: underline;">
+            Privacidad
+          </a>
+        </p>
+      </div>
+    `;
 
-   
-    <a href="https://calculatuluz.es" 
-       style="display: inline-block; margin: 25px 0; padding: 12px 25px;
-              background: #2c3e50; color: white; text-decoration: none; border-radius: 5px;">
-      Calcular consumo ahora
-    </a>
+    // 6. ENVIAR CORREOS INDIVIDUALMENTE (Corrección de Privacidad)
+    // Usamos un bucle for...of para procesar uno a uno y manejar errores individuales
+    let successCount = 0;
+    let errorCount = 0;
 
-    <p style="font-size: 12px; color: #666;">
-      <a href="https://calculatuluz.es/desuscribirse" style="color: #666; text-decoration: underline;">
-        Desuscribirse
-      </a> | 
-      <a href="https://calculatuluz.es/privacidad" style="color: #666; text-decoration: underline;">
-        Privacidad
-      </a>
-    </p>
-  </div>
-`;
+    for (const subscriber of subscribers) {
+      try {
+        const { error } = await resend.emails.send({
+          from: 'CalculaTuLuz <info@calculatuluz.es>',
+          to: subscriber.email, // ✅ Solo UN destinatario por envío
+          subject: `💰 Horas luz más baratas - ${new Date().toLocaleDateString('es-ES')}`,
+          html: emailHtml,
+          // Cabecera para evitar SPAM y facilitar la baja automática
+          headers: {
+            'List-Unsubscribe': `<https://calculatuluz.es/desuscribirse?email=${subscriber.email}>`,
+          },
+        });
 
-    // 5. Enviar
-    await resend.emails.send({
-      from: 'CalculaTuLuz <info@calculatuluz.es>',
-      to: subscribers.map((s) => s.email),
-      subject: `💰 Horas luz más baratas - ${new Date().toLocaleDateString('es-ES')}`,
-      html: emailHtml,
-    });
+        if (error) {
+          console.error(`❌ Fallo enviando a ${subscriber.email}:`, error);
+          errorCount++;
+        } else {
+          console.log(`✅ Enviado a: ${subscriber.email}`);
+          successCount++;
+        }
+
+        // Pequeña pausa opcional para no saturar la API si tienes muchos usuarios (opcional)
+        // await new Promise(resolve => setTimeout(resolve, 100)); 
+
+      } catch (err) {
+        console.error(`❌ Error inesperado con ${subscriber.email}:`, err);
+        errorCount++;
+      }
+    }
+
+    console.log('-----------------------------------');
+    console.log(`🏁 Proceso finalizado.`);
+    console.log(`✅ Éxitos: ${successCount}`);
+    console.log(`❌ Errores: ${errorCount}`);
+
   } catch (error) {
-    console.error('Error en send-daily:', error);
-    // Implementar notificación de error (ej: enviar a Slack)
+    console.error('🔥 Error CRÍTICO en send-daily:', error);
+    // Aquí podrías añadir una notificación a ti mismo si el script falla por completo
   }
 }
 
