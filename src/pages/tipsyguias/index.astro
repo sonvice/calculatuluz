@@ -1,23 +1,139 @@
 ---
+export const prerender = true; 
+
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 
-const tips = await getCollection('tipsyguias');
-const conical = 'https://calculatuluz.es/tips-y-guias'
+// Obtenemos los posts y los ORDENAMOS por fecha (del más nuevo al más viejo)
+const tips = (await getCollection('tipsyguias')).sort(
+	(a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const conical = 'https://calculatuluz.es/tipsyguias/';
 ---
 
 <Layout
-  title="Tips y guías"
-  description="Guías y consejos para optimizar el consumo eléctrico de tu hogar." conical={conical}>
-  <h1 class="fw-700 text-neutral-50 mt-space-2xl">Tips y guías</h1>
-  <ul role="list" class="text-neutral-50 prose flow">
-    {
-      tips.map((item) => (
-        <li>
-          <a class="fw-500 text-size-1" href={`/tipsyguias/${item.id}`}>{item.data.title}</a>
-          <p>{item.data.description}</p>
-        </li>
-      ))
-    }
-  </ul>
+  title="Tips y Guías de Ahorro Eléctrico | CalculaTuLuz"
+  description="Artículos, guías y consejos prácticos para optimizar el consumo eléctrico de tu hogar y ahorrar en la factura de la luz."
+  conical={conical}
+>
+  <div class="mt-space-2xl">
+    <div class="text-center mb-space-xl">
+      <h1 class="fw-700 text-neutral-50 text-size-3">Tips y Guías de Ahorro</h1>
+      <p class="text-neutral-200 mt-space-s max-w-prose mx-auto">
+        Aprende a gestionar tu consumo y descubre los secretos de la factura eléctrica.
+      </p>
+    </div>
+
+    <div class="blog-grid">
+      {
+        tips.map((item) => (
+          <a href={`/tipsyguias/${item.id}`} class="blog-card">
+            <article>
+              <h2 class="blog-title">{item.data.title}</h2>
+              <p class="blog-desc">{item.data.description}</p>
+              
+              <div class="blog-footer">
+                <span class="read-more">Leer artículo →</span>
+                {item.data.date && (
+                  <time class="blog-date">
+                    {new Date(item.data.date).toLocaleDateString('es-ES', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </time>
+                )}
+              </div>
+            </article>
+          </a>
+        ))
+      }
+    </div>
+  </div>
 </Layout>
+
+<style>
+  .max-w-prose { max-width: 65ch; }
+
+  /* Grid Layout Responsivo */
+  .blog-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-m);
+    margin-top: var(--space-l);
+  }
+
+  @media (min-width: 768px) {
+    .blog-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .blog-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Tarjeta de Blog estilo "Appliance Card" pero adaptada */
+  .blog-card {
+    display: block;
+    text-decoration: none;
+    background-color: var(--primary-900);
+    border: 1px solid var(--primary-700);
+    padding: var(--space-m);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .blog-card:hover {
+    background-color: var(--primary-800);
+    transform: translateY(-4px);
+    border-color: var(--accent-500);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  }
+
+  .blog-title {
+    color: var(--neutral-50);
+    font-size: var(--text-size-1);
+    font-weight: 700;
+    margin-bottom: var(--space-s);
+    line-height: 1.3;
+  }
+
+  .blog-desc {
+    color: var(--neutral-300);
+    font-size: var(--text-size-0);
+    line-height: 1.5;
+    margin-bottom: var(--space-m);
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Corta el texto si es muy largo */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex-grow: 1;
+  }
+
+  .blog-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto; /* Empuja el footer al fondo */
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--primary-800);
+  }
+
+  .read-more {
+    color: var(--accent-400);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .blog-date {
+    color: var(--neutral-500);
+    font-size: 0.85rem;
+  }
+</style>

@@ -3,6 +3,7 @@ title: "Cuánto consume un aire acondicionado en 8 horas - Guía completa"
 tags: ["consumo","electrodomésticos","verano","ahorro energético"]
 description: "Análisis detallado del consumo eléctrico de un aire acondicionado funcionando 8 horas diarias. Incluye tablas de consumo, coste estimado y consejos para ahorrar."
 image: './images/aire-acondicionado/consumo-8-horas.webp'
+date: "2025-09-22"
 ---
 
 ![Aire acondicionado encendido en una habitación](./images/aire-acondicionado/consumo-8-horas.webp)

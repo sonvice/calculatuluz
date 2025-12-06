@@ -3,6 +3,7 @@ title: "Cómo se calcula el precio de la luz y quién lo fija - Guía completa"
 tags: ["factura eléctrica", "mercado energético", "ahorro energético", "tarifas luz"]
 description: "Análisis detallado sobre cómo se determina el precio de la electricidad en España. Incluye componentes de la factura, diferencias entre mercado libre/regulado y consejos para optimizar costes."
 image: './images/precio-luz/factura-electrica.webp'
+date: "2025-10-02"
 ---
 
 ![Desglose de una factura eléctrica con gráficos explicativos](./images/precio-luz/factura-electrica.webp)
