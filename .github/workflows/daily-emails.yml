@@ -3,6 +3,7 @@ name: Envío Diario de Horas Económicas
 on:
   schedule:
     - cron: '30 19 * * *'  # 19:30 UTC -> 20:30 CET (invierno) / 21:30 CEST (verano). Siempre después de 20:15 CET/CEST.
+  workflow_dispatch: 
 
 jobs:
   send-emails:
