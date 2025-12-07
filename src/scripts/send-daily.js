@@ -11,12 +11,12 @@ async function main() {
     const priceResponse = await fetch(
       'https://calculatuluz.es/api/prices?day=tomorrow'
     );
-    
+
     if (!priceResponse.ok) {
-        // Si falla la API de precios, paramos todo
-        throw new Error(`Error fetching prices: ${priceResponse.statusText}`);
+      // Si falla la API de precios, paramos todo
+      throw new Error(`Error fetching prices: ${priceResponse.statusText}`);
     }
-    
+
     const { prices, maxPrice } = await priceResponse.json();
 
     // 2. Filtrar horas baratas
@@ -44,10 +44,10 @@ async function main() {
       .eq('confirmed', true);
 
     if (error) throw error;
-    
+
     if (!subscribers || subscribers.length === 0) {
-        console.log('⚠️ No hay suscriptores activos.');
-        return;
+      console.log('⚠️ No hay suscriptores activos.');
+      return;
     }
 
     console.log(`📨 Preparando envío para ${subscribers.length} suscriptores...`);
@@ -72,8 +72,8 @@ async function main() {
           <h3 style="margin-top: 0;">Top 3 horas baratas (mañana):</h3>
           <table style="width: 100%; border-collapse: collapse;">
             ${bestHours
-              .map(
-                (h) => `
+        .map(
+          (h) => `
               <tr style="border-bottom: 1px solid #eee;">
                 <td style="padding: 10px;">${h.hour}</td>
                 <td style="text-align: right; color: #4CAF50; font-weight: bold;">
@@ -81,8 +81,8 @@ async function main() {
                 </td>
               </tr>
             `
-              )
-              .join('')}
+        )
+        .join('')}
           </table>
         </div>
 
@@ -92,8 +92,8 @@ async function main() {
           </h3>
           <table style="width: 100%; border-collapse: collapse;">
             ${worstHours
-              .map(
-                (h) => `
+        .map(
+          (h) => `
               <tr style="border-bottom: 1px solid #eee;">
                 <td style="padding: 10px;">${h.hour}</td>
                 <td style="text-align: right; color: #c0392b; font-weight: bold;">
@@ -101,8 +101,8 @@ async function main() {
                 </td>
               </tr>
             `
-              )
-              .join('')}
+        )
+        .join('')}
           </table>
         </div>
        
@@ -138,10 +138,9 @@ async function main() {
       try {
         const { error } = await resend.emails.send({
           from: 'CalculaTuLuz <info@calculatuluz.es>',
-          to: subscriber.email, // ✅ Solo UN destinatario por envío
+          to: subscriber.email,
           subject: `💰 Horas luz más baratas - ${new Date().toLocaleDateString('es-ES')}`,
           html: emailHtml,
-          // Cabecera para evitar SPAM y facilitar la baja automática
           headers: {
             'List-Unsubscribe': `<https://calculatuluz.es/desuscribirse?email=${subscriber.email}>`,
           },
@@ -155,8 +154,8 @@ async function main() {
           successCount++;
         }
 
-        // Pequeña pausa opcional para no saturar la API si tienes muchos usuarios (opcional)
-        // await new Promise(resolve => setTimeout(resolve, 100)); 
+        // ✅ Pausa de 600ms para respetar rate limit (2 req/segundo)
+        await new Promise(resolve => setTimeout(resolve, 600));
 
       } catch (err) {
         console.error(`❌ Error inesperado con ${subscriber.email}:`, err);
