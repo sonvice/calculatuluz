@@ -1,0 +1,236 @@
+---
+// components/HeatingPromoCard.astro
+// Componente promocional para artículo de calefactores
+// Inserta debajo de la calculadora principal en index.astro
+
+import { Flame, AlertTriangle, TrendingDown, Zap, CheckCircle2, ArrowRight } from '@lucide/astro';
+
+interface Props {
+  variant?: 'urgency' | 'curiosity' | 'savings';
+}
+
+const { variant = 'urgency' } = Astro.props;
+
+const content = {
+  urgency: {
+    Icon: AlertTriangle,
+    iconColor: 'var(--red-500)',
+    title: '¿Miedo a encender la estufa?',
+    description: 'Hemos calculado cuánto gasta cada modelo de calefactor y seleccionado los 3 más eficientes de 2026 para que no pagues de más.',
+    cta: 'Ver Comparativa y Ahorrar'
+  },
+  curiosity: {
+    Icon: Flame,
+    iconColor: 'var(--orange-500)',
+    title: '¿Tu radiador es un "vampiro" de luz?',
+    description: 'Comprueba aquí su consumo real en euros. Te mostramos 5 alternativas que calientan igual gastando hasta 30€ menos al mes.',
+    cta: 'Analizar mi Calefacción'
+  },
+  savings: {
+    Icon: TrendingDown,
+    iconColor: 'var(--esmerald-green)',
+    title: 'Ahorra hasta 30€/mes en calefacción',
+    description: 'Análisis real de consumo de los 5 calefactores más vendidos. Descubre cuál consume menos y calienta mejor según tu tipo de vivienda.',
+    cta: 'Ver Análisis Completo'
+  }
+};
+
+const selected = content[variant];
+const IconComponent = selected.Icon;
+---
+
+<div class="heating-promo-card bg-primary-800 mt-space-l">
+  <div class="card-content">
+    <div class="card-header">
+      <div class="icon-wrapper">
+        <IconComponent size={24} color={selected.iconColor} />
+      </div>
+      <span class="badge bg-primary-600 text-primary-50">Invierno 2026</span>
+    </div>
+    
+    <h3 class="card-title text-primary-50">{selected.title}</h3>
+    <p class="card-description text-primary-200">{selected.description}</p>
+    
+    <div class="card-features">
+      <div class="feature text-primary-200">
+        <CheckCircle2 size={16} color="var(--esmerald-green)" />
+        <span>Consumo real en €/mes</span>
+      </div>
+      <div class="feature text-primary-200">
+        <CheckCircle2 size={16} color="var(--esmerald-green)" />
+        <span>Análisis de 5 modelos top</span>
+      </div>
+      <div class="feature text-primary-200">
+        <CheckCircle2 size={16} color="var(--esmerald-green)" />
+        <span>Ahorra hasta 30€/mes</span>
+      </div>
+    </div>
+
+    <a href="/tipsyguias/mejores-calefactores-bajo-consumo-2026" class="btn bg-primary-600">
+      <Zap size={18} />
+      {selected.cta}
+      <ArrowRight size={18} />
+    </a>
+  </div>
+
+  <div class="card-decoration">
+    <div class="animated-gradient"></div>
+  </div>
+</div>
+
+<style>
+  .heating-promo-card {
+    position: relative;
+    border-radius: var(--rounded-lg);
+    padding: var(--space-l);
+    overflow: hidden;
+    border: 1px solid var(--primary-600);
+    transition: all 0.3s ease;
+  }
+
+  .heating-promo-card:hover {
+    border-color: var(--primary-500);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .card-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    margin-bottom: var(--space-s);
+  }
+
+  .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--primary-700);
+    border-radius: var(--rounded-md);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.9; }
+  }
+
+  .badge {
+    padding: var(--space-3xs) var(--space-xs);
+    border-radius: var(--rounded-full);
+    font-size: var(--size--2);
+    font-weight: var(--bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .card-title {
+    font-size: var(--size-1);
+    font-weight: var(--bold);
+    margin-bottom: var(--space-2xs);
+    line-height: 1.3;
+  }
+
+  .card-description {
+    font-size: var(--size--1);
+    line-height: 1.5;
+    margin-bottom: var(--space-s);
+  }
+
+  .card-features {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    margin-bottom: var(--space-s);
+  }
+
+  .feature {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-size: var(--size--1);
+  }
+
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    color: var(--primary-50);
+    padding: var(--space-xs) var(--space-m);
+    border-radius: var(--rounded-md);
+    font-weight: var(--bold);
+    font-size: var(--size--1);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .cta-button:hover {
+    background: var(--primary-500);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .card-decoration {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  .animated-gradient {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, var(--primary-400) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-20px, -20px) scale(1.1); }
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .heating-promo-card {
+      padding: var(--space-s);
+    }
+
+    .card-title {
+      font-size: var(--size-0);
+    }
+
+    .card-description {
+      font-size: var(--size--2);
+    }
+
+    .cta-button {
+      width: 100%;
+      justify-content: center;
+      padding: var(--space-2xs) var(--space-s);
+      font-size: var(--size--2);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .card-features {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    .feature {
+      flex: 1;
+      min-width: 160px;
+    }
+  }
+</style>

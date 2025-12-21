@@ -129,6 +129,13 @@ export const appliances = [
       tips: ['Instala un temporizador para que caliente solo antes de las duchas.', 'Baja la temperatura del termostato a 60ºC.', 'Aisla el termo si está en un lugar frío.']
     }
   },
+  {
+    value: 1300, label: 'Calefactor eléctrico', watts: '1.300W', icon: 'Heater', slug: 'calefactor',
+    seo: {
+      description: 'Los calefactores de resistencia son los más económicos, pero consumen más que los de infrarrojos. La clave está en el termostato.',
+      tips: ['Usa un termostato con programación.', 'Limpia el filtro cada 3 meses.', 'Colócalo en un lugar estratégico para cubrir toda la habitación.']
+    }
+  },
 
   // Custom
   { value: 'custom', label: 'Personalizado', watts: '', icon: 'Settings', image: '/images/personalizado.jpg' },

@@ -9,6 +9,7 @@ import ListNewsletter from "../components/ListNewsletter.astro";
 import heroImg from "../assets/imgs/calculator.webp";
 import { faqData } from "../constant";
 import ApplianceGrid from "../components/ApplianceGrid.astro";
+import HeatingPromoCard from "@/components/HeatingPromoCard.astro";
 const conical = "https://calculatuluz.es";
 
 
@@ -87,7 +88,9 @@ import Table from "@/components/Table";
     <div
       class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50 bg-texture"
     >
-      <Calculator client:load />
+      <Calculator client:load initialPower={1500}
+  initialApplianceName="Radiador eléctrico" />
+      <HeatingPromoCard />
     </div>
     <div class="mt-space-2xl">
       <h2 class="text-neutral-50 mb-space-m text-center">
