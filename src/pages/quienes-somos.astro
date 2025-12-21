@@ -1,0 +1,149 @@
+---
+export const prerender = true;
+
+import Layout from "../layouts/Layout.astro";
+import SubscribeForm from "../components/SubscribeForm.vue";
+
+const conical = "https://calculatuluz.es/quienes-somos";
+import {  CheckCircle2, ArrowRight } from '@lucide/astro';
+---
+
+<Layout
+    title="Quiénes Somos | CalculaTuLuz - Transparencia Energética"
+    description="Conoce el equipo detrás de CalculaTuLuz. Nuestra misión es democratizar el acceso a los datos de consumo eléctrico y ayudarte a ahorrar en tu factura de luz."
+    conical={conical}
+>
+    <div class="text-primary-100 mt-space-l">
+        <div class="max-w-prose mx-auto">
+            <h1 class="fw-700 text-neutral-50">Sobre CalculaTuLuz</h1>
+            <p class="mt-space-m text-lg">
+                Democratizando el acceso a los datos energéticos para que pagues
+                solo lo justo.
+            </p>
+        </div>
+
+        <div
+            class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50 bg-texture"
+        >
+            <h2 class="text-neutral-50 mb-space-s">Nuestra Misión</h2>
+            <p class="leading-relaxed">
+                El mercado eléctrico en España es complejo. Entre horas punta,
+                valle, peajes y cargos, es difícil saber cuánto vas a pagar
+                realmente al poner una lavadora.
+            </p>
+            <p class="mt-space-s leading-relaxed">
+                <strong>CalculaTuLuz</strong> nació con un objetivo simple: transformar
+                datos técnicos complejos en <strong
+                    >información útil y accionable</strong
+                > para tu bolsillo. No somos una comercializadora eléctrica. Somos
+                una herramienta independiente diseñada para el consumidor.
+            </p>
+        </div>
+
+        <div class="mt-space-2xl d-grid">
+            <div>
+                <h2 class="text-neutral-50 mb-space-m">
+                    Datos Oficiales y Transparencia
+                </h2>
+                <p class="text-neutral-300">
+                    La precisión es nuestra prioridad. No hacemos estimaciones
+                    al azar. Nuestra calculadora se conecta directamente a la
+                    API pública de <strong
+                        >ESIOS (Red Eléctrica de España)</strong
+                    > para obtener el precio del PVPC en tiempo real.
+                </p>
+                <p class="text-neutral-300 mt-space-s">
+                    Esto significa que cuando calculas el coste de un
+                    electrodoméstico en nuestra web, estás viendo el dato real
+                    basado en la tarifa regulada oficial del momento.
+                </p>
+            </div>
+
+            <!-- <div
+                class="bg-primary-900/50 p-space-m rounded-md border border-neutral-700"
+            >
+                <h3 class="text-neutral-50 fw-700 mb-space-xs">
+                    Financiación y Afiliación
+                </h3>
+                <p class="text-neutral-300 text-sm">
+                    Mantener esta herramienta online conlleva costes de
+                    servidores y desarrollo. Para financiar el proyecto de forma
+                    sostenible y gratuita para el usuario, participamos en
+                    programas de afiliación.
+                </p>
+                <p class="text-neutral-300 text-sm mt-space-s italic">
+                    CalculaTuLuz.es participa en el Programa de Afiliados de
+                    Amazon EU, un programa de publicidad para afiliados diseñado
+                    para ofrecer a sitios web un modo de obtener comisiones por
+                    publicidad, publicitando e incluyendo enlaces a Amazon.es.
+                </p>
+            </div> -->
+        </div>
+
+        <hr class="text-neutral-400 my-space-2xl" />
+
+        <div class="max-w-prose mx-auto mt-space-xl">
+            <h2 class="text-neutral-50">Nuestro Compromiso</h2>
+            <ul role="list" class="flow mt-space-m text-left inline-block">
+                <li class="d-flex">
+                    <CheckCircle2 /> <strong>Gratuidad:</strong> El acceso a la calculadora siempre
+                    será gratuito.
+                </li>
+                <li class="d-flex">
+                    <CheckCircle2 /> <strong>Privacidad:</strong> No vendemos tus datos de consumo
+                    a terceros.
+                </li>
+                <li class="d-flex">
+                    <CheckCircle2 /> <strong>Independencia:</strong> Nuestras recomendaciones de
+                    productos se basan en eficiencia técnica, no en presiones de
+                    marcas.
+                </li>
+            </ul>
+        </div>
+
+        <div class="mt-space-2xl">
+            <h3 class="text-neutral-50 mb-space-m">
+                ¿Tienes dudas o sugerencias?
+            </h3>
+            <p class="text-neutral-300 mb-space-l">
+                Estamos mejorando constantemente. Si encuentras un error o
+                quieres sugerir una funcionalidad, escríbenos.
+            </p>
+            <a href="mailto:info@calculatuluz.es" class="btn"
+                >Contactar con el equipo</a
+            >
+        </div>
+
+        <div class="mt-space-2xl">
+            <div
+                class="bg-primary-900 p-space-l rounded-md bg-texture text-center"
+            >
+                <h2 class="text-neutral-50 mb-space-m">
+                    Únete al ahorro inteligente
+                </h2>
+                <div class="max-w-md mx-auto">
+                    <SubscribeForm client:visible />
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>
+
+<style>
+    hr {
+        opacity: 0.2;
+    }
+
+    /* Reutilizamos utilidades de grid si las tienes en global, si no, un apaño rápido para el grid */
+    .grid {
+        display: grid;
+    }
+    @media (min-width: 768px) {
+        .md\:grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    .gap-8 {
+        gap: 2rem;
+    }
+</style>
