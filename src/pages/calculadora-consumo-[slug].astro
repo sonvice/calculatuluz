@@ -5,11 +5,12 @@ export const prerender = true;
 import Layout from "../layouts/Layout.astro";
 import Calculator from "../components/Calculator.vue";
 import ApplianceIcon from "../components/ApplianceIcon.astro";
+import ConsumptionTable from "../components/ConsumptionTable";
 import { appliances } from "../constant/index.js";
+import { Check, ArrowRight, Zap, Clock, Coins } from '@lucide/astro';
 
 export async function getStaticPaths() {
     const cleanAppliances = appliances.filter((app) => app.slug);
-
     return cleanAppliances.map((app) => ({
         params: { slug: app.slug },
         props: { app },
@@ -25,211 +26,676 @@ const powerNumeric =
 // SEO: Constantes para la tabla estática
 const PRECIO_MEDIO = 0.15;
 const costoHora = ((powerNumeric * PRECIO_MEDIO) / 1000).toFixed(3);
-const costoMes = (((powerNumeric * PRECIO_MEDIO) / 1000) * 30).toFixed(2);
+const costoDia5h = ((powerNumeric * PRECIO_MEDIO * 5) / 1000).toFixed(2);
+const costoMes = ((powerNumeric * PRECIO_MEDIO * 30) / 1000).toFixed(2);
+const costoMes5h = ((powerNumeric * PRECIO_MEDIO * 5 * 30) / 1000).toFixed(2);
+const kwhHora = (powerNumeric / 1000).toFixed(2);
+const kwhMes = ((powerNumeric * 30) / 1000).toFixed(1);
 
-const titleSEO = `Cuánto consume una ${app.label} | Calculadora Gasto Luz`;
-const descSEO = `Descubre el gasto real de tu ${app.label} (${app.watts}). Calculadora online actualizada, consejos de ahorro y tabla de costes.`;
+// Obtener electrodomésticos relacionados
+const relacionados = app.seo?.relacionados 
+    ? appliances.filter(a => app.seo.relacionados.includes(a.slug))
+    : appliances.filter(a => a.slug && a.slug !== app.slug).slice(0, 3);
+
+// SEO mejorado
+const titleSEO = app.seo?.title || `Cuánto consume una ${app.label} | Calculadora Gasto Luz`;
+const descSEO = app.seo?.metaDescription || `Descubre el gasto real de tu ${app.label} (${app.watts}). Calculadora online actualizada, consejos de ahorro y tabla de costes.`;
+
+// Schema.org FAQPage
+const faqSchema = app.seo?.faqs ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": app.seo.faqs.map(faq => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": faq.answer
+        }
+    }))
+} : null;
 ---
 
 <Layout title={titleSEO} description={descSEO}>
-    <div class="slug-container mt-space-xl">
-        <div class="info-title mb-space-l d-flex">
-            <div
-                class="icon-wrapper p-space-s bg-primary-100 rounded-full mt-space-s text-primary-900"
-            >
-                <ApplianceIcon icon={app.icon} size={64} />
+    {faqSchema && (
+        <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+    )}
+    
+    <div class="container mt-space-xl">
+        <!-- Header con icono y título -->
+        <header class="page-header mb-space-xl">
+            <div class="header-content">
+                <div class="icon-wrapper">
+                    <ApplianceIcon icon={app.icon} size={56} />
+                </div>
+                <div class="header-text">
+                    <h1 class="d-block">
+                        Calculadora de consumo: <span class="text-accent-400">{app.label}</span>
+                    </h1>
+                    <p class="header-description">
+                        {app.seo?.description || `Descubre cuánto pagas realmente por usar tu ${app.label}.`}
+                    </p>
+                </div>
             </div>
-            <div>
-                <h1 class="text-neutral-50">
-                    Calculadora de consumo: <span class="text-accent-400"
-                        >{app.label}</span
-                    >
-                </h1>
-                <p class="text-neutral-200 mt-space-s">
-                    {
-                        app.seo?.description ||
-                            `Descubre cuánto pagas realmente por usar tu ${app.label}.`
-                    }
-                </p>
+            
+            <!-- Resumen rápido de consumo -->
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <Zap size={20} class="stat-icon" />
+                    <div class="stat-content">
+                        <span class="stat-value">{app.watts}</span>
+                        <span class="stat-label">Potencia</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <Clock size={20} class="stat-icon" />
+                    <div class="stat-content">
+                        <span class="stat-value">{kwhHora} kWh</span>
+                        <span class="stat-label">Por hora</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <Coins size={20} class="stat-icon" />
+                    <div class="stat-content">
+                        <span class="stat-value">{costoHora}€</span>
+                        <span class="stat-label">Coste/hora*</span>
+                    </div>
+                </div>
             </div>
-        </div>
+        </header>
 
-        <div
-            class="bg-primary-900 p-space-l rounded-md text-neutral-50 bg-texture shadow-lg border border-primary-800"
-        >
-            <Calculator
-                client:load
-                initialPower={powerNumeric}
-                initialApplianceName={app.label}
-            />
-        </div>
-
-        <article class="mt-space-2xl text-neutral-100 flow">
-            <h2>📊 Tabla de consumo orientativo: {app.label}</h2>
-            <p>
-                Estimación rápida basada en una potencia de <strong
-                    >{app.watts}</strong
-                > y un precio medio de <strong>{PRECIO_MEDIO} €/kWh</strong>.
-            </p>
-
-            <div class="table-wrapper mt-space-m">
-                <table class="">
-                    <thead>
-                        <tr
-                            class="text-neutral-300 border-b border-neutral-700"
-                        >
-                            <th class="p-space-xs">Tiempo de uso</th>
-                            <th class="p-space-xs">Consumo (kWh)</th>
-                            <th class="p-space-xs">Coste Estimado*</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-neutral-50">
-                        <tr class="border-b border-neutral-800">
-                            <td class="p-space-xs">1 Hora</td>
-                            <td class="p-space-xs"
-                                >{(powerNumeric / 1000).toFixed(2)} kWh</td
-                            >
-                            <td class="p-space-xs font-bold text-accent-400"
-                                >{costoHora} €</td
-                            >
-                        </tr>
-                        <tr class="border-b border-neutral-800">
-                            <td class="p-space-xs">2 Horas</td>
-                            <td class="p-space-xs"
-                                >{((powerNumeric * 2) / 1000).toFixed(2)} kWh</td
-                            >
-                            <td class="p-space-xs font-bold text-accent-400"
-                                >{(parseFloat(costoHora) * 2).toFixed(3)} €</td
-                            >
-                        </tr>
-                        <tr class="border-b border-neutral-800">
-                            <td class="p-space-xs">Uso Mensual (1h/día)</td>
-                            <td class="p-space-xs"
-                                >{((powerNumeric * 30) / 1000).toFixed(2)} kWh</td
-                            >
-                            <td class="p-space-xs font-bold text-accent-400"
-                                >{costoMes} €</td
-                            >
-                        </tr>
-                    </tbody>
-                </table>
-                <p class="text-size--1 text-neutral-400 mt-space-xs">
-                    *Cálculo aproximado con impuestos incluidos. Usa la
-                    calculadora superior para el precio real exacto de ahora
-                    mismo.
-                </p>
+        <!-- Calculadora principal -->
+        <section class="calculator-section" aria-labelledby="calculator-title">
+            <h2 id="calculator-title" class="visually-hidden">Calculadora de consumo</h2>
+            <div class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50 bg-texture">
+                <Calculator
+                    client:load
+                    initialPower={powerNumeric}
+                    initialApplianceName={app.label}
+                />
             </div>
+        </section>
 
-            <h2 class="mt-space-xl">
-                Consejos para ahorrar con tu {app.label}
-            </h2>
+        <!-- Contenido SEO principal -->
+        <article class="content-article">
+            
+            <!-- Introducción extendida -->
+            {app.seo?.intro && (
+                <section class="intro-section">
+                    <h2>¿Cuánto consume realmente {app.label.toLowerCase().startsWith('a') || app.label.toLowerCase().startsWith('e') || app.label.toLowerCase().startsWith('i') || app.label.toLowerCase().startsWith('o') || app.label.toLowerCase().startsWith('u') ? 'un' : 'una'} {app.label.toLowerCase()}?</h2>
+                    <p class="intro-text">{app.seo.intro}</p>
+                </section>
+            )}
 
-            {
-                app.seo?.tips && app.seo.tips.length > 0 ? (
-                    <ul role="list" class="custom-list mt-space-s">
+            <!-- Consumo según uso -->
+            {app.seo?.consumoMedio && (
+                <section class="consumption-levels">
+                    <h2>Consumo según el tipo de uso</h2>
+                    <div class="levels-grid">
+                        <div class="level-card level-low">
+                            <div class="level-header">
+                                <span class="level-badge">Bajo</span>
+                                <span class="level-watts">{app.seo.consumoMedio.bajo.watts}{typeof app.seo.consumoMedio.bajo.watts === 'number' && app.seo.consumoMedio.bajo.watts < 10 ? ' kWh' : 'W'}</span>
+                            </div>
+                            <p class="level-description">{app.seo.consumoMedio.bajo.descripcion}</p>
+                        </div>
+                        <div class="level-card level-medium">
+                            <div class="level-header">
+                                <span class="level-badge">Medio</span>
+                                <span class="level-watts">{app.seo.consumoMedio.medio.watts}{typeof app.seo.consumoMedio.medio.watts === 'number' && app.seo.consumoMedio.medio.watts < 10 ? ' kWh' : 'W'}</span>
+                            </div>
+                            <p class="level-description">{app.seo.consumoMedio.medio.descripcion}</p>
+                        </div>
+                        <div class="level-card level-high">
+                            <div class="level-header">
+                                <span class="level-badge">Alto</span>
+                                <span class="level-watts">{app.seo.consumoMedio.alto.watts}{typeof app.seo.consumoMedio.alto.watts === 'number' && app.seo.consumoMedio.alto.watts < 10 ? ' kWh' : 'W'}</span>
+                            </div>
+                            <p class="level-description">{app.seo.consumoMedio.alto.descripcion}</p>
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            <!-- Tabla de consumo orientativo -->
+            <section class="table-section">
+                <h2>Tabla de consumo orientativo: {app.label}</h2>
+                <p>Estimación basada en <strong>{app.watts}</strong> y precio medio de <strong>0,15 €/kWh</strong>.</p>
+                
+                <ConsumptionTable client:load powerWatts={powerNumeric} pricePerKwh={0.15} />
+                
+                <p class="table-note">*Cálculo aproximado con impuestos. Usa la calculadora para el precio actual.</p>
+            </section>
+
+            <!-- Comparativa si existe -->
+            {app.seo?.comparativa && (
+                <section class="comparison-section">
+                    <h2>Comparativa de consumo</h2>
+                    <div class="comparison-box">
+                        <p>{app.seo.comparativa}</p>
+                    </div>
+                </section>
+            )}
+
+            <!-- Consejos de ahorro -->
+            <section class="tips-section mt-space-m">
+                <h2>Consejos para ahorrar con tu {app.label}</h2>
+                {app.seo?.tips && app.seo.tips.length > 0 ? (
+                    <ul class="tips-list">
                         {app.seo.tips.map((tip) => (
-                            <li class="mb-space-s flex gap-s items-start">
-                                <span class="text-accent-400 mt-1">✓</span>
-                                <span class="text-neutral-200">{tip}</span>
+                            <li class="tip-item">
+                                <Check size={18} class="tip-icon" />
+                                <span>{tip}</span>
                             </li>
                         ))}
                     </ul>
                 ) : (
-                    <p>
-                        Utiliza este electrodoméstico en horas valle para
-                        maximizar tu ahorro.
-                    </p>
-                )
-            }
+                    <p>Utiliza este electrodoméstico en horas valle para maximizar tu ahorro.</p>
+                )}
+            </section>
 
-            <div class="mt-space-2xl py-space-m bg-primary-800 rounded">
-                <h3 class="text-size-1 mb-space-s">
-                    ¿Quieres saber el precio de la luz ahora?
-                </h3>
-                <p class="mb-space-m text-neutral-300">
-                    Antes de encender tu {app.label.toLowerCase()}, revisa si es
-                    buena hora.
-                </p>
-                <a href="/precio-luz-hoy" class="btn" data-type="accent"
-                    >Ver Precio de la Luz Hoy →</a
-                >
-            </div>
+            <!-- FAQs -->
+            {app.seo?.faqs && app.seo.faqs.length > 0 && (
+                <section class="faq-section mt-space-m">
+                    <h2>Preguntas frecuentes sobre {app.label.toLowerCase()}</h2>
+                    <div class="faq-list">
+                        {app.seo.faqs.map((faq, index) => (
+                            <details class="faq-item" open={index === 0}>
+                                <summary class="faq-question">{faq.question}</summary>
+                                <p class="faq-answer">{faq.answer}</p>
+                            </details>
+                        ))}
+                    </div>
+                </section>
+            )}
 
-            <div class="mt-space-xl">
-                <a
-                    href="/"
-                    class="btn-link text-neutral-400 hover:text-white transition"
-                    >← Volver al inicio</a
-                >
-            </div>
+            <!-- CTA precio luz -->
+            <section class="cta-section">
+                <div class="cta-box">
+                    <h3>¿Quieres saber el precio de la luz ahora?</h3>
+                    <p>Antes de encender tu {app.label.toLowerCase()}, revisa si es buena hora.</p>
+                    <a href="/precio-luz-hoy" class="btn" data-type="accent">
+                        Ver Precio de la Luz Hoy
+                        <ArrowRight size={18} />
+                    </a>
+                </div>
+            </section>
+
+            <!-- Electrodomésticos relacionados -->
+            {relacionados.length > 0 && (
+                <section class="related-section">
+                    <h2>Calculadoras relacionadas</h2>
+                    <div class="related-grid">
+                        {relacionados.map((rel) => (
+                            <a href={`/calculadora-consumo-${rel.slug}`} class="related-card">
+                                <div class="related-icon">
+                                    <ApplianceIcon icon={rel.icon} size={32} />
+                                </div>
+                                <div class="related-info">
+                                    <span class="related-name">{rel.label}</span>
+                                    <span class="related-watts">{rel.watts}</span>
+                                </div>
+                                <ArrowRight size={16} class="related-arrow" />
+                            </a>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            <!-- Navegación -->
+            <nav class="page-nav">
+                <a href="/" class="nav-link">
+                    Volver al inicio
+                </a>
+            </nav>
         </article>
     </div>
 </Layout>
 
 <style>
-    h1 {
-        display: block;
+
+    /* Header */
+    .page-header {
         text-align: left;
-        max-width: 34ch;
-    }
-    p {
-        text-align: left;
-    }
-    .max-w-prose {
-        max-width: 65ch;
-    }
-    .mx-auto {
-        margin-inline: auto;
-    }
-    .text-center {
-        text-align: center;
     }
 
-    .shadow-lg {
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    .header-content {
+        display: flex;
+        gap: var(--space-m);
+        align-items: flex-start;
+        margin-bottom: var(--space-l);
     }
 
     .icon-wrapper {
-        display: inline-flex;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-m);
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(4px);
-        margin-bottom: 0;
-    }
-    .info-title{
-        --vertical-alignment: start;
+        border-radius: var(--rounded-lg);
+        color: var(--accent-400);
+        flex-shrink: 0;
     }
 
-    /* Estilos Tabla SEO */
+    .header-text h1 {
+        font-size: var(--size-3);
+        color: var(--neutral-50);
+        margin: 0 0 var(--space-s) 0;
+        line-height: 1.2;
+    }
+
+    .header-description {
+        color: var(--neutral-200);
+        font-size: var(--size-0);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* Quick stats */
+    .quick-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-s);
+        padding: var(--space-m);
+        background: var(--primary-800);
+        border-radius: var(--rounded-md);
+        border: 1px solid var(--primary-700);
+               max-width:42rem;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-xs);
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .stat-icon {
+        color: var(--accent-400);
+    }
+
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-value {
+        font-size: var(--size-1);
+        font-weight: var(--bold);
+        color: var(--neutral-50);
+    }
+
+    .stat-label {
+        font-size: var(--size--2);
+        color: var(--neutral-400);
+    }
+
+    /* Calculator section */
+    .calculator-wrapper {
+        background: var(--primary-900);
+        padding: var(--space-l);
+        border-radius: var(--rounded-lg);
+        border: 1px solid var(--primary-800);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Content article */
+    .content-article {
+        margin-top: var(--space-2xl);
+    }
+
+    .content-article h2 {
+        font-size: var(--size-2);
+        color: var(--neutral-50);
+        margin: var(--space-2xl) 0 var(--space-m) 0;
+        font-weight: var(--bold);
+    }
+
+    .content-article h2:first-of-type {
+        margin-top: 0;
+    }
+
+    .content-article p {
+        color: var(--neutral-200);
+        line-height: 1.7;
+    }
+
+    /* Intro section */
+    .intro-text {
+        font-size: var(--size-0);
+        padding: var(--space-m);
+        background: var(--primary-800);
+        border-left: 3px solid var(--accent-400);
+        border-radius: 0 var(--rounded-md) var(--rounded-md) 0;
+    }
+
+    /* Consumption levels */
+    .levels-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--space-m);
+    }
+
+    .level-card {
+        padding: var(--space-m);
+        border-radius: var(--rounded-md);
+        border: 1px solid var(--primary-700);
+        background: var(--primary-900);
+    }
+
+    .level-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-s);
+    }
+
+    .level-badge {
+        font-size: var(--size--2);
+        font-weight: var(--semi-bold);
+        padding: var(--space-3xs) var(--space-xs);
+        border-radius: var(--rounded-full);
+        text-transform: uppercase;
+    }
+
+    .level-low .level-badge {
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--esmerald-green);
+    }
+
+    .level-medium .level-badge {
+        background: rgba(245, 158, 11, 0.2);
+        color: var(--amber);
+    }
+
+    .level-high .level-badge {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--red);
+    }
+
+    .level-watts {
+        font-size: var(--size-1);
+        font-weight: var(--bold);
+        color: var(--neutral-50);
+    }
+
+    .level-description {
+        font-size: var(--size--1);
+        color: var(--neutral-300);
+        margin: 0;
+    }
+
+    /* Table section */
     .table-wrapper {
         overflow-x: auto;
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 8px;
-        padding: var(--space-s);
-        max-width: 56rem;
+        background: var(--primary-800);
+        border-radius: var(--rounded-md);
+        padding: var(--space-m);
+        margin-top: var(--space-m);
     }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
     th {
-        font-weight: 600;
+        font-weight: var(--semi-bold);
         text-transform: uppercase;
-        font-size: 0.85rem;
+        font-size: var(--size--2);
         letter-spacing: 0.05em;
+        color: var(--neutral-400);
+        text-align: left;
+        padding: var(--space-s);
+        border-bottom: 1px solid var(--primary-600);
     }
 
-    /* Reutiliza tus variables CSS existentes */
-    h2 {
-        font-size: var(--text-size-2);
-        color: var(--neutral-50);
-        margin-top: var(--space-xl);
-        margin-bottom: var(--space-m);
-        font-weight: 700;
-    }
-    h3 {
-        font-size: var(--text-size-1);
-        color: var(--neutral-50);
-        font-weight: 600;
+    td {
+        padding: var(--space-s);
+        color: var(--neutral-100);
+        border-bottom: 1px solid var(--primary-700);
     }
 
-    .btn-link {
+    .cost-cell {
+        font-weight: var(--bold);
+        color: var(--accent-400);
+    }
+
+    .highlighted-row {
+        background: var(--primary-700);
+    }
+
+    .highlighted-row td {
+        border-bottom: none;
+    }
+
+    .table-note {
+        font-size: var(--size--2);
+        color: var(--neutral-400);
+        margin-top: var(--space-s);
+        margin-bottom: 0;
+    }
+
+    /* Comparison section */
+    .comparison-box {
+        padding: var(--space-m);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-radius: var(--rounded-md);
+    }
+
+    .comparison-box p {
+        margin: 0;
+        color: var(--neutral-100);
+    }
+
+    /* Tips section */
+    .tips-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-s);
+    }
+
+    .tip-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-s);
+        padding: var(--space-s);
+        background: var(--primary-800);
+        border-radius: var(--rounded-md);
+    }
+
+    .tip-icon {
+        color: var(--esmerald-green);
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .tip-item span {
+        color: var(--neutral-200);
+        line-height: 1.5;
+    }
+
+    /* FAQ section */
+    .faq-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-s);
+    }
+
+    .faq-item {
+        background: var(--primary-800);
+        border-radius: var(--rounded-md);
+        border: 1px solid var(--primary-700);
+        overflow: hidden;
+    }
+
+    .faq-question {
+        padding: var(--space-m);
+        font-weight: var(--semi-bold);
+        color: var(--neutral-50);
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color:var(--primary-900);
+    }
+
+    .faq-question::-webkit-details-marker {
+        display: none;
+    }
+
+    .faq-question::after {
+        content: '+';
+        font-size: var(--size-1);
+        color: var(--accent-400);
+        transition: transform 0.2s;
+    }
+
+    .faq-item[open] .faq-question::after {
+        content: '-';
+    }
+
+    .faq-answer {
+        padding: 0 var(--space-m) var(--space-m);
+        color: var(--neutral-300);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* CTA section */
+    .cta-box {
+        text-align: center;
+        padding: var(--space-xl);
+        background: var(--primary-800);
+        border-radius: var(--rounded-lg);
+        margin-top: var(--space-2xl);
+    }
+
+    .cta-box h3 {
+        font-size: var(--size-1);
+        color: var(--neutral-50);
+        margin: 0 0 var(--space-s) 0;
+    }
+
+    .cta-box p {
+        color: var(--neutral-300);
+        margin: 0 0 var(--space-m) 0;
+    }
+
+    .cta-box .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-xs);
+    }
+
+    /* Related section */
+    .related-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--space-m);
+    }
+
+    .related-card {
+        display: flex;
+        align-items: center;
+        gap: var(--space-m);
+        padding: var(--space-m);
+        background: var(--primary-800);
+        border: 1px solid var(--primary-700);
+        border-radius: var(--rounded-md);
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .related-card:hover {
+        background: var(--primary-700);
+        border-color: var(--accent-500);
+        transform: translateY(-2px);
+    }
+
+    .related-icon {
+        color: var(--accent-400);
+        flex-shrink: 0;
+    }
+
+    .related-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .related-name {
+        color: var(--neutral-100);
+        font-weight: var(--semi-bold);
+    }
+
+    .related-watts {
+        color: var(--neutral-400);
+        font-size: var(--size--1);
+    }
+
+    .related-arrow {
+        color: var(--neutral-500);
+        transition: transform 0.2s;
+    }
+
+    .related-card:hover .related-arrow {
+        transform: translateX(4px);
+        color: var(--accent-400);
+    }
+
+    /* Navigation */
+    .page-nav {
+        margin-top: var(--space-2xl);
+        padding-top: var(--space-m);
+        border-top: 1px solid var(--primary-700);
+    }
+
+    .nav-link {
+        color: var(--neutral-400);
         text-decoration: none;
         border-bottom: 1px dashed currentColor;
+        transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+        color: var(--neutral-100);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+        .header-content {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .header-text h1 {
+            font-size: var(--size-2);
+        }
+
+        .quick-stats {
+            flex-direction: column;
+     
+        }
+
+        .stat-item {
+            min-width: 100%;
+        }
+
+        .calculator-wrapper {
+            padding: var(--space-m);
+        }
+
+        .levels-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>

@@ -209,6 +209,7 @@ export default function ProductComparisonTable({ data }) {
           border: 1px solid var(--primary-500, #e5e7eb);
           border-radius: 4px;
           overflow: hidden;
+          color:var(--primary-50);
         }
 
         th,

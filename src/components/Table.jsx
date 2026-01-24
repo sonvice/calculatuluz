@@ -54,6 +54,7 @@ export default function Table({ columns, data }) {
     border: 1px solid var(--primary-500, #e5e7eb); /* Borde completo */
     border-radius: 4px; /* Bordes redondeados */
     overflow: hidden; /* Recorta los bordes de las celdas */
+      color:var(--primary-50);
   }
 
   th,
