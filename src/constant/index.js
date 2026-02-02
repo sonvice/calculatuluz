@@ -1,11 +1,18 @@
 export const navigation = [
-  { title: 'Calculadora', url: '/', onlyTips: false },
+  { 
+    title: 'Herramientas', 
+    url: '/', 
+    onlyTips: false,
+    children: [
+      { title: 'Simulador factura', url: '/simulador-factura-luz' },
+      { title: 'Calculadora consumo', url: '/' },
+    ]
+  },
   { title: 'Precio luz hoy', url: '/precio-luz-hoy' },
   { title: 'Tips & Guías', url: '/tipsyguias' },
   { title: 'Mi consumo', url: '/mi-consumo' },
   { title: 'Contacto', url: '/contacto' },
 ];
-
 
 export const appliances = [
   // --- ILUMINACIÓN Y OFICINA ---

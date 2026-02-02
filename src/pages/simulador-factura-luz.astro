@@ -1,0 +1,175 @@
+---
+export const prerender = true;
+
+import Layout from "../layouts/Layout.astro";
+import SimuladorFacturaLuz from "../components/SimuladorFacturaLuz.vue";
+import Faq from "../components/Faq.astro";
+import SubscribeForm from "../components/SubscribeForm.vue";
+import ListNewsletter from "../components/ListNewsletter.astro";
+
+const conical = "https://calculatuluz.es/simulador-factura-luz/";
+
+// FAQ específicas del simulador
+const faqSimulador = [
+  {
+    question: "¿Qué es el PVPC?",
+    answer: "El PVPC (Precio Voluntario para el Pequeño Consumidor) es la tarifa regulada de electricidad en España. El precio de la energía cambia cada hora según el mercado mayorista. Solo pueden acogerse consumidores con potencia contratada hasta 10 kW a través de una comercializadora de referencia."
+  },
+  {
+    question: "¿Qué son los peajes y cargos de la factura?",
+    answer: "Los peajes cubren el coste de las redes de transporte y distribución (fijados por la CNMC). Los cargos financian otros costes del sistema eléctrico como las energías renovables y el bono social (fijados por el Ministerio)."
+  },
+  {
+    question: "¿Cuáles son los horarios punta, llano y valle?",
+    answer: "Punta: 10:00-14:00 y 18:00-22:00 (lunes a viernes laborables). Llano: 08:00-10:00, 14:00-18:00 y 22:00-00:00 (lunes a viernes laborables). Valle: 00:00-08:00 todos los días, más sábados, domingos y festivos nacionales completos."
+  },
+  {
+    question: "¿Qué impuestos se pagan en la factura de la luz?",
+    answer: "Se pagan dos impuestos: el Impuesto Especial sobre la Electricidad (5,11%) que se aplica sobre el subtotal, y el IVA (21%) que se aplica sobre la base imponible. Desde enero de 2026, el IVA volvió al 21% tras el periodo de reducción."
+  },
+  {
+    question: "¿Qué es el término de potencia?",
+    answer: "Es la parte fija de tu factura. Pagas por tener disponible una cantidad máxima de electricidad (potencia), aunque no la uses. Se divide en dos periodos: punta (horario diurno laborable) y valle (noches y fines de semana)."
+  },
+  {
+    question: "¿Cómo puedo ahorrar en mi factura de la luz?",
+    answer: "Consume en horario valle (noches y fines de semana), ajusta tu potencia contratada a tus necesidades reales, usa electrodomésticos eficientes (clase A) y considera instalar placas solares para autoconsumo."
+  }
+];
+---
+
+<Layout
+  title="⚡ Simulador de Factura de Luz 2026 | Calcula tu recibo eléctrico gratis"
+  description="Calcula tu factura de la luz con los valores regulados de 2026. Simulador gratuito con precios PVPC en tiempo real, desglose completo de peajes, cargos e impuestos."
+  conical={conical}
+>
+  <div class="text-primary-100 mt-space-l">
+    <!-- Hero Section -->
+    <div class="hero-wrapper">
+      <div>
+        <h1 class="fw-700 text-neutral-50">
+          Simulador de Factura de Luz 2026
+        </h1>
+        <p class="mt-space-m">
+          Calcula el importe de tu factura eléctrica con nuestro <strong>simulador gratuito</strong>. 
+          Utilizamos los <strong>valores regulados oficiales de 2026</strong> y los 
+          <strong>precios PVPC en tiempo real</strong> de la API de Red Eléctrica de España.
+        </p>
+        <p class="mt-space-s">
+          Compatible con <strong>PVPC</strong> (mercado regulado) y <strong>tarifas de precio fijo</strong> 
+          (mercado libre). Desglose completo de todos los conceptos de tu recibo.
+        </p>
+        <!-- Form -->
+        <div class="mt-space-l subscribe">
+          <SubscribeForm client:visible />
+        </div>
+      </div>
+    </div>
+
+    <!-- Simulador Vue -->
+    <div class="bg-primary-900 p-space-l mt-space-xl rounded-md text-neutral-50 bg-texture">
+      <SimuladorFacturaLuz client:load />
+    </div>
+
+    <!-- Contenido SEO -->
+    <hr class="text-neutral-400 my-space-2xl" />
+
+    <h2 id="como-funciona-simulador" class="text-neutral-50 mt-space-xl">
+      ¿Cómo funciona el simulador de factura?
+    </h2>
+    <p class="mt-space-s">
+      Nuestro simulador calcula <strong>todos los conceptos</strong> que aparecen en tu factura eléctrica, 
+      utilizando los <strong>precios reales del mercado PVPC</strong> en tiempo real y los <strong>valores regulados vigentes en 2026</strong>.
+    </p>
+    
+    <ul role="list" class="flow mt-space-m">
+      <li>⚡ <strong>Término de potencia:</strong> Peajes + cargos + margen de comercialización</li>
+      <li>📊 <strong>Término de energía:</strong> Peajes + cargos + coste de la energía por periodo</li>
+      <li>📋 <strong>Otros conceptos:</strong> Alquiler de contador, financiación del bono social</li>
+      <li>💰 <strong>Impuestos:</strong> Impuesto eléctrico (5,11%) + IVA (21%)</li>
+    </ul>
+
+    <h2 class="text-neutral-50 mt-space-xl">Valores regulados 2026 (Tarifa 2.0TD)</h2>
+    <p class="mt-space-s">
+      El simulador utiliza los precios oficiales establecidos en la 
+      <strong>Resolución CNMC RAP/DE/009/24</strong> (peajes de transporte y distribución) y la 
+      <strong>Orden TED/1487/2024</strong> (cargos del sistema eléctrico) vigentes desde el 1 de enero de 2026.
+    </p>
+
+    <div class="valores-tabla mt-space-l">
+      <h3 class="text-neutral-100">Peajes de potencia</h3>
+      <ul class="mt-space-s">
+        <li>Periodo punta: <strong>22,96 €/kW/año</strong></li>
+        <li>Periodo valle: <strong>0,44 €/kW/año</strong></li>
+      </ul>
+
+      <h3 class="text-neutral-100 mt-space-m">Cargos de potencia</h3>
+      <ul class="mt-space-s">
+        <li>Periodo punta: <strong>3,97 €/kW/año</strong></li>
+        <li>Periodo valle: <strong>0,26 €/kW/año</strong></li>
+      </ul>
+
+      <h3 class="text-neutral-100 mt-space-m">Peajes + Cargos de energía</h3>
+      <ul class="mt-space-s">
+        <li>🔴 Punta (P1): <strong>0,0925 €/kWh</strong></li>
+        <li>🟡 Llano (P2): <strong>0,0282 €/kWh</strong></li>
+        <li>🟢 Valle (P3): <strong>0,0030 €/kWh</strong></li>
+      </ul>
+    </div>
+
+    <h2 class="text-neutral-50 mt-space-xl">5 consejos para ahorrar en tu factura</h2>
+    <p class="mt-space-s">
+      Reducir el consumo eléctrico es clave para cuidar el medio ambiente y tu
+      bolsillo. Combina <strong>hábitos inteligentes</strong> con tecnología eficiente:
+      programa electrodomésticos como lavadoras en <strong>horas valle</strong> (cuando
+      la energía es más económica). <a href="/precio-luz-hoy">Consulta aquí</a> las horas más baratas
+      del día antes de usar tus electrodomésticos.
+    </p>
+    <ul role="list" class="flow mt-space-m">
+      <li>🌙 <strong>Consume en horario valle:</strong> De 00:00 a 08:00 y fines de semana completos</li>
+      <li>⚡ <strong>Ajusta tu potencia:</strong> No contrates más kW de los que necesitas realmente</li>
+      <li>🔄 <strong>Compara PVPC vs precio fijo:</strong> El PVPC es mejor cuando hay precios bajos en el mercado</li>
+      <li>☀️ <strong>Considera el autoconsumo:</strong> Las placas solares reducen tu dependencia de la red</li>
+      <li>💡 <strong>Usa electrodomésticos eficientes:</strong> Clase A o superior</li>
+    </ul>
+
+    <!-- FAQ -->
+    <div class="mt-space-xl">
+      <Faq data={faqSimulador} />
+    </div>
+
+    <!-- Newsletter -->
+    <div class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture">
+      <div class="newsletter-header text-primary-50">
+        <h2>⚡¡No te pierdas las horas más baratas de luz!</h2>
+        <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
+        <ListNewsletter />
+        <div class="mt-space-m">
+          <SubscribeForm client:load />
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .valores-tabla {
+    background: var(--primary-800, #1e3a5f);
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+
+  .valores-tabla ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .valores-tabla li {
+    padding: 0.25rem 0;
+  }
+  .subscribe{
+    max-width: 42rem;
+
+  }
+</style>
