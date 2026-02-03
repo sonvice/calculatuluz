@@ -781,6 +781,7 @@ function formatearPrecio(valor) {
   display: flex;
   flex-direction: column;
   gap: var(--space-s);
+  min-width: 0;
 }
 
 .form-card {
