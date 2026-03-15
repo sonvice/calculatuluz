@@ -331,12 +331,22 @@ defineExpose({ openModal })
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
+}
+
+/* Blur en pseudo-elemento para no bloquear touch events en Android/MIUI */
+.modal-overlay::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .modal-container {

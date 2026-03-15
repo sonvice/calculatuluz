@@ -1,12 +1,15 @@
 import type { APIRoute } from 'astro'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
+import { Resend } from 'resend'
 
 export const POST: APIRoute = async ({ request }) => {
   const stripeKey = import.meta.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY
   const webhookSecret = import.meta.env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET
   const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL
   const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+  const resendKey = import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY
+  const adminEmail = import.meta.env.ADMIN_EMAIL || process.env.ADMIN_EMAIL
 
   if (!stripeKey || !webhookSecret) {
     return new Response('Stripe no configurado', { status: 500 })
@@ -51,6 +54,31 @@ export const POST: APIRoute = async ({ request }) => {
             ...(isActive ? { monthly_scans_used: 0, monthly_scans_reset_at: new Date().toISOString() } : {}),
           })
           .eq('id', userId)
+      }
+
+      // Notificar al admin cuando se activa una nueva suscripción
+      if (isActive && event.type === 'customer.subscription.created' && resendKey && adminEmail) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('id')
+          .eq('id', userId)
+          .single()
+        const customer = await stripe.customers.retrieve(sub.customer as string) as Stripe.Customer
+        const userEmail = customer.email || 'desconocido'
+        const price = (sub.items.data[0]?.price?.unit_amount || 0) / 100
+        const resend = new Resend(resendKey)
+        await resend.emails.send({
+          from: 'Calculatuluz <noreply@calculatuluz.es>',
+          to: adminEmail,
+          subject: `💰 Nueva suscripción — Plan ${tier === 'pro' ? 'Pro' : 'Básico'} (${price}€/mes)`,
+          html: `
+            <h2>Nueva suscripción en Calculatuluz</h2>
+            <p><strong>Plan:</strong> ${tier === 'pro' ? 'Pro (9,99€/mes)' : 'Básico (4,99€/mes)'}</p>
+            <p><strong>Email:</strong> ${userEmail}</p>
+            <p><strong>Stripe ID:</strong> ${sub.id}</p>
+            <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES')}</p>
+          `,
+        }).catch(() => {}) // No bloquear el webhook si falla el email
       }
       break
     }
