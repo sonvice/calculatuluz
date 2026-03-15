@@ -68,10 +68,16 @@ import Table from "@/components/Table";
           cargas en las horas más económicas y entender mejor su gasto
           energético.
         </p>
-        <!-- Form -->
-         <div class="mt-space-l">
-           <SubscribeForm client:only="vue" />
-         </div>
+        <!-- CTAs -->
+        <div class="hero-ctas mt-space-l">
+          <a href="/escanear-factura" class="btn" data-type="accent">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Escanear factura
+          </a>
+          <a href="#newsletter" class="btn">
+            Suscribirme
+          </a>
+        </div>
       </div>
       <img
         src={heroImg.src}
@@ -241,6 +247,7 @@ import Table from "@/components/Table";
     <Faq data={faqData} />
   </div>
   <div
+    id="newsletter"
     class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture"
   >
     <div class="newsletter-header text-primary-50">
@@ -257,6 +264,12 @@ import Table from "@/components/Table";
 <style>
   hr { opacity: 0.2; }
   code { white-space: pre-wrap; }
+  .hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    align-items: center;
+  }
   .newsletter-header { max-width: 48rem; border-radius: 8px; }
   .hero-wrapper {
     display: block;
