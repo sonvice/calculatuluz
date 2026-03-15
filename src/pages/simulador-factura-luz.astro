@@ -61,7 +61,7 @@ const faqSimulador = [
         </p>
         <!-- Form -->
         <div class="mt-space-l subscribe">
-          <SubscribeForm client:visible />
+          <SubscribeForm client:only="vue" />
         </div>
       </div>
     </div>
@@ -145,7 +145,7 @@ const faqSimulador = [
         <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
         <ListNewsletter />
         <div class="mt-space-m">
-          <SubscribeForm client:load />
+          <SubscribeForm client:only="vue" />
         </div>
       </div>
     </div>

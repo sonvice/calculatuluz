@@ -9,7 +9,6 @@ import ListNewsletter from "../components/ListNewsletter.astro";
 import heroImg from "../assets/imgs/calculator.webp";
 import { faqData } from "../constant";
 import ApplianceGrid from "../components/ApplianceGrid.astro";
-import HeatingPromoCard from "@/components/HeatingPromoCard.astro";
 const conical = "https://calculatuluz.es";
 
 
@@ -71,7 +70,7 @@ import Table from "@/components/Table";
         </p>
         <!-- Form -->
          <div class="mt-space-l">
-           <SubscribeForm client:visible />
+           <SubscribeForm client:only="vue" />
          </div>
       </div>
       <img
@@ -90,7 +89,69 @@ import Table from "@/components/Table";
     >
       <Calculator client:load initialPower={1500}
   initialApplianceName="Radiador eléctrico" />
-      <HeatingPromoCard />
+
+      <!-- ── Promo: Escáner de facturas con IA ────────────── -->
+      <a href="/escanear-factura" class="scanner-promo" aria-label="Analiza tu factura de luz o gas con IA — 1 escaneo gratis">
+        <div class="scanner-promo__inner">
+          <div class="scanner-promo__left">
+            <span class="scanner-promo__badge">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+              Nuevo · IA
+            </span>
+            <h2 class="scanner-promo__title">
+              Analiza tu factura de luz o gas con IA
+            </h2>
+            <p class="scanner-promo__desc">
+              Sube una foto o PDF y nuestra inteligencia artificial extrae al instante el consumo en kWh,
+              CUPS, términos P1/P2/P3, importes desglosados y consejos personalizados para <strong>reducir tu factura eléctrica</strong>.
+            </p>
+            <ul class="scanner-promo__features" aria-label="Características del escáner de facturas">
+              <li>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Consumo por periodos tarifarios P1/P2/P3
+              </li>
+              <li>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                CUPS, titular, comercializadora y distribuidora
+              </li>
+              <li>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Desglose de potencia, energía, IVA e impuesto eléctrico
+              </li>
+              <li>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Compatible con imágenes JPG/PNG y PDFs · Luz y gas
+              </li>
+            </ul>
+            <div class="scanner-promo__cta-row">
+              <span class="scanner-promo__cta">
+                Escanear mi factura gratis
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </span>
+              <span class="scanner-promo__note">1 análisis gratis · Sin tarjeta de crédito</span>
+            </div>
+          </div>
+          <div class="scanner-promo__visual" aria-hidden="true">
+            <div class="scanner-promo__icon-wrap">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <div class="scanner-promo__stats">
+              <div class="scanner-promo__stat">
+                <span class="scanner-stat__val">696</span>
+                <span class="scanner-stat__label">kWh</span>
+              </div>
+              <div class="scanner-promo__stat">
+                <span class="scanner-stat__val">172€</span>
+                <span class="scanner-stat__label">total</span>
+              </div>
+              <div class="scanner-promo__stat">
+                <span class="scanner-stat__val">P1/P2</span>
+                <span class="scanner-stat__label">tarifas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </a>
     </div>
     <div class="mt-space-2xl">
       <h2 class="text-neutral-50 mb-space-m text-center">
@@ -187,40 +248,194 @@ import Table from "@/components/Table";
       <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
       <ListNewsletter />
       <div class="mt-space-m">
-        <SubscribeForm client:load />
+        <SubscribeForm client:only="vue" />
       </div>
     </div>
   </div>
 </Layout>
 
 <style>
-  hr {
-    opacity: 0.2;
-  }
-  code {
-    white-space: pre-wrap;
-  }
-  .newsletter-header {
-    max-width: 48rem;
-    border-radius: 8px;
-  }
+  hr { opacity: 0.2; }
+  code { white-space: pre-wrap; }
+  .newsletter-header { max-width: 48rem; border-radius: 8px; }
   .hero-wrapper {
     display: block;
     grid-template-columns: 1fr 1fr;
     justify-items: center;
     align-items: center;
-
-    & img {
-      display: none;
-    }
+    & img { display: none; }
   }
   @media (min-width: 63.99875em) {
     .hero-wrapper {
       display: grid;
-      & img {
-        display: block;
-        height: auto;
-      }
+      & img { display: block; height: auto; }
     }
+  }
+
+  /* ── Scanner Promo Card ───────────────────────────── */
+  .scanner-promo {
+    display: block;
+    margin-top: var(--space-l);
+    border-radius: 14px;
+    border: 1px solid var(--esmerald-green);
+    background: linear-gradient(135deg,
+      rgba(16,185,129,.08) 0%,
+      rgba(16,185,129,.03) 50%,
+      transparent 100%);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color .2s, box-shadow .2s;
+    box-shadow: 0 0 24px rgba(16,185,129,.08);
+  }
+  .scanner-promo:hover {
+    border-color: color-mix(in srgb, var(--esmerald-green) 80%, white);
+    box-shadow: 0 0 36px rgba(16,185,129,.18);
+  }
+  .scanner-promo:focus-visible {
+    outline: 2px solid var(--esmerald-green);
+    outline-offset: 3px;
+  }
+  .scanner-promo__inner {
+    display: flex;
+    gap: var(--space-l);
+    padding: var(--space-l);
+    align-items: center;
+  }
+  .scanner-promo__left { flex: 1; min-width: 0; }
+
+  /* Badge */
+  .scanner-promo__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .25rem .75rem;
+    background: rgba(16,185,129,.15);
+    border: 1px solid rgba(16,185,129,.35);
+    border-radius: 20px;
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--esmerald-green);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-xs);
+  }
+
+  /* Heading */
+  .scanner-promo__title {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-weight: 700;
+    color: var(--neutral-50);
+    margin: 0 0 var(--space-xs);
+    line-height: 1.3;
+  }
+  .scanner-promo__desc {
+    font-size: .9rem;
+    color: var(--primary-200);
+    line-height: 1.6;
+    margin: 0 0 var(--space-s);
+    max-width: 52ch;
+  }
+  .scanner-promo__desc strong { color: var(--neutral-100); }
+
+  /* Feature list */
+  .scanner-promo__features {
+    list-style: none;
+    padding: 0; margin: 0 0 var(--space-m);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .35rem .75rem;
+  }
+  .scanner-promo__features li {
+    display: flex;
+    align-items: flex-start;
+    gap: .4rem;
+    font-size: .82rem;
+    color: var(--primary-100);
+    line-height: 1.4;
+  }
+  .scanner-promo__features li svg {
+    flex-shrink: 0;
+    color: var(--esmerald-green);
+    margin-top: .12rem;
+  }
+
+  /* CTA */
+  .scanner-promo__cta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .75rem;
+  }
+  .scanner-promo__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .7rem 1.4rem;
+    background: var(--esmerald-green);
+    border-radius: 10px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: #022c22;
+    min-height: 44px;
+    transition: background .15s, transform .15s;
+    white-space: nowrap;
+  }
+  .scanner-promo:hover .scanner-promo__cta {
+    background: color-mix(in srgb, var(--esmerald-green) 85%, white);
+    transform: translateX(2px);
+  }
+  .scanner-promo__note {
+    font-size: .78rem;
+    color: var(--primary-400);
+  }
+
+  /* Visual side */
+  .scanner-promo__visual {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-s);
+  }
+  .scanner-promo__icon-wrap {
+    width: 80px; height: 80px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(16,185,129,.12);
+    border: 1px solid rgba(16,185,129,.25);
+    border-radius: 20px;
+    color: var(--esmerald-green);
+  }
+  .scanner-promo__stats {
+    display: flex;
+    gap: .5rem;
+  }
+  .scanner-promo__stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--primary-700);
+    border-radius: 8px;
+    padding: .4rem .65rem;
+    min-width: 52px;
+  }
+  .scanner-stat__val {
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--neutral-50);
+    white-space: nowrap;
+  }
+  .scanner-stat__label {
+    font-size: .65rem;
+    color: var(--primary-400);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  /* Responsive */
+  @media (max-width: 63.99875em) {
+    .scanner-promo__visual { display: none; }
+    .scanner-promo__features { grid-template-columns: 1fr; }
+    .scanner-promo__inner { padding: var(--space-m); }
   }
 </style>

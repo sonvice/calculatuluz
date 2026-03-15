@@ -1,7 +1,7 @@
 export const navigation = [
-  { 
-    title: 'Herramientas', 
-    url: '/', 
+  {
+    title: 'Herramientas',
+    url: '/',
     onlyTips: false,
     children: [
       { title: 'Simulador factura', url: '/simulador-factura-luz' },
@@ -10,7 +10,7 @@ export const navigation = [
   },
   { title: 'Precio luz hoy', url: '/precio-luz-hoy' },
   { title: 'Tips & Guías', url: '/tipsyguias' },
-  { title: 'Mi consumo', url: '/mi-consumo' },
+  { title: 'Escanear factura', url: '/escanear-factura', isAI: true },
   { title: 'Contacto', url: '/contacto' },
 ];
 

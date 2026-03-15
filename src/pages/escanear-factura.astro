@@ -1,0 +1,428 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AuthModal from "../components/facturas/AuthModal.vue";
+import InvoiceScanner from "../components/facturas/InvoiceScanner.vue";
+import InvoiceDashboard from "../components/facturas/InvoiceDashboard.vue";
+import Faq from "../components/Faq.astro";
+import SubscribeForm from "../components/SubscribeForm.vue";
+import ListNewsletter from "../components/ListNewsletter.astro";
+
+const canonical = "https://calculatuluz.es/escanear-factura";
+
+const faqScanner = [
+  {
+    question: "¿Cómo funciona el escáner de facturas con IA?",
+    answer: "Subes una foto o PDF de tu factura de luz o gas y nuestra inteligencia artificial analiza automáticamente todos los datos: importe total, consumo en kWh, periodo de facturación, término de potencia, término de energía, impuestos y más. Además, genera consejos personalizados de ahorro basados en tu consumo real. Todo en segundos, sin teclear nada a mano."
+  },
+  {
+    question: "¿Qué tipos de facturas puedo analizar?",
+    answer: "Facturas de electricidad (luz), gas natural y otros suministros. Nuestra IA está entrenada con facturas españolas: extrae periodos tarifarios P1/P2/P3, potencia contratada, tarifa PVPC o mercado libre, datos del contador y el desglose completo de costes. Compatible con todas las grandes comercializadoras: Endesa, Iberdrola, Naturgy, EDP, Repsol y más."
+  },
+  {
+    question: "¿Es seguro subir mi factura?",
+    answer: "Sí. Tus facturas se almacenan cifradas en tu cuenta privada. Solo tú puedes acceder a ellas — ni siquiera nosotros. Cumplimos el Reglamento General de Protección de Datos (RGPD) y la LOPDGDD. Puedes eliminar cualquier factura en cualquier momento desde tu dashboard."
+  },
+  {
+    question: "¿Cuántas facturas puedo analizar gratis?",
+    answer: "1 análisis completamente gratuito al registrarte, sin necesidad de tarjeta de crédito. Después, el Plan Básico (4,99 €/mes) incluye 20 análisis mensuales y el Plan Pro (9,99 €/mes) incluye 50 análisis con historial completo, gráficos de evolución y comparativas entre periodos."
+  },
+  {
+    question: "¿Qué datos extrae la IA de mi factura?",
+    answer: "Importe total, periodo de facturación, comercializadora, consumo en kWh (desglosado por periodos punta/llano/valle), precio medio por kWh, término de potencia, término de energía, impuestos (IVA, impuesto eléctrico), potencia contratada, tipo de tarifa (PVPC/mercado libre) y consejos personalizados para reducir tu factura de la luz."
+  },
+  {
+    question: "¿Puedo subir PDFs además de imágenes?",
+    answer: "Sí. El escáner acepta imágenes (JPG, PNG, WebP) y archivos PDF de hasta 5 MB. Si tienes la factura en PDF directamente del email de tu comercializadora, puedes subirla sin necesidad de hacer una foto."
+  },
+  {
+    question: "¿Puedo cancelar la suscripción cuando quiera?",
+    answer: "Sí, cancela en cualquier momento sin permanencia ni penalización. Mantendrás el acceso a todas las funciones hasta el final del periodo ya pagado."
+  }
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Escáner de Facturas con IA – CalculaTuLuz",
+  "url": canonical,
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Web",
+  "inLanguage": "es-ES",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Gratis",
+      "price": "0",
+      "priceCurrency": "EUR",
+      "description": "1 análisis de factura gratuito al registrarse"
+    },
+    {
+      "@type": "Offer",
+      "name": "Plan Básico",
+      "price": "4.99",
+      "priceCurrency": "EUR",
+      "description": "20 análisis de facturas al mes",
+      "billingIncrement": "P1M"
+    },
+    {
+      "@type": "Offer",
+      "name": "Plan Pro",
+      "price": "9.99",
+      "priceCurrency": "EUR",
+      "description": "50 análisis de facturas al mes con comparativas avanzadas",
+      "billingIncrement": "P1M"
+    }
+  ],
+  "description": "Analiza tus facturas de luz y gas con inteligencia artificial. Extrae automáticamente consumo, importes, periodos tarifarios y recibe consejos personalizados para ahorrar en tu factura eléctrica.",
+  "featureList": [
+    "Análisis automático de facturas de luz y gas con IA",
+    "Extracción de consumo kWh, importes y periodos tarifarios P1/P2/P3",
+    "Compatible con PVPC y mercado libre",
+    "Consejos personalizados para reducir la factura de la luz",
+    "Dashboard con historial y gráficos de gastos",
+    "Soporte para PDF e imágenes",
+    "Almacenamiento privado y seguro (RGPD)"
+  ],
+  "audience": {
+    "@type": "Audience",
+    "geographicArea": { "@type": "Country", "name": "España" }
+  }
+};
+---
+
+<Layout
+  title="Analiza tu Factura de Luz y Gas con IA | Escáner Gratis – CalculaTuLuz"
+  description="Sube tu factura de luz o gas (imagen o PDF) y nuestra IA extrae automáticamente consumo en kWh, importes, periodos P1/P2/P3 y te da consejos para ahorrar. 1 análisis gratis, sin tarjeta."
+  conical={canonical}
+>
+  <slot name="head-schema" slot="head-schema">
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  </slot>
+
+  <div class="text-primary-100 mt-space-l scanner-page">
+
+    <!-- ── HERO ────────────────────────────────────── -->
+    <section class="hero">
+      <div class="hero__text">
+        <div class="hero__eyebrow">
+          <span class="ai-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+            Análisis con IA · CalculaTuLuz
+          </span>
+        </div>
+        <h1 class="fw-700 text-neutral-50">
+          Escanea tu factura<br class="hero__br"> de luz y gas con IA
+        </h1>
+        <p class="mt-space-s hero__desc">
+          Sube una foto o PDF de tu factura y nuestra IA extrae automáticamente consumo en kWh,
+          importes, periodos tarifarios y te da <strong>consejos personalizados para ahorrar en tu factura eléctrica</strong>.
+        </p>
+        <div class="hero__badges mt-space-m">
+          <span class="badge badge--free">1 escaneo gratis</span>
+          <span class="badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Luz
+          </span>
+          <span class="badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+            Gas
+          </span>
+          <span class="badge">Historial &amp; gráficos</span>
+        </div>
+      </div>
+      <div class="hero__auth">
+        <AuthModal client:only="vue" />
+      </div>
+    </section>
+
+    <!-- ── MAIN TABS ───────────────────────────────── -->
+    <div class="main-tabs mt-space-l" id="app-tabs">
+      <div class="main-tabs__nav">
+        <button class="tab-btn tab-btn--active" data-tab="scanner" onclick="switchTab('scanner')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Escanear factura
+        </button>
+        <button class="tab-btn" data-tab="dashboard" onclick="switchTab('dashboard')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Mi dashboard
+        </button>
+      </div>
+
+      <!-- Scanner tab -->
+      <div id="tab-scanner" class="tab-panel tab-panel--active">
+        <div class="bg-primary-900 p-space-l rounded-md bg-texture">
+          <InvoiceScanner client:only="vue" />
+        </div>
+      </div>
+
+      <!-- Dashboard tab -->
+      <div id="tab-dashboard" class="tab-panel">
+        <div class="bg-primary-900 p-space-l rounded-md bg-texture">
+          <InvoiceDashboard client:only="vue" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CÓMO FUNCIONA ───────────────────────────── -->
+    <hr class="sep my-space-2xl" />
+
+    <section>
+      <h2 class="text-neutral-50">¿Cómo funciona?</h2>
+      <div class="steps-grid mt-space-l">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h3>Regístrate gratis</h3>
+          <p>Crea tu cuenta en segundos. Tu primer escaneo es completamente gratuito.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h3>Sube tu factura</h3>
+          <p>Arrastra o selecciona la imagen de tu factura de luz o gas.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h3>Análisis con IA</h3>
+          <p>Nuestra IA analiza la imagen al instante y extrae todos los datos de tu factura.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <h3>Dashboard</h3>
+          <p>Visualiza tu historial, evolución mensual y gastos por categoría.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── QUÉ EXTRAE ──────────────────────────────── -->
+    <section class="mt-space-xl">
+      <h2 class="text-neutral-50">¿Qué datos extrae la IA?</h2>
+      <div class="features-grid mt-space-l">
+        <div class="feature-item">
+          <span class="feature-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v2m0 8v2M9.17 9.17A4 4 0 0 1 16 12a4 4 0 0 1-6.83 2.83"/></svg>
+          </span>
+          <strong>Importe total</strong>
+          <p>Coste total desglosado por conceptos.</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </span>
+          <strong>Consumo en kWh</strong>
+          <p>Consumo real por periodos punta, llano y valle.</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          </span>
+          <strong>Término de potencia</strong>
+          <p>Coste fijo por la potencia contratada.</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          </span>
+          <strong>Término de energía</strong>
+          <p>Coste variable según tu consumo real.</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </span>
+          <strong>Impuestos</strong>
+          <p>Impuesto eléctrico (5,11 %) e IVA (21 %).</p>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+          </span>
+          <strong>Consejos de ahorro</strong>
+          <p>Recomendaciones personalizadas para tu caso.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FAQ ────────────────────────────────────── -->
+    <div class="mt-space-xl">
+      <Faq data={faqScanner} />
+    </div>
+
+    <!-- ── NEWSLETTER ──────────────────────────────── -->
+    <div class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture">
+      <div class="newsletter-wrap">
+        <h2>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.35rem" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          ¡No te pierdas las horas más baratas de luz!
+        </h2>
+        <p class="subtitle mt-space-xs">Recibe cada día un correo con:</p>
+        <ListNewsletter />
+        <div class="mt-space-m">
+          <SubscribeForm client:only="vue" />
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<!-- Tab switching script -->
+<script is:inline>
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-btn--active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('tab-panel--active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('tab-btn--active');
+  document.getElementById(`tab-${tab}`).classList.add('tab-panel--active');
+}
+// Expose so link in scanner can jump to dashboard
+window.switchToDashboard = () => switchTab('dashboard');
+
+// Manejar redirección desde Stripe
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const payment = params.get('payment');
+  if (payment === 'success') {
+    switchTab('dashboard');
+    document.getElementById('app-tabs')?.scrollIntoView({ behavior: 'smooth' });
+    // Limpiar el param de la URL sin recargar
+    history.replaceState(null, '', window.location.pathname);
+  } else if (payment === 'cancelled') {
+    // Volver al scanner donde están los planes (paywall)
+    switchTab('scanner');
+    document.getElementById('app-tabs')?.scrollIntoView({ behavior: 'smooth' });
+    history.replaceState(null, '', window.location.pathname);
+  }
+})();
+</script>
+
+<style>
+.scanner-page { max-width: 100%; }
+
+/* ── Hero ──────────────────────────────────────── */
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.hero__text { flex: 1; min-width: 280px; }
+.hero__auth { flex-shrink: 0; padding-top: 0.25rem; }
+
+.hero__eyebrow { margin-bottom: 0.75rem; }
+.ai-pill {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.3rem 0.85rem;
+  background: linear-gradient(135deg, rgba(139,92,246,.2), rgba(59,130,246,.15));
+  border: 1px solid rgba(139,92,246,.4);
+  border-radius: 20px;
+  font-size: 0.78rem; font-weight: 600;
+  color: #c4b5fd;
+}
+.hero__desc { color: var(--primary-100); line-height: 1.6; }
+
+.hero__badges { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.3rem 0.75rem;
+  background: var(--primary-800);
+  border: 1px solid var(--primary-700);
+  border-radius: 20px;
+  font-size: 0.8rem; color: var(--primary-200); font-weight: 500;
+}
+.badge--free {
+  background: rgba(34,197,94,.12);
+  border-color: rgba(34,197,94,.3);
+  color: #86efac;
+}
+
+/* ── Tabs ──────────────────────────────────────── */
+.main-tabs { }
+.main-tabs__nav {
+  display: flex; gap: 0.35rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--primary-800);
+  padding-bottom: 0;
+}
+.tab-btn {
+  display: flex; align-items: center; gap: 0.45rem;
+  padding: 0.6rem 1.1rem;
+  background: none;
+  border: none; border-bottom: 2px solid transparent;
+  color: var(--primary-400);
+  font-size: 0.9rem; font-weight: 500; cursor: pointer;
+  transition: all .15s; font-family: inherit;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--primary-100); }
+.tab-btn--active {
+  color: var(--neutral-50);
+  border-bottom-color: var(--primary-400);
+}
+.tab-panel { display: none; }
+.tab-panel--active { display: block; }
+
+/* ── Steps ─────────────────────────────────────── */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+.step-card {
+  background: var(--primary-800);
+  border: 1px solid var(--primary-700);
+  border-radius: 12px;
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+}
+.step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  background: var(--primary-500);
+  color: var(--neutral-50);
+  border-radius: 50%; font-size: 1.1rem; font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+.step-card h3 { font-size: 1rem; color: var(--neutral-50); margin: 0 0 0.35rem; }
+.step-card p  { font-size: 0.85rem; color: var(--primary-200); margin: 0; line-height: 1.4; }
+
+/* ── Features ──────────────────────────────────── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.feature-item {
+  background: var(--primary-800);
+  border: 1px solid var(--primary-700);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex; flex-direction: column; gap: 0.25rem;
+}
+.feature-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  background: var(--primary-700);
+  border-radius: 8px;
+  color: var(--primary-300);
+  flex-shrink: 0;
+}
+.feature-item strong { font-size: 0.95rem; color: var(--neutral-50); }
+.feature-item p { font-size: 0.85rem; color: var(--primary-200); margin: 0; line-height: 1.4; }
+
+/* ── Misc ──────────────────────────────────────── */
+.sep { border-color: var(--primary-800); }
+.newsletter-wrap { max-width: 48rem; }
+
+/* ── Responsive ────────────────────────────────── */
+@media (max-width: 900px) {
+  .steps-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .hero { flex-direction: column; }
+  .hero__auth { width: 100%; }
+  .features-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .steps-grid { grid-template-columns: 1fr; }
+  .features-grid { grid-template-columns: 1fr; }
+  .tab-btn { padding: 0.5rem 0.7rem; font-size: 0.82rem; }
+}
+</style>
