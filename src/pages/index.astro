@@ -124,7 +124,7 @@ import Table from "@/components/Table";
               </li>
             </ul>
             <div class="scanner-promo__cta-row">
-              <span class="scanner-promo__cta">
+              <span class="btn" data-type="accent" data-size="small">
                 Escanear mi factura gratis
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </span>
@@ -366,22 +366,7 @@ import Table from "@/components/Table";
     flex-wrap: wrap;
     gap: .75rem;
   }
-  .scanner-promo__cta {
-    display: inline-flex;
-    align-items: center;
-    gap: .45rem;
-    padding: .7rem 1.4rem;
-    background: var(--esmerald-green);
-    border-radius: 10px;
-    font-size: .95rem;
-    font-weight: 700;
-    color: #022c22;
-    min-height: 44px;
-    transition: background .15s, transform .15s;
-    white-space: nowrap;
-  }
-  .scanner-promo:hover .scanner-promo__cta {
-    background: color-mix(in srgb, var(--esmerald-green) 85%, white);
+  .scanner-promo:hover .btn[data-type="accent"] {
     transform: translateX(2px);
   }
   .scanner-promo__note {
