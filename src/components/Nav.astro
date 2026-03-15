@@ -300,7 +300,13 @@ function isItemActive(item: any): boolean {
 
     .nav {
       position: relative;
-      overflow: visible;
+      flex: 1;
+      min-width: 0;
+      overflow-x: clip; /* evita scroll de página sin cortar dropdowns verticales */
+    }
+
+    .nav__list {
+      overflow-x: auto;
     }
 
     .nav::after {
