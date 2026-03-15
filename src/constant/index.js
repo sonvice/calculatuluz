@@ -1,4 +1,5 @@
 export const navigation = [
+  { title: 'Escanear factura', url: '/escanear-factura', isAI: true },
   {
     title: 'Herramientas',
     url: '/',
@@ -8,7 +9,6 @@ export const navigation = [
       { title: 'Calculadora consumo', url: '/' },
     ]
   },
-  { title: 'Escanear factura', url: '/escanear-factura', isAI: true },
   { title: 'Precio luz hoy', url: '/precio-luz-hoy' },
   { title: 'Tips & Guías', url: '/tipsyguias' },
   { title: 'Contacto', url: '/contacto' },

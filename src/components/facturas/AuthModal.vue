@@ -542,9 +542,17 @@ defineExpose({ openModal })
 }
 
 @media (max-width: 480px) {
+  .modal-overlay {
+    align-items: flex-start;
+    padding-top: 1.5rem;
+    overflow-y: auto;
+  }
+
   .modal-container {
     max-width: 100%;
-    margin: 0.5rem;
+    margin: 0 0.5rem 1rem;
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
   }
 
   .auth-buttons {

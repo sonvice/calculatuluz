@@ -215,7 +215,11 @@ export async function signIn(email: string, password: string) {
 
 // Logout
 export async function signOut() {
-  await supabase.auth.signOut()
+  try {
+    await supabase.auth.signOut()
+  } catch {
+    // Ignorar 403 cuando el token ya expiró — la sesión local se limpia igualmente
+  }
   currentUser.set(null)
   currentSession.set(null)
   userProfile.set(null)

@@ -321,23 +321,40 @@ function isItemActive(item: any): boolean {
       z-index: 10;
     }
 
-    /* Dropdown en móvil - se abre con tap */
+    /* Dropdown en móvil - inline dentro del scroll del nav */
     .dropdown-menu {
-      position: absolute;
-      left: 0;
-      right: auto;
-      min-width: 180px;
+      position: static;
+      display: none;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      box-shadow: none;
+      background: transparent;
+      border: none;
+      padding: 0;
+      margin: 0;
+      min-width: unset;
+      flex-direction: row;
+      gap: 0.25rem;
+      align-items: center;
+    }
+
+    .has-dropdown.open .dropdown-menu {
+      display: flex;
     }
 
     .dropdown-link {
-      padding: var(--space-xs) var(--space-s);
+      padding: var(--space-2xs) var(--space-xs);
+      font-size: var(--size--1);
+      background: var(--primary-800);
+      border: 1px solid var(--primary-700);
+      border-radius: 6px;
+      white-space: nowrap;
     }
 
-    /* Evitar que el dropdown se corte */
-    .has-dropdown:last-child .dropdown-menu,
-    .has-dropdown:nth-last-child(2) .dropdown-menu {
-      left: auto;
-      right: 0;
+    .dropdown-link:hover,
+    .dropdown-link--active {
+      background: var(--primary-700);
     }
   }
 
