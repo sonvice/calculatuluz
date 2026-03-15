@@ -30,6 +30,7 @@ const portalLoading  = ref(false)
 const portalError    = ref('')
 const upgradeLoading = ref(false)
 const upgradeSuccess = ref(false)
+const upgradeConfirm = ref(false)
 
 async function openCustomerPortal() {
   portalLoading.value = true
@@ -48,6 +49,7 @@ async function openCustomerPortal() {
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Error desconocido')
+    portalLoading.value = false
     window.location.href = data.url
   } catch (e) {
     portalError.value = e.message
@@ -73,10 +75,12 @@ async function upgradeToPro() {
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Error desconocido')
     upgradeSuccess.value = true
+    upgradeConfirm.value = false
     // Recargar perfil para reflejar el nuevo plan
     await import('../../stores/authStore').then(m => m.refreshProfile())
   } catch (e) {
     portalError.value = e.message
+    upgradeConfirm.value = false
   } finally {
     upgradeLoading.value = false
   }
@@ -270,9 +274,10 @@ const signedUrls = ref({})
 
 async function resolveImageUrl(inv) {
   if (!inv.image_path || signedUrls.value[inv.id]) return
-  const { data } = await supabase.storage
+  const { data, error } = await supabase.storage
     .from('invoices')
     .createSignedUrl(inv.image_path, 3600) // 1h para visualización
+  if (error) console.error('[resolveImageUrl] Supabase storage error:', error, 'path:', inv.image_path)
   if (data?.signedUrl) signedUrls.value = { ...signedUrls.value, [inv.id]: data.signedUrl }
 }
 
@@ -320,6 +325,16 @@ onMounted(async () => {
 
   // Escuchar evento del scanner para refrescar tras nuevo escaneo
   document.addEventListener('refresh-dashboard', fetchInvoices)
+
+  // Resetear estados de carga si el navegador restaura la página desde bfcache
+  // (ocurre cuando el usuario vuelve con el botón "atrás" desde el portal de Stripe)
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+      portalLoading.value  = false
+      upgradeLoading.value = false
+      upgradeConfirm.value = false
+    }
+  })
 })
 
 // Si el usuario se autentica después de montar (timing race), recargar facturas
@@ -363,15 +378,21 @@ defineExpose({ fetchInvoices })
               ¡Actualizado a Pro! 🎉
             </span>
             <!-- Upgrade a Pro (solo visible en plan Básico) -->
-            <button
-              v-if="$profile?.subscription_tier !== 'pro'"
-              class="btn-upgrade"
-              :disabled="upgradeLoading"
-              @click="upgradeToPro"
-            >
-              <span v-if="upgradeLoading" class="spinner-xs"></span>
-              {{ upgradeLoading ? 'Actualizando...' : '⬆ Subir a Pro — 9,99€/mes' }}
-            </button>
+            <template v-if="$profile?.subscription_tier !== 'pro'">
+              <div v-if="upgradeConfirm" class="upgrade-confirm">
+                <span class="upgrade-confirm__msg">Se cargará la diferencia proporcional ahora. ¿Confirmar subida a Pro (9,99€/mes)?</span>
+                <div class="upgrade-confirm__btns">
+                  <button class="btn-cancel-del" @click="upgradeConfirm = false">Cancelar</button>
+                  <button class="btn-upgrade btn-upgrade--confirm" :disabled="upgradeLoading" @click="upgradeToPro">
+                    <span v-if="upgradeLoading" class="spinner-xs"></span>
+                    {{ upgradeLoading ? 'Actualizando...' : 'Confirmar' }}
+                  </button>
+                </div>
+              </div>
+              <button v-else class="btn-upgrade" @click="upgradeConfirm = true">
+                ⬆ Subir a Pro — 9,99€/mes
+              </button>
+            </template>
             <button
               class="btn-portal"
               :disabled="portalLoading"
@@ -1165,6 +1186,31 @@ code.d-id-val { font-family: 'Courier New', monospace; font-size: 0.72rem; color
   border-top-color: #10b981;
   border-radius: 50%;
   animation: spin .7s linear infinite;
+}
+.upgrade-confirm {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+  padding: .55rem .85rem;
+  background: rgba(139,92,246,.08);
+  border: 1px solid rgba(139,92,246,.3);
+  border-radius: 8px;
+}
+.upgrade-confirm__msg {
+  font-size: .8rem;
+  color: #c4b5fd;
+  flex: 1;
+  min-width: 180px;
+}
+.upgrade-confirm__btns {
+  display: flex;
+  gap: .4rem;
+  flex-shrink: 0;
+}
+.btn-upgrade--confirm {
+  background: rgba(139,92,246,.25);
+  border-color: rgba(139,92,246,.6);
 }
 .sub-bar__badge--pro {
   background: rgba(139,92,246,.18);
