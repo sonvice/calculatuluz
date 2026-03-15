@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useStore } from '@nanostores/vue'
-import { currentUser, currentSession, initAuth } from '../../stores/authStore'
+import { currentUser, currentSession, initAuth, userProfile, isSubscribed, monthlyScansLeft, monthlyLimit } from '../../stores/authStore'
 import { supabase } from '../../lib/supabaseClient'
 import Bar from '../charts/BarChart.js'
 import Doughnut from '../charts/DoughnutChart.js'
@@ -12,8 +12,12 @@ import {
   AlertTriangle, X, User, Network, Gauge, Receipt
 } from 'lucide-vue-next'
 
-const $user = useStore(currentUser)
-const $session = useStore(currentSession)
+const $user        = useStore(currentUser)
+const $session     = useStore(currentSession)
+const $profile     = useStore(userProfile)
+const $isSubscribed = useStore(isSubscribed)
+const $scansLeft   = useStore(monthlyScansLeft)
+const $monthlyLimit = useStore(monthlyLimit)
 
 // ─── State ───────────────────────────────────────────
 const invoices = ref([])
@@ -23,6 +27,26 @@ const expandedId = ref(null)
 const activeTab = ref('all') // 'all' | 'luz' | 'gas' | 'otro'
 const activeView = ref('list') // 'list' | 'charts'
 const pendingDeleteId = ref(null) // confirmación de borrado inline
+const portalLoading = ref(false)
+const portalError   = ref('')
+
+async function openCustomerPortal() {
+  if (!$session.value?.access_token) return
+  portalLoading.value = true
+  portalError.value   = ''
+  try {
+    const res = await fetch('/api/customer-portal', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${$session.value.access_token}` },
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Error desconocido')
+    window.location.href = data.url
+  } catch (e) {
+    portalError.value = e.message
+    portalLoading.value = false
+  }
+}
 
 // ─── Computed: filtered list ──────────────────────────
 const filteredInvoices = computed(() =>
@@ -289,6 +313,29 @@ defineExpose({ fetchInvoices })
       </div>
 
       <template v-else>
+        <!-- ── Subscription bar ──────────────────────── -->
+        <div v-if="$isSubscribed" class="sub-bar">
+          <div class="sub-bar__info">
+            <span class="sub-bar__badge">
+              Plan {{ $profile?.subscription_tier === 'pro' ? 'Pro' : 'Básico' }}
+            </span>
+            <span class="sub-bar__scans">
+              {{ $scansLeft }} / {{ $monthlyLimit }} escaneos este mes
+            </span>
+          </div>
+          <div class="sub-bar__actions">
+            <p v-if="portalError" class="sub-bar__error">{{ portalError }}</p>
+            <button
+              class="btn-portal"
+              :disabled="portalLoading"
+              @click="openCustomerPortal"
+            >
+              <span v-if="portalLoading" class="spinner-xs"></span>
+              {{ portalLoading ? 'Abriendo...' : 'Gestionar suscripción' }}
+            </button>
+          </div>
+        </div>
+
         <!-- ── KPI Cards ────────────────────────────── -->
         <div v-if="stats" class="kpi-row">
           <div class="kpi-card">
@@ -995,6 +1042,83 @@ code.d-id-val { font-family: 'Courier New', monospace; font-size: 0.72rem; color
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin .7s linear infinite; }
 .btn-refresh:disabled { opacity: .6; cursor: default; }
+
+/* ── Subscription bar ────────────────────────────── */
+.sub-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem;
+  padding: .75rem 1rem;
+  background: rgba(16,185,129,.07);
+  border: 1px solid rgba(16,185,129,.22);
+  border-radius: 10px;
+  margin-bottom: var(--space-m);
+}
+.sub-bar__info {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+.sub-bar__badge {
+  display: inline-block;
+  padding: .2rem .65rem;
+  background: rgba(16,185,129,.18);
+  border: 1px solid rgba(16,185,129,.35);
+  border-radius: 20px;
+  font-size: .75rem;
+  font-weight: 700;
+  color: #10b981;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.sub-bar__scans {
+  font-size: .85rem;
+  color: var(--primary-200);
+}
+.sub-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+.sub-bar__error {
+  font-size: .8rem;
+  color: #f87171;
+}
+.btn-portal {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .45rem 1rem;
+  background: transparent;
+  border: 1px solid rgba(16,185,129,.5);
+  border-radius: 8px;
+  color: #10b981;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  white-space: nowrap;
+  min-height: 36px;
+}
+.btn-portal:hover:not(:disabled) {
+  background: rgba(16,185,129,.12);
+  border-color: #10b981;
+}
+.btn-portal:disabled {
+  opacity: .6;
+  cursor: default;
+}
+.spinner-xs {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border: 2px solid rgba(16,185,129,.3);
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
 
 /* ── Responsive ──────────────────────────────────── */
 @media (max-width: 860px) {
