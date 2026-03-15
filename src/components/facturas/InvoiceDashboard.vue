@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useStore } from '@nanostores/vue'
-import { currentUser, currentSession, initAuth, userProfile, isSubscribed, monthlyScansLeft, monthlyLimit } from '../../stores/authStore'
+import { currentUser, initAuth, userProfile, isSubscribed, monthlyScansLeft, monthlyLimit } from '../../stores/authStore'
 import { supabase } from '../../lib/supabaseClient'
 import Bar from '../charts/BarChart.js'
 import Doughnut from '../charts/DoughnutChart.js'
@@ -13,7 +13,6 @@ import {
 } from 'lucide-vue-next'
 
 const $user        = useStore(currentUser)
-const $session     = useStore(currentSession)
 const $profile     = useStore(userProfile)
 const $isSubscribed = useStore(isSubscribed)
 const $scansLeft   = useStore(monthlyScansLeft)
@@ -27,17 +26,25 @@ const expandedId = ref(null)
 const activeTab = ref('all') // 'all' | 'luz' | 'gas' | 'otro'
 const activeView = ref('list') // 'list' | 'charts'
 const pendingDeleteId = ref(null) // confirmación de borrado inline
-const portalLoading = ref(false)
-const portalError   = ref('')
+const portalLoading  = ref(false)
+const portalError    = ref('')
+const upgradeLoading = ref(false)
+const upgradeSuccess = ref(false)
 
 async function openCustomerPortal() {
-  if (!$session.value?.access_token) return
   portalLoading.value = true
   portalError.value   = ''
   try {
+    // Leer sesión fresca de Supabase para evitar token expirado
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      portalError.value = 'Sesión expirada. Recarga la página e inicia sesión.'
+      portalLoading.value = false
+      return
+    }
     const res = await fetch('/api/customer-portal', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${$session.value.access_token}` },
+      headers: { Authorization: `Bearer ${session.access_token}` },
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Error desconocido')
@@ -45,6 +52,33 @@ async function openCustomerPortal() {
   } catch (e) {
     portalError.value = e.message
     portalLoading.value = false
+  }
+}
+
+async function upgradeToPro() {
+  upgradeLoading.value = true
+  portalError.value    = ''
+  upgradeSuccess.value = false
+  try {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      portalError.value = 'Sesión expirada. Recarga la página.'
+      upgradeLoading.value = false
+      return
+    }
+    const res  = await fetch('/api/upgrade-plan', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Error desconocido')
+    upgradeSuccess.value = true
+    // Recargar perfil para reflejar el nuevo plan
+    await import('../../stores/authStore').then(m => m.refreshProfile())
+  } catch (e) {
+    portalError.value = e.message
+  } finally {
+    upgradeLoading.value = false
   }
 }
 
@@ -316,7 +350,7 @@ defineExpose({ fetchInvoices })
         <!-- ── Subscription bar ──────────────────────── -->
         <div v-if="$isSubscribed" class="sub-bar">
           <div class="sub-bar__info">
-            <span class="sub-bar__badge">
+            <span class="sub-bar__badge" :class="$profile?.subscription_tier === 'pro' ? 'sub-bar__badge--pro' : ''">
               Plan {{ $profile?.subscription_tier === 'pro' ? 'Pro' : 'Básico' }}
             </span>
             <span class="sub-bar__scans">
@@ -325,6 +359,19 @@ defineExpose({ fetchInvoices })
           </div>
           <div class="sub-bar__actions">
             <p v-if="portalError" class="sub-bar__error">{{ portalError }}</p>
+            <span v-if="upgradeSuccess" class="sub-bar__success">
+              ¡Actualizado a Pro! 🎉
+            </span>
+            <!-- Upgrade a Pro (solo visible en plan Básico) -->
+            <button
+              v-if="$profile?.subscription_tier !== 'pro'"
+              class="btn-upgrade"
+              :disabled="upgradeLoading"
+              @click="upgradeToPro"
+            >
+              <span v-if="upgradeLoading" class="spinner-xs"></span>
+              {{ upgradeLoading ? 'Actualizando...' : '⬆ Subir a Pro — 9,99€/mes' }}
+            </button>
             <button
               class="btn-portal"
               :disabled="portalLoading"
@@ -1118,6 +1165,41 @@ code.d-id-val { font-family: 'Courier New', monospace; font-size: 0.72rem; color
   border-top-color: #10b981;
   border-radius: 50%;
   animation: spin .7s linear infinite;
+}
+.sub-bar__badge--pro {
+  background: rgba(139,92,246,.18);
+  border-color: rgba(139,92,246,.35);
+  color: #a78bfa;
+}
+.sub-bar__success {
+  font-size: .82rem;
+  font-weight: 600;
+  color: #4ade80;
+}
+.btn-upgrade {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .45rem 1rem;
+  background: rgba(139,92,246,.15);
+  border: 1px solid rgba(139,92,246,.45);
+  border-radius: 8px;
+  color: #c4b5fd;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  white-space: nowrap;
+  min-height: 36px;
+}
+.btn-upgrade:hover:not(:disabled) {
+  background: rgba(139,92,246,.28);
+  border-color: #a78bfa;
+  color: #ede9fe;
+}
+.btn-upgrade:disabled {
+  opacity: .6;
+  cursor: default;
 }
 
 /* ── Responsive ──────────────────────────────────── */
