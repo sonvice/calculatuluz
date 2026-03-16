@@ -47,7 +47,8 @@ export const POST: APIRoute = async ({ request }) => {
   const plan = PLANS[tier]
 
   if (!plan?.priceId) {
-    return new Response(JSON.stringify({ error: `STRIPE_PRICE_${tier?.toUpperCase()} no configurado` }), {
+    console.error(`[create-checkout] Missing env var STRIPE_PRICE_${tier?.toUpperCase()}`)
+    return new Response(JSON.stringify({ error: `Plan "${tier}" no disponible. Contacta con soporte.` }), {
       status: 500, headers: { 'Content-Type': 'application/json' }
     })
   }
@@ -101,8 +102,11 @@ export const POST: APIRoute = async ({ request }) => {
       status: 200, headers: { 'Content-Type': 'application/json' }
     })
   } catch (err: any) {
-    console.error('Stripe checkout error:', err)
-    return new Response(JSON.stringify({ error: 'Error al crear sesión de pago' }), {
+    console.error('[create-checkout] Stripe error:', err?.raw?.message || err?.message, '| tier:', tier, '| priceId:', plan?.priceId)
+    const userMsg = err?.raw?.code === 'resource_missing'
+      ? 'El precio de Stripe no existe. Contacta con soporte.'
+      : 'Error al crear sesión de pago'
+    return new Response(JSON.stringify({ error: userMsg }), {
       status: 500, headers: { 'Content-Type': 'application/json' }
     })
   }
