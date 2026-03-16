@@ -451,7 +451,7 @@ onMounted(async () => {
             data-type="accent"
             aria-label="Suscribirse al Plan Pro por 9,99 euros al mes"
             @click="handleSubscribe('pro')"
-            :disabled="subscribing"
+            :disabled="!!subscribing"
           >
             <Loader v-if="subscribing === 'pro'" :size="15" class="spin" aria-hidden="true" />
             <BarChart3 v-else :size="15" aria-hidden="true" />
