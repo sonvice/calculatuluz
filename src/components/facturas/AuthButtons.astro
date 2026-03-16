@@ -1,0 +1,631 @@
+---
+// AuthButtons.astro — login/register sin Vue, vanilla JS puro
+// Sin v-model, sin reactividad: lee el DOM directamente al hacer submit
+---
+
+<!-- Botones de sesión (se actualizan via JS) -->
+<div id="auth-root">
+  <div id="auth-guest" class="ab-buttons">
+    <button id="btn-open-login" class="ab-btn ab-btn--primary" type="button">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Iniciar sesión
+    </button>
+    <button id="btn-open-register" class="ab-btn ab-btn--outline" type="button">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      Registrarse
+    </button>
+  </div>
+  <div id="auth-user" class="ab-user" style="display:none">
+    <span id="auth-user-email" class="ab-user-email"></span>
+    <button id="btn-logout" class="ab-btn ab-btn--outline" type="button">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Salir
+    </button>
+  </div>
+</div>
+
+<!-- Modal (JS lo mueve al body) -->
+<div id="auth-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="auth-modal-title"
+  style="display:none"
+  class="ab-overlay">
+  <div class="ab-container">
+    <div class="ab-header">
+      <h2 id="auth-modal-title" class="ab-title">Iniciar sesión</h2>
+      <button id="btn-modal-close" class="ab-close" type="button" aria-label="Cerrar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <form id="auth-form" class="ab-body" novalidate autocomplete="on">
+      <!-- Honeypot anti-bot -->
+      <div class="ab-hp" aria-hidden="true">
+        <input type="text" name="website" id="hp-input" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <!-- Feedback (error / éxito) -->
+      <div id="auth-feedback" role="alert" aria-live="assertive" style="display:none" class="ab-feedback"></div>
+
+      <!-- Nombre (solo registro) -->
+      <div id="field-name" class="ab-field" style="display:none">
+        <label for="inp-name">Nombre completo</label>
+        <input id="inp-name" type="text" placeholder="Tu nombre" autocomplete="name" inputmode="text" />
+      </div>
+
+      <!-- Email -->
+      <div class="ab-field">
+        <label for="inp-email">Email</label>
+        <input id="inp-email" type="email" placeholder="tu@email.com" autocomplete="email" inputmode="email" />
+      </div>
+
+      <!-- Contraseña -->
+      <div class="ab-field">
+        <label for="inp-password">Contraseña</label>
+        <div class="ab-pass-wrap">
+          <input id="inp-password" type="password" placeholder="Mínimo 8 caracteres" autocomplete="current-password" />
+          <button type="button" id="btn-toggle-pass" class="ab-pass-toggle" aria-label="Mostrar contraseña">
+            <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg id="eye-off-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" id="auth-submit" class="ab-submit">
+        <span id="submit-spinner" class="ab-spinner" style="display:none"></span>
+        <span id="submit-label">Iniciar sesión</span>
+      </button>
+
+      <!-- Cambiar modo -->
+      <p class="ab-toggle">
+        <span id="toggle-msg">¿No tienes cuenta?</span>
+        <button type="button" id="btn-toggle-mode" class="ab-toggle-btn">Regístrate</button>
+      </p>
+    </form>
+  </div>
+</div>
+
+<script>
+  import { supabase } from '../../lib/supabaseClient'
+  import { currentUser, userProfile, authError, refreshProfile } from '../../stores/authStore'
+  import { isDisposableEmail, isValidEmailFormat } from '../../lib/disposableEmailDomains'
+
+  // ── Elementos del DOM ─────────────────────────────
+  const modal       = document.getElementById('auth-modal')!
+  const authGuest   = document.getElementById('auth-guest')!
+  const authUser    = document.getElementById('auth-user')!
+  const userEmailEl = document.getElementById('auth-user-email')!
+  const form        = document.getElementById('auth-form') as HTMLFormElement
+  const feedback    = document.getElementById('auth-feedback')!
+  const fieldName   = document.getElementById('field-name')!
+  const inpEmail    = document.getElementById('inp-email') as HTMLInputElement
+  const inpPassword = document.getElementById('inp-password') as HTMLInputElement
+  const inpName     = document.getElementById('inp-name') as HTMLInputElement
+  const hpInput     = document.getElementById('hp-input') as HTMLInputElement
+  const submitBtn   = document.getElementById('auth-submit') as HTMLButtonElement
+  const submitSpinner = document.getElementById('submit-spinner')!
+  const submitLabel = document.getElementById('submit-label')!
+  const modalTitle  = document.getElementById('auth-modal-title')!
+  const toggleMsg   = document.getElementById('toggle-msg')!
+  const toggleBtn   = document.getElementById('btn-toggle-mode')!
+  const eyeIcon     = document.getElementById('eye-icon')!
+  const eyeOffIcon  = document.getElementById('eye-off-icon')!
+
+  // Mover modal al body para evitar problemas de z-index/overflow
+  document.body.appendChild(modal)
+
+  let mode = 'login'      // 'login' | 'register'
+  let openedAt = 0
+
+  // ── Funciones de UI ───────────────────────────────
+
+  function setMode(m: string) {
+    mode = m
+    const isLogin = m === 'login'
+    modalTitle.textContent  = isLogin ? 'Iniciar sesión' : 'Crear cuenta'
+    submitLabel.textContent = isLogin ? 'Iniciar sesión' : 'Crear cuenta'
+    toggleMsg.textContent   = isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'
+    toggleBtn.textContent   = isLogin ? 'Regístrate' : 'Inicia sesión'
+    fieldName.style.display = isLogin ? 'none' : 'flex'
+    if (!isLogin) inpPassword.setAttribute('autocomplete', 'new-password')
+    else inpPassword.setAttribute('autocomplete', 'current-password')
+  }
+
+  function openModal(m = 'login') {
+    setMode(m)
+    openedAt = Date.now()
+    hideFeedback()
+    form.reset()
+    modal.style.display = 'flex'
+    document.body.style.overflow = 'hidden'
+    // Focus al primer campo tras animación
+    setTimeout(() => inpEmail.focus(), 100)
+  }
+
+  function closeModal() {
+    modal.style.display = 'none'
+    document.body.style.overflow = ''
+    hideFeedback()
+    form.reset()
+  }
+
+  function showError(msg: string) {
+    feedback.textContent = msg
+    feedback.className = 'ab-feedback ab-feedback--error'
+    feedback.style.display = 'block'
+  }
+
+  function showSuccess(msg: string) {
+    feedback.textContent = msg
+    feedback.className = 'ab-feedback ab-feedback--success'
+    feedback.style.display = 'block'
+  }
+
+  function hideFeedback() {
+    feedback.style.display = 'none'
+    feedback.textContent = ''
+  }
+
+  function setLoading(on: boolean) {
+    submitBtn.disabled = on
+    submitSpinner.style.display = on ? 'inline-block' : 'none'
+    submitLabel.style.display   = on ? 'none'         : 'inline'
+  }
+
+  function translateError(msg: string) {
+    const m = (msg || '').toLowerCase()
+    if (m.includes('invalid login credentials') || m.includes('invalid email or password'))
+      return 'Email o contraseña incorrectos.'
+    if (m.includes('email not confirmed'))
+      return 'Confirma tu email antes de entrar. Revisa tu bandeja de entrada.'
+    if (m.includes('user already registered') || m.includes('already been registered'))
+      return 'Ya existe una cuenta con ese email. Inicia sesión.'
+    if (m.includes('password should be at least'))
+      return 'La contraseña debe tener al menos 8 caracteres.'
+    if (m.includes('rate limit') || m.includes('too many requests'))
+      return 'Demasiados intentos. Espera unos minutos.'
+    if (m.includes('network') || m.includes('fetch') || m.includes('failed'))
+      return 'Error de conexión. Comprueba tu internet.'
+    return msg || 'Error desconocido. Inténtalo de nuevo.'
+  }
+
+  // ── Actualizar UI según sesión ────────────────────
+
+  function updateAuthUI(user: any) {
+    if (user) {
+      authGuest.style.display = 'none'
+      authUser.style.display  = 'flex'
+      userEmailEl.textContent = user.email || ''
+    } else {
+      authGuest.style.display = 'flex'
+      authUser.style.display  = 'none'
+    }
+  }
+
+  // Suscribirse al nanostore para mantener UI en sync con Vue islands
+  currentUser.subscribe(updateAuthUI)
+
+  // Cargar sesión inicial
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session?.user) {
+      currentUser.set(session.user)
+      refreshProfile()
+    }
+  })
+
+  // ── Event listeners ───────────────────────────────
+
+  document.getElementById('btn-open-login')!.addEventListener('click', () => openModal('login'))
+  document.getElementById('btn-open-register')!.addEventListener('click', () => openModal('register'))
+  document.getElementById('btn-modal-close')!.addEventListener('click', closeModal)
+
+  // Cerrar al hacer click fuera del contenedor
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal()
+  })
+
+  // Escape para cerrar
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display !== 'none') closeModal()
+  })
+
+  // Toggle mostrar/ocultar contraseña
+  document.getElementById('btn-toggle-pass')!.addEventListener('click', () => {
+    const isPass = inpPassword.type === 'password'
+    inpPassword.type = isPass ? 'text' : 'password'
+    eyeIcon.style.display    = isPass ? 'none'  : 'block'
+    eyeOffIcon.style.display = isPass ? 'block' : 'none'
+    document.getElementById('btn-toggle-pass')!.setAttribute(
+      'aria-label', isPass ? 'Ocultar contraseña' : 'Mostrar contraseña'
+    )
+  })
+
+  // Cambiar modo login ↔ register
+  toggleBtn.addEventListener('click', () => {
+    setMode(mode === 'login' ? 'register' : 'login')
+    hideFeedback()
+  })
+
+  // Logout
+  document.getElementById('btn-logout')!.addEventListener('click', async () => {
+    try { await supabase.auth.signOut() } catch {}
+    currentUser.set(null)
+    userProfile.set(null)
+  })
+
+  // Escuchar evento desde InvoiceScanner u otros componentes Vue
+  document.addEventListener('open-auth-modal', (e: any) => {
+    openModal(e.detail?.mode || 'login')
+  })
+
+  // ── Submit del formulario ─────────────────────────
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    hideFeedback()
+
+    // Anti-bot honeypot
+    if (hpInput.value) return
+
+    // Leer valores del DOM directamente (resuelve autofill en móvil)
+    const email    = inpEmail.value.trim()
+    const password = inpPassword.value
+    const fullName = inpName.value.trim()
+
+    // Validación con feedback al usuario
+    if (!email) {
+      showError('Introduce tu email.')
+      inpEmail.focus()
+      return
+    }
+    if (!isValidEmailFormat(email)) {
+      showError('El email no tiene un formato válido.')
+      inpEmail.focus()
+      return
+    }
+    if (!password) {
+      showError('Introduce tu contraseña.')
+      inpPassword.focus()
+      return
+    }
+    if (password.length < 8) {
+      showError('La contraseña debe tener al menos 8 caracteres.')
+      inpPassword.focus()
+      return
+    }
+    if (mode === 'register') {
+      if (!fullName) {
+        showError('Introduce tu nombre completo.')
+        inpName.focus()
+        return
+      }
+      if (Date.now() - openedAt < 1500) {
+        showError('Por favor, inténtalo de nuevo.')
+        return
+      }
+      if (isDisposableEmail(email)) {
+        showError('No se permiten emails temporales. Usa tu email real.')
+        return
+      }
+    }
+
+    setLoading(true)
+    try {
+      if (mode === 'login') {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) {
+          showError(translateError(error.message))
+        } else if (data?.user) {
+          currentUser.set(data.user)
+          await refreshProfile()
+          closeModal()
+        }
+      } else {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: fullName } }
+        })
+        if (error) {
+          showError(translateError(error.message))
+        } else if (data?.user && !data?.session) {
+          showSuccess('Revisa tu email para confirmar tu cuenta.')
+        } else if (data?.user) {
+          currentUser.set(data.user)
+          await refreshProfile()
+          closeModal()
+        }
+      }
+    } catch {
+      showError('Error de conexión. Comprueba tu internet e inténtalo de nuevo.')
+    } finally {
+      setLoading(false)
+    }
+  })
+</script>
+
+<style>
+/* ── Auth buttons ─────────────────────────────── */
+.ab-buttons, .ab-user {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.ab-btn--primary { background: var(--primary-500); color: var(--neutral-50); }
+.ab-btn--primary:hover { background: var(--primary-400); }
+.ab-btn--outline { background: transparent; color: var(--primary-100); border: 1px solid var(--primary-600); }
+.ab-btn--outline:hover { background: var(--primary-800); border-color: var(--primary-500); }
+
+.ab-user-email {
+  font-size: 0.85rem;
+  color: var(--primary-200);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Modal overlay ────────────────────────────── */
+.ab-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+/* Blur sin bloquear touch en Android */
+.ab-overlay::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.ab-container {
+  background: var(--primary-900);
+  border: 1px solid var(--primary-700);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+  animation: abIn 0.2s ease-out;
+}
+
+@keyframes abIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Header ───────────────────────────────────── */
+.ab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--primary-800);
+}
+
+.ab-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--neutral-50);
+  margin: 0;
+}
+
+.ab-close {
+  background: none;
+  border: none;
+  color: var(--primary-300);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  transition: all 0.15s;
+}
+.ab-close:hover { background: var(--primary-800); color: var(--neutral-50); }
+
+/* ── Body / form ──────────────────────────────── */
+.ab-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Honeypot */
+.ab-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ab-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ab-field label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--primary-200);
+}
+
+.ab-field input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--primary-800);
+  border: 1px solid var(--primary-700);
+  border-radius: 8px;
+  color: var(--neutral-50);
+  font-size: 1rem;
+  font-family: inherit;
+  min-height: 48px;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+}
+
+.ab-field input:focus {
+  outline: none;
+  border-color: var(--primary-400);
+  box-shadow: 0 0 0 3px rgba(99,149,238,0.15);
+}
+
+.ab-field input::placeholder { color: var(--primary-500); }
+
+/* Contraseña con toggle */
+.ab-pass-wrap {
+  position: relative;
+}
+
+.ab-pass-wrap input {
+  padding-right: 3rem;
+}
+
+.ab-pass-toggle {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--primary-400);
+  cursor: pointer;
+  padding: 0.5rem;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ab-pass-toggle:hover { color: var(--primary-200); }
+
+/* Feedback */
+.ab-feedback {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.ab-feedback--error {
+  background: rgba(239,68,68,0.15);
+  border: 1px solid rgba(239,68,68,0.4);
+  color: #fca5a5;
+}
+.ab-feedback--success {
+  background: rgba(34,197,94,0.15);
+  border: 1px solid rgba(34,197,94,0.3);
+  color: #86efac;
+}
+
+/* Submit */
+.ab-submit {
+  width: 100%;
+  padding: 0.85rem;
+  background: var(--primary-500);
+  color: var(--neutral-50);
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 0.2s, transform 0.15s;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+}
+.ab-submit:hover:not(:disabled) { background: var(--primary-400); transform: translateY(-1px); }
+.ab-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.ab-spinner {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: abSpin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes abSpin { to { transform: rotate(360deg); } }
+
+/* Toggle modo */
+.ab-toggle {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--primary-300);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+.ab-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--primary-200);
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: underline;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0.25rem;
+}
+.ab-toggle-btn:hover { color: var(--neutral-50); }
+
+/* ── Mobile ───────────────────────────────────── */
+@media (max-width: 480px) {
+  .ab-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .ab-container {
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+    max-height: 92dvh;
+    overflow-y: auto;
+  }
+  .ab-btn {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.8rem;
+  }
+}
+</style>

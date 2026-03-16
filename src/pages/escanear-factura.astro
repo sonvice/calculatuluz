@@ -1,6 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import AuthModal from "../components/facturas/AuthModal.vue";
+import AuthButtons from "../components/facturas/AuthButtons.astro";
 import InvoiceScanner from "../components/facturas/InvoiceScanner.vue";
 import InvoiceDashboard from "../components/facturas/InvoiceDashboard.vue";
 import Faq from "../components/Faq.astro";
@@ -131,7 +131,7 @@ const structuredData = {
         </div>
       </div>
       <div class="hero__auth">
-        <AuthModal client:only="vue" />
+        <AuthButtons />
       </div>
     </section>
 
