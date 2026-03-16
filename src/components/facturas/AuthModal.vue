@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from '@nanostores/vue'
 import {
-  currentUser, authLoading, authError,
+  currentUser, authError,
   signIn, signUp, signOut, initAuth
 } from '../../stores/authStore'
 
@@ -27,7 +27,6 @@ import { LogIn, UserPlus, LogOut, Mail, Lock, User, X, Eye, EyeOff } from 'lucid
 import { isDisposableEmail, isValidEmailFormat } from '../../lib/disposableEmailDomains'
 
 const $user = useStore(currentUser)
-const $loading = useStore(authLoading)
 const $error = useStore(authError)
 
 const showModal = ref(false)
@@ -35,6 +34,7 @@ const mode = ref('login') // 'login' | 'register'
 const showPassword = ref(false)
 const successMessage = ref('')
 const validationError = ref('')
+const submitting = ref(false)
 
 // Honeypot: campo oculto que solo los bots rellenan
 const honeypot = ref('')
@@ -72,12 +72,16 @@ function closeModal() {
 }
 
 async function handleSubmit() {
-  if (!formValid.value) return
   successMessage.value = ''
   validationError.value = ''
 
   // ── Anti-bot: honeypot relleno = bot
   if (honeypot.value) return
+
+  if (!formValid.value) {
+    validationError.value = 'Completa todos los campos correctamente.'
+    return
+  }
 
   if (mode.value === 'register') {
     // ── Anti-bot solo en registro: envío en menos de 1,5 s = bot
@@ -92,20 +96,23 @@ async function handleSubmit() {
     }
   }
 
-  if (mode.value === 'login') {
-    const result = await signIn(form.value.email, form.value.password)
-    if (result) {
-      closeModal()
-    }
-  } else {
-    const result = await signUp(form.value.email, form.value.password, form.value.fullName)
-    if (result) {
-      if (result.user && !result.session) {
-        successMessage.value = 'Revisa tu email para confirmar tu cuenta'
-      } else {
-        closeModal()
+  submitting.value = true
+  try {
+    if (mode.value === 'login') {
+      const result = await signIn(form.value.email, form.value.password)
+      if (result) closeModal()
+    } else {
+      const result = await signUp(form.value.email, form.value.password, form.value.fullName)
+      if (result) {
+        if (result.user && !result.session) {
+          successMessage.value = 'Revisa tu email para confirmar tu cuenta'
+        } else {
+          closeModal()
+        }
       }
     }
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -207,6 +214,7 @@ defineExpose({ openModal })
               <input
                 id="auth-email"
                 v-model="form.email"
+                @change="form.email = $event.target.value"
                 type="email"
                 placeholder="tu@email.com"
                 required
@@ -217,12 +225,13 @@ defineExpose({ openModal })
 
           <!-- Password -->
           <div class="form-group">
-            <label for="auth-password">Contrasena</label>
+            <label for="auth-password">Contraseña</label>
             <div class="input-wrapper">
               <Lock :size="18" class="input-icon" />
               <input
                 id="auth-password"
                 v-model="form.password"
+                @change="form.password = $event.target.value"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="Mínimo 8 caracteres"
                 required
@@ -245,9 +254,9 @@ defineExpose({ openModal })
           <button
             type="submit"
             class="btn-submit"
-            :disabled="!formValid || $loading"
+            :disabled="submitting"
           >
-            <span v-if="$loading" class="spinner"></span>
+            <span v-if="submitting" class="spinner"></span>
             <template v-else>
               {{ mode === 'login' ? 'Iniciar sesion' : 'Crear cuenta' }}
             </template>
