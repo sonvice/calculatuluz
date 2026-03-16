@@ -32,6 +32,7 @@ export const POST: APIRoute = async ({ request }) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey || '')
   const { data: { user }, error: authError } = await supabase.auth.getUser(token)
   if (authError || !user) {
+    console.error('[create-checkout] Auth failed:', authError?.message)
     return new Response(JSON.stringify({ error: 'Token inválido' }), {
       status: 401, headers: { 'Content-Type': 'application/json' }
     })

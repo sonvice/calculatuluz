@@ -25,6 +25,7 @@ export const POST: APIRoute = async ({ request }) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey || '')
   const { data: { user }, error: authError } = await supabase.auth.getUser(token)
   if (authError || !user) {
+    console.error('[upgrade-plan] Auth failed:', authError?.message)
     return new Response(JSON.stringify({ error: 'Token inválido' }), {
       status: 401, headers: { 'Content-Type': 'application/json' }
     })
@@ -35,6 +36,8 @@ export const POST: APIRoute = async ({ request }) => {
     .select('stripe_subscription_id, subscription_tier')
     .eq('id', user.id)
     .single()
+
+  console.log('[upgrade-plan] user:', user.id, 'tier:', profile?.subscription_tier, 'sub_id:', profile?.stripe_subscription_id)
 
   if (!profile?.stripe_subscription_id) {
     return new Response(JSON.stringify({ error: 'No tienes una suscripción activa' }), {
