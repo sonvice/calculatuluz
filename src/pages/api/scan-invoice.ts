@@ -157,12 +157,44 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     const formData = await request.formData()
     const file = formData.get('image') as File | null
     const invoiceType = (formData.get('invoiceType') as string) || 'luz'
+    const fileHash = (formData.get('fileHash') as string) || null
 
     if (!file) {
       return new Response(JSON.stringify({ error: 'No se envio imagen' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       })
+    }
+
+    // ── Cache hit: misma imagen ya procesada por este usuario ────────────────
+    if (fileHash) {
+      try {
+        const { data: cached } = await supabase
+          .from('scanned_invoices')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('file_hash', fileHash)
+          .maybeSingle()
+
+        if (cached) {
+          const tier = profile.subscription_tier as Tier | null
+          const monthlyLimit = tier ? (SCAN_LIMITS[tier] ?? 0) : 0
+          const scansLeft = profile.is_subscribed
+            ? Math.max(0, monthlyLimit - (profile.monthly_scans_used ?? 0))
+            : 0
+          return new Response(JSON.stringify({
+            success: true,
+            invoice: cached,
+            extracted: cached.extracted_data,
+            imageUrl: cached.image_url,
+            cached: true,
+            scansLeft,
+            monthlyLimit,
+          }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+        }
+      } catch {
+        // Column may not exist yet — continue with full scan
+      }
     }
 
     const bytes = await file.arrayBuffer()
@@ -226,6 +258,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     const invoiceData = {
       user_id: user.id,
       invoice_type: invoiceType,
+      file_hash: fileHash,
       total_amount: parsed.total_amount || null,
       billing_period_start: parsed.billing_period_start || null,
       billing_period_end: parsed.billing_period_end || null,

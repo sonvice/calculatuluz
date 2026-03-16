@@ -17,6 +17,7 @@ import {
   User, Hash, Network, Gauge, Receipt, Percent,
   Thermometer, Droplets, ClipboardList
 } from 'lucide-vue-next'
+import TariffAdvisor from './TariffAdvisor.vue'
 
 const emit = defineEmits(['open-auth'])
 
@@ -165,7 +166,7 @@ const scansLeftBadge = computed(() => {
 const invoiceTypes = [
   { value: 'luz',  label: 'Factura de Luz', icon: Zap,          color: '#fbbf24' },
   { value: 'gas',  label: 'Factura de Gas', icon: Flame,        color: '#f97316' },
-  { value: 'otro', label: 'Otro tipo',      icon: FileQuestion, color: '#8b5cf6' },
+  { value: 'otro', label: 'Otro tipo',      icon: FileQuestion, color: '#10b981' },
 ]
 const currentType = computed(() => invoiceTypes.find(t => t.value === invoiceType.value))
 
@@ -240,6 +241,19 @@ async function prepareAndScan(file) {
   }
 }
 
+// ─── File hash (SHA-256) for scan caching ─────────────
+async function hashFile(file) {
+  try {
+    const buf = await file.arrayBuffer()
+    const digest = await crypto.subtle.digest('SHA-256', buf)
+    return Array.from(new Uint8Array(digest))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+  } catch {
+    return null
+  }
+}
+
 // ─── Main scan logic ─────────────────────────────────
 async function uploadAndScan(file, skipPreview = false) {
   if (!$user.value || !$session.value) return
@@ -251,9 +265,12 @@ async function uploadAndScan(file, skipPreview = false) {
   result.value    = null
 
   try {
+    const fileHash = await hashFile(file)
+
     const fd = new FormData()
     fd.append('image', file)
     fd.append('invoiceType', invoiceType.value)
+    if (fileHash) fd.append('fileHash', fileHash)
 
     const res = await fetch('/api/scan-invoice', {
       method: 'POST',
@@ -427,7 +444,8 @@ onMounted(async () => {
             <li><CheckCircle :size="13" aria-hidden="true" /> Soporte prioritario</li>
           </ul>
           <button
-            class="btn-gate btn-gate--subscribe btn-gate--pro"
+            class="btn btn-gate"
+            data-type="accent"
             aria-label="Suscribirse al Plan Pro por 9,99 euros al mes"
             @click="handleSubscribe('pro')"
             :disabled="subscribing"
@@ -619,7 +637,7 @@ onMounted(async () => {
             </div>
           </div>
           <div v-if="result.extracted?.billing_period_start" class="kpi" role="listitem">
-            <Calendar :size="18" class="kpi__icon kpi__icon--purple" aria-hidden="true" />
+            <Calendar :size="18" class="kpi__icon kpi__icon--primary" aria-hidden="true" />
             <div>
               <span class="kpi__label">Periodo</span>
               <span class="kpi__val kpi__val--sm">
@@ -817,6 +835,14 @@ onMounted(async () => {
           </ul>
         </div>
 
+        <!-- Comparativa de tarifas (solo facturas de luz) -->
+        <TariffAdvisor
+          v-if="resultType === 'luz'"
+          :pricePerKwh="result.extracted?.price_per_kwh ?? null"
+          :consumptionKwh="result.extracted?.consumption_kwh ?? null"
+          :provider="result.extracted?.provider ?? null"
+        />
+
         <!-- Ver OCR colapsable -->
         <details class="ocr-details">
           <summary>
@@ -948,7 +974,7 @@ onMounted(async () => {
   margin: 0;
 }
 .plan-scans svg { color: #fbbf24; flex-shrink: 0; }
-.plan-card--featured .plan-scans svg { color: #a78bfa; }
+.plan-card--featured .plan-scans svg { color: var(--amber); }
 .plan-features { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }
 .plan-features li {
   display: flex; align-items: center; gap: 0.4rem;
@@ -1115,7 +1141,7 @@ onMounted(async () => {
 }
 .kpi__icon--blue   { background: rgba(59,130,246,.18); color: #60a5fa; }
 .kpi__icon--yellow { background: rgba(251,191,36,.18); color: #fbbf24; }
-.kpi__icon--purple { background: rgba(139,92,246,.18); color: #a78bfa; }
+.kpi__icon--primary { background: rgba(37,79,159,.18); color: var(--primary-200); }
 .kpi__icon--gray   { background: rgba(107,114,128,.18); color: #9ca3af; }
 .kpi__icon--teal   { background: rgba(20,184,166,.18); color: #2dd4bf; }
 .kpi__label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--primary-400); }

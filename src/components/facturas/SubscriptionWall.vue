@@ -215,7 +215,7 @@ async function handleSubscribe(tier) {
   font-size: 0.82rem; color: var(--primary-200); margin: 0;
 }
 .plan-scans svg { color: #fbbf24; flex-shrink: 0; }
-.plan-card--featured .plan-scans svg { color: #a78bfa; }
+.plan-card--featured .plan-scans svg { color: var(--amber); }
 
 .plan-features { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.3rem; }
 .plan-features li {

@@ -1,22 +1,19 @@
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useStore } from '@nanostores/vue'
-import { currentUser, initAuth, userProfile, isSubscribed, monthlyScansLeft, monthlyLimit } from '../../stores/authStore'
+import { currentUser, initAuth } from '../../stores/authStore'
 import { supabase } from '../../lib/supabaseClient'
 import Bar from '../charts/BarChart.js'
 import Doughnut from '../charts/DoughnutChart.js'
+import TariffAdvisor from './TariffAdvisor.vue'
 import {
   FileText, Zap, Flame, FileQuestion, Trash2,
   Calendar, Euro, TrendingDown, ChevronDown, ChevronUp,
   BarChart3, Lightbulb, RefreshCw, Building2, Hash,
-  AlertTriangle, X, User, Network, Gauge, Receipt
+  AlertTriangle, X, User, Network, Gauge, Receipt, Download
 } from 'lucide-vue-next'
 
-const $user        = useStore(currentUser)
-const $profile     = useStore(userProfile)
-const $isSubscribed = useStore(isSubscribed)
-const $scansLeft   = useStore(monthlyScansLeft)
-const $monthlyLimit = useStore(monthlyLimit)
+const $user = useStore(currentUser)
 
 // ─── State ───────────────────────────────────────────
 const invoices = ref([])
@@ -26,65 +23,6 @@ const expandedId = ref(null)
 const activeTab = ref('all') // 'all' | 'luz' | 'gas' | 'otro'
 const activeView = ref('list') // 'list' | 'charts'
 const pendingDeleteId = ref(null) // confirmación de borrado inline
-const portalLoading  = ref(false)
-const portalError    = ref('')
-const upgradeLoading = ref(false)
-const upgradeSuccess = ref(false)
-const upgradeConfirm = ref(false)
-
-async function openCustomerPortal() {
-  portalLoading.value = true
-  portalError.value   = ''
-  try {
-    // Leer sesión fresca de Supabase para evitar token expirado
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.access_token) {
-      portalError.value = 'Sesión expirada. Recarga la página e inicia sesión.'
-      portalLoading.value = false
-      return
-    }
-    const res = await fetch('/api/customer-portal', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error || 'Error desconocido')
-    portalLoading.value = false
-    window.location.href = data.url
-  } catch (e) {
-    portalError.value = e.message
-    portalLoading.value = false
-  }
-}
-
-async function upgradeToPro() {
-  upgradeLoading.value = true
-  portalError.value    = ''
-  upgradeSuccess.value = false
-  try {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.access_token) {
-      portalError.value = 'Sesión expirada. Recarga la página.'
-      upgradeLoading.value = false
-      return
-    }
-    const res  = await fetch('/api/upgrade-plan', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.error || 'Error desconocido')
-    upgradeSuccess.value = true
-    upgradeConfirm.value = false
-    // Recargar perfil para reflejar el nuevo plan
-    await import('../../stores/authStore').then(m => m.refreshProfile())
-  } catch (e) {
-    portalError.value = e.message
-    upgradeConfirm.value = false
-  } finally {
-    upgradeLoading.value = false
-  }
-}
 
 // ─── Computed: filtered list ──────────────────────────
 const filteredInvoices = computed(() =>
@@ -130,8 +68,8 @@ const doughnutData = computed(() => {
     labels,
     datasets: [{
       data: values,
-      backgroundColor: ['#fbbf24CC', '#f97316CC', '#8b5cf6CC'],
-      borderColor:     ['#fbbf24',   '#f97316',   '#8b5cf6'],
+      backgroundColor: ['#fbbf24CC', '#f97316CC', '#10b981CC'],
+      borderColor:     ['#fbbf24',   '#f97316',   '#10b981'],
       borderWidth: 2,
       hoverOffset: 6,
     }]
@@ -206,8 +144,8 @@ const barData = computed(() => {
       {
         label: 'Otros',
         data: sorted.map(k => months[k].otro),
-        backgroundColor: '#8b5cf6AA',
-        borderColor: '#8b5cf6',
+        backgroundColor: '#10b981AA',
+        borderColor: '#10b981',
         borderWidth: 1,
         borderRadius: 4,
       }
@@ -266,7 +204,160 @@ function typeIcon(t) {
   return t === 'luz' ? Zap : t === 'gas' ? Flame : FileQuestion
 }
 function typeColor(t) {
-  return t === 'luz' ? '#fbbf24' : t === 'gas' ? '#f97316' : '#8b5cf6'
+  return t === 'luz' ? '#fbbf24' : t === 'gas' ? '#f97316' : '#10b981'
+}
+
+// ─── Download invoice as HTML report ──────────────────
+function downloadInvoice(inv) {
+  const d  = inv.extracted_data || {}
+  const typeName = inv.invoice_type === 'luz' ? 'Electricidad' : inv.invoice_type === 'gas' ? 'Gas Natural' : 'Suministro'
+  const generatedOn = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long', timeStyle: 'short' }).format(new Date())
+
+  function row(label, value) {
+    if (value == null || value === '' || value === 0) return ''
+    return `<tr><td class="label">${label}</td><td class="value">${value}</td></tr>`
+  }
+  function section(title) {
+    return `<tr class="section-row"><td colspan="2">${title}</td></tr>`
+  }
+  function money(v) {
+    if (v == null) return null
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(v)
+  }
+  function date(v) {
+    if (!v) return null
+    return new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(v))
+  }
+
+  const tips = d.tips?.length
+    ? `<div class="tips-section">
+        <h3>Consejos de ahorro</h3>
+        <ul>${d.tips.map(t => `<li>${t}</li>`).join('')}</ul>
+       </div>`
+    : ''
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Factura ${typeName} — ${inv.provider || 'Sin comercializadora'}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; color: #1e293b; background: #f8fafc; padding: 2rem; }
+    .page { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,.1); overflow: hidden; }
+    .header { background: #002763; color: #fff; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+    .header-brand { font-size: 1.2rem; font-weight: 800; letter-spacing: -.02em; }
+    .header-brand span { color: #f59e0b; }
+    .header-meta { text-align: right; font-size: 0.78rem; opacity: .8; line-height: 1.6; }
+    .type-pill { display: inline-block; margin-top: 0.35rem; padding: 0.2rem 0.7rem; background: rgba(245,158,11,.25); border: 1px solid rgba(245,158,11,.5); border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: #f59e0b; letter-spacing: .05em; text-transform: uppercase; }
+    .summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: #e2e8f0; }
+    .summary-cell { background: #f1f5f9; padding: 1rem 1.25rem; }
+    .summary-cell .s-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: .06em; color: #64748b; margin-bottom: 0.2rem; }
+    .summary-cell .s-value { font-size: 1.2rem; font-weight: 800; color: #0f172a; font-variant-numeric: tabular-nums; }
+    .summary-cell .s-value.total { color: #002763; font-size: 1.5rem; }
+    .body { padding: 1.5rem 2rem; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+    td { padding: 0.45rem 0.5rem; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+    td.label { color: #475569; width: 55%; font-size: 0.82rem; }
+    td.value { color: #0f172a; font-weight: 600; text-align: right; font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+    tr.section-row td { background: #f8fafc; color: #334155; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; padding: 0.6rem 0.5rem 0.3rem; border-bottom: 2px solid #e2e8f0; border-top: 1px solid #e2e8f0; }
+    tr:last-child td { border-bottom: none; }
+    .total-row td { font-weight: 800; font-size: 0.95rem; color: #002763; border-top: 2px solid #002763; padding-top: 0.6rem; }
+    .tips-section { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+    .tips-section h3 { font-size: 0.82rem; font-weight: 700; color: #15803d; margin-bottom: 0.5rem; }
+    .tips-section ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+    .tips-section li { font-size: 0.78rem; color: #166534; padding-left: 1rem; position: relative; line-height: 1.4; }
+    .tips-section li::before { content: '→'; position: absolute; left: 0; color: #4ade80; }
+    .footer { background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 0.85rem 2rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: #94a3b8; }
+    code { font-family: 'Courier New', monospace; font-size: 0.75rem; background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 4px; color: #3b82f6; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .page { box-shadow: none; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div>
+        <div class="header-brand">Calcula<span>Tu</span>Luz</div>
+        <div class="type-pill">${typeName}</div>
+      </div>
+      <div class="header-meta">
+        Generado el ${generatedOn}<br />
+        ${inv.provider || ''}
+      </div>
+    </div>
+
+    <div class="summary">
+      <div class="summary-cell">
+        <div class="s-label">Periodo</div>
+        <div class="s-value" style="font-size:.95rem">${date(inv.billing_period_start) || '—'}<br/><span style="font-size:.75rem;font-weight:400;color:#64748b">al ${date(inv.billing_period_end) || '—'}</span></div>
+      </div>
+      <div class="summary-cell">
+        <div class="s-label">Consumo</div>
+        <div class="s-value">${inv.consumption_kwh != null ? inv.consumption_kwh + ' kWh' : '—'}</div>
+      </div>
+      <div class="summary-cell">
+        <div class="s-label">Total factura</div>
+        <div class="s-value total">${money(inv.total_amount) || '—'}</div>
+      </div>
+    </div>
+
+    <div class="body">
+      <table>
+        ${section('Costes')}
+        ${row('Término de potencia / fijo', money(inv.power_term))}
+        ${row('Término de energía / variable', money(inv.energy_term))}
+        ${row('Alquiler del contador', money(d.meter_rental))}
+        ${row(`Impuesto electricidad${d.electricity_tax_rate ? ` (${d.electricity_tax_rate}%)` : ''}`, money(d.electricity_tax))}
+        ${row('Impuesto hidrocarburos', money(d.hydrocarbon_tax))}
+        ${row(`IVA${d.iva_rate ? ` (${d.iva_rate}%)` : ''}`, money(inv.taxes))}
+        <tr class="total-row">
+          <td class="label">TOTAL</td>
+          <td class="value">${money(inv.total_amount) || '—'}</td>
+        </tr>
+        ${inv.consumption_kwh || d.consumption_m3 || inv.price_per_kwh ? section('Consumo') : ''}
+        ${row('Consumo total', inv.consumption_kwh != null ? inv.consumption_kwh + ' kWh' : null)}
+        ${row('Consumo (m³)', d.consumption_m3 != null ? d.consumption_m3 + ' m³' : null)}
+        ${row('Precio medio kWh', inv.price_per_kwh != null ? inv.price_per_kwh.toFixed(4) + ' €/kWh' : null)}
+        ${row('Consumo punta P1', d.consumption_p1 != null ? d.consumption_p1 + ' kWh' + (d.price_p1 ? ` · ${d.price_p1.toFixed(4)} €/kWh` : '') : null)}
+        ${row('Consumo llano P2', d.consumption_p2 != null ? d.consumption_p2 + ' kWh' + (d.price_p2 ? ` · ${d.price_p2.toFixed(4)} €/kWh` : '') : null)}
+        ${row('Consumo valle P3', d.consumption_p3 != null ? d.consumption_p3 + ' kWh' + (d.price_p3 ? ` · ${d.price_p3.toFixed(4)} €/kWh` : '') : null)}
+        ${row('Lectura inicial', d.meter_reading_start != null ? d.meter_reading_start + ' kWh' : null)}
+        ${row('Lectura final', d.meter_reading_end != null ? d.meter_reading_end + ' kWh' : null)}
+        ${d.tariff_type || d.access_tariff || d.contracted_power_p1 || d.cups || d.holder_name ? section('Contrato y tarifa') : ''}
+        ${row('Tipo de tarifa', d.tariff_type)}
+        ${row('Tarifa de acceso', d.access_tariff)}
+        ${row('Potencia contratada P1', d.contracted_power_p1 != null ? d.contracted_power_p1 + ' kW' : null)}
+        ${row('Potencia contratada P2', d.contracted_power_p2 != null ? d.contracted_power_p2 + ' kW' : null)}
+        ${row('Distribuidora', d.distributor)}
+        ${d.holder_name ? `<tr><td class="label">Titular</td><td class="value">${d.holder_name}</td></tr>` : ''}
+        ${d.cups ? `<tr><td class="label">CUPS</td><td class="value"><code>${d.cups}</code></td></tr>` : ''}
+        ${row('Nº contrato', inv.contract_number)}
+      </table>
+
+      ${tips}
+    </div>
+
+    <div class="footer">
+      <span>CalculaTuLuz.es — Análisis de facturas con IA</span>
+      <span>Los datos son orientativos según el escaneo OCR</span>
+    </div>
+  </div>
+</body>
+</html>`
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  const provider  = (inv.provider || 'factura').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+  const dateStamp = inv.billing_period_start ? inv.billing_period_start.slice(0, 7) : new Date().toISOString().slice(0, 7)
+  a.href     = url
+  a.download = `factura-${provider}-${dateStamp}.html`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 // ─── Signed URLs (bucket privado) ─────────────────────
@@ -282,19 +373,25 @@ async function resolveImageUrl(inv) {
 }
 
 // ─── Data fetching ────────────────────────────────────
+let _fetchInProgress = false
 async function fetchInvoices() {
-  if (!$user.value) { loading.value = false; return }
+  if (_fetchInProgress || !$user.value) { loading.value = false; return }
+  _fetchInProgress = true
   // Carga inicial: mostrar skeleton. Refresco: actualizar en segundo plano sin ocultar datos
   if (!invoices.value.length) loading.value = true
   else refreshing.value = true
-  const { data, error } = await supabase
-    .from('scanned_invoices')
-    .select('*')
-    .eq('user_id', $user.value.id)
-    .order('created_at', { ascending: false })
-  if (!error && data) invoices.value = data
-  loading.value = false
-  refreshing.value = false
+  try {
+    const { data, error } = await supabase
+      .from('scanned_invoices')
+      .select('*')
+      .eq('user_id', $user.value.id)
+      .order('created_at', { ascending: false })
+    if (!error && data) invoices.value = data
+  } finally {
+    loading.value = false
+    refreshing.value = false
+    _fetchInProgress = false
+  }
 }
 
 function requestDelete(id) {
@@ -325,21 +422,15 @@ onMounted(async () => {
 
   // Escuchar evento del scanner para refrescar tras nuevo escaneo
   document.addEventListener('refresh-dashboard', fetchInvoices)
+})
 
-  // Resetear estados de carga si el navegador restaura la página desde bfcache
-  // (ocurre cuando el usuario vuelve con el botón "atrás" desde el portal de Stripe)
-  window.addEventListener('pageshow', (e) => {
-    if (e.persisted) {
-      portalLoading.value  = false
-      upgradeLoading.value = false
-      upgradeConfirm.value = false
-    }
-  })
+onBeforeUnmount(() => {
+  document.removeEventListener('refresh-dashboard', fetchInvoices)
 })
 
 // Si el usuario se autentica después de montar (timing race), recargar facturas
 watch($user, (user) => {
-  if (user && !invoices.value.length) fetchInvoices()
+  if (user && !invoices.value.length && !_fetchInProgress) fetchInvoices()
 })
 
 defineExpose({ fetchInvoices })
@@ -362,48 +453,6 @@ defineExpose({ fetchInvoices })
       </div>
 
       <template v-else>
-        <!-- ── Subscription bar ──────────────────────── -->
-        <div v-if="$isSubscribed" class="sub-bar">
-          <div class="sub-bar__info">
-            <span class="sub-bar__badge" :class="$profile?.subscription_tier === 'pro' ? 'sub-bar__badge--pro' : ''">
-              Plan {{ $profile?.subscription_tier === 'pro' ? 'Pro' : 'Básico' }}
-            </span>
-            <span class="sub-bar__scans">
-              {{ $scansLeft }} / {{ $monthlyLimit }} escaneos este mes
-            </span>
-          </div>
-          <div class="sub-bar__actions">
-            <p v-if="portalError" class="sub-bar__error">{{ portalError }}</p>
-            <span v-if="upgradeSuccess" class="sub-bar__success">
-              ¡Actualizado a Pro! 🎉
-            </span>
-            <!-- Upgrade a Pro (solo visible en plan Básico) -->
-            <template v-if="$profile?.subscription_tier !== 'pro'">
-              <div v-if="upgradeConfirm" class="upgrade-confirm">
-                <span class="upgrade-confirm__msg">Se cargará la diferencia proporcional ahora. ¿Confirmar subida a Pro (9,99€/mes)?</span>
-                <div class="upgrade-confirm__btns">
-                  <button class="btn-cancel-del" @click="upgradeConfirm = false">Cancelar</button>
-                  <button class="btn-upgrade btn-upgrade--confirm" :disabled="upgradeLoading" @click="upgradeToPro">
-                    <span v-if="upgradeLoading" class="spinner-xs"></span>
-                    {{ upgradeLoading ? 'Actualizando...' : 'Confirmar' }}
-                  </button>
-                </div>
-              </div>
-              <button v-else class="btn-upgrade" @click="upgradeConfirm = true">
-                ⬆ Subir a Pro — 9,99€/mes
-              </button>
-            </template>
-            <button
-              class="btn-portal"
-              :disabled="portalLoading"
-              @click="openCustomerPortal"
-            >
-              <span v-if="portalLoading" class="spinner-xs"></span>
-              {{ portalLoading ? 'Abriendo...' : 'Gestionar suscripción' }}
-            </button>
-          </div>
-        </div>
-
         <!-- ── KPI Cards ────────────────────────────── -->
         <div v-if="stats" class="kpi-row">
           <div class="kpi-card">
@@ -489,7 +538,7 @@ defineExpose({ fetchInvoices })
                     <span class="cat-amount">{{ fmt(stats.gasTotal) }}</span>
                   </div>
                   <div v-if="stats && stats.otroTotal > 0" class="cat-item">
-                    <span class="cat-dot" style="background:#8b5cf6"></span>
+                    <span class="cat-dot" style="background:var(--esmerald-green)"></span>
                     <span>Otros</span>
                     <span class="cat-amount">{{ fmt(stats.otroTotal) }}</span>
                   </div>
@@ -518,7 +567,7 @@ defineExpose({ fetchInvoices })
                   { value: 'all', label: 'Todas', count: invoices.length },
                   { value: 'luz', label: 'Luz', count: invoices.filter(i => i.invoice_type === 'luz').length, color: '#fbbf24' },
                   { value: 'gas', label: 'Gas', count: invoices.filter(i => i.invoice_type === 'gas').length, color: '#f97316' },
-                  { value: 'otro', label: 'Otros', count: invoices.filter(i => i.invoice_type === 'otro').length, color: '#8b5cf6' }
+                  { value: 'otro', label: 'Otros', count: invoices.filter(i => i.invoice_type === 'otro').length, color: '#10b981' }
                 ]"
                 :key="tab.value"
                 :class="['filter-tab', { 'filter-tab--active': activeTab === tab.value }]"
@@ -597,7 +646,7 @@ defineExpose({ fetchInvoices })
                           </div>
                         </div>
                         <div v-if="inv.billing_period_start" class="d-kpi">
-                          <Calendar :size="15" class="d-kpi__icon d-kpi__icon--purple" aria-hidden="true" />
+                          <Calendar :size="15" class="d-kpi__icon d-kpi__icon--primary" aria-hidden="true" />
                           <div>
                             <span class="d-kpi__label">Periodo</span>
                             <span class="d-kpi__val d-kpi__val--sm">{{ fmtDate(inv.billing_period_start) }} – {{ fmtDate(inv.billing_period_end) }}</span>
@@ -710,6 +759,13 @@ defineExpose({ fetchInvoices })
 
                       <!-- Acciones -->
                       <div class="detail-actions">
+                        <button
+                          class="btn-download"
+                          @click.stop="downloadInvoice(inv)"
+                          aria-label="Descargar datos de la factura"
+                        >
+                          <Download :size="13" /> Descargar
+                        </button>
                         <div
                           v-if="pendingDeleteId === inv.id"
                           class="delete-confirm"
@@ -740,6 +796,15 @@ defineExpose({ fetchInvoices })
 
                     </div><!-- /detail-main -->
                   </div><!-- /detail-body -->
+
+                  <!-- Comparativa de tarifas (luz) -->
+                  <TariffAdvisor
+                    v-if="inv.invoice_type === 'luz'"
+                    :pricePerKwh="inv.price_per_kwh ?? null"
+                    :consumptionKwh="inv.consumption_kwh ?? null"
+                    :provider="inv.provider ?? null"
+                    class="mt-space-s"
+                  />
                 </div>
               </div>
             </div>
@@ -956,7 +1021,7 @@ defineExpose({ fetchInvoices })
 }
 .d-kpi__icon--blue   { background: rgba(59,130,246,.18); color: #60a5fa; }
 .d-kpi__icon--yellow { background: rgba(251,191,36,.18); color: #fbbf24; }
-.d-kpi__icon--purple { background: rgba(139,92,246,.18); color: #a78bfa; }
+.d-kpi__icon--primary { background: rgba(37,79,159,.18); color: var(--primary-200); }
 .d-kpi__icon--teal   { background: rgba(20,184,166,.18); color: #2dd4bf; }
 .d-kpi__label { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: .05em; color: var(--primary-400); }
 .d-kpi__val { display: block; font-size: 0.95rem; font-weight: 700; color: var(--neutral-50); }
@@ -1028,7 +1093,25 @@ code.d-id-val { font-family: 'Courier New', monospace; font-size: 0.72rem; color
 }
 .d-tips-details li svg { flex-shrink: 0; margin-top: 0.1rem; color: #4ade80; }
 
-.detail-actions { margin-top: 0.25rem; }
+.detail-actions {
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.btn-download {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.3rem 0.65rem; min-height: 32px;
+  background: rgba(37,79,159,.12); border: 1px solid rgba(37,79,159,.28);
+  border-radius: 6px; font-size: 0.78rem; color: var(--primary-200);
+  cursor: pointer; font-family: inherit; transition: all .2s;
+}
+.btn-download:hover {
+  background: rgba(37,79,159,.22); border-color: var(--primary-500);
+  color: var(--neutral-50);
+}
+.btn-download:focus-visible { outline: 2px solid var(--primary-500); outline-offset: 2px; }
 
 /* Responsive: en móvil apilar imagen y datos */
 @media (max-width: 600px) {
@@ -1111,143 +1194,6 @@ code.d-id-val { font-family: 'Courier New', monospace; font-size: 0.72rem; color
 .spin { animation: spin .7s linear infinite; }
 .btn-refresh:disabled { opacity: .6; cursor: default; }
 
-/* ── Subscription bar ────────────────────────────── */
-.sub-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: .75rem;
-  padding: .75rem 1rem;
-  background: rgba(16,185,129,.07);
-  border: 1px solid rgba(16,185,129,.22);
-  border-radius: 10px;
-  margin-bottom: var(--space-m);
-}
-.sub-bar__info {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  flex-wrap: wrap;
-}
-.sub-bar__badge {
-  display: inline-block;
-  padding: .2rem .65rem;
-  background: rgba(16,185,129,.18);
-  border: 1px solid rgba(16,185,129,.35);
-  border-radius: 20px;
-  font-size: .75rem;
-  font-weight: 700;
-  color: #10b981;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-.sub-bar__scans {
-  font-size: .85rem;
-  color: var(--primary-200);
-}
-.sub-bar__actions {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-}
-.sub-bar__error {
-  font-size: .8rem;
-  color: #f87171;
-}
-.btn-portal {
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  padding: .45rem 1rem;
-  background: transparent;
-  border: 1px solid rgba(16,185,129,.5);
-  border-radius: 8px;
-  color: #10b981;
-  font-size: .85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .15s, border-color .15s;
-  white-space: nowrap;
-  min-height: 36px;
-}
-.btn-portal:hover:not(:disabled) {
-  background: rgba(16,185,129,.12);
-  border-color: #10b981;
-}
-.btn-portal:disabled {
-  opacity: .6;
-  cursor: default;
-}
-.spinner-xs {
-  display: inline-block;
-  width: 12px; height: 12px;
-  border: 2px solid rgba(16,185,129,.3);
-  border-top-color: #10b981;
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
-}
-.upgrade-confirm {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: .5rem;
-  padding: .55rem .85rem;
-  background: rgba(139,92,246,.08);
-  border: 1px solid rgba(139,92,246,.3);
-  border-radius: 8px;
-}
-.upgrade-confirm__msg {
-  font-size: .8rem;
-  color: #c4b5fd;
-  flex: 1;
-  min-width: 180px;
-}
-.upgrade-confirm__btns {
-  display: flex;
-  gap: .4rem;
-  flex-shrink: 0;
-}
-.btn-upgrade--confirm {
-  background: rgba(139,92,246,.25);
-  border-color: rgba(139,92,246,.6);
-}
-.sub-bar__badge--pro {
-  background: rgba(139,92,246,.18);
-  border-color: rgba(139,92,246,.35);
-  color: #a78bfa;
-}
-.sub-bar__success {
-  font-size: .82rem;
-  font-weight: 600;
-  color: #4ade80;
-}
-.btn-upgrade {
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  padding: .45rem 1rem;
-  background: rgba(139,92,246,.15);
-  border: 1px solid rgba(139,92,246,.45);
-  border-radius: 8px;
-  color: #c4b5fd;
-  font-size: .85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background .15s, border-color .15s;
-  white-space: nowrap;
-  min-height: 36px;
-}
-.btn-upgrade:hover:not(:disabled) {
-  background: rgba(139,92,246,.28);
-  border-color: #a78bfa;
-  color: #ede9fe;
-}
-.btn-upgrade:disabled {
-  opacity: .6;
-  cursor: default;
-}
-
 /* ── Responsive ──────────────────────────────────── */
 @media (max-width: 860px) {
   .charts-grid { grid-template-columns: 1fr; }
@@ -1255,7 +1201,17 @@ code.d-id-val { font-family: 'Courier New', monospace; font-size: 0.72rem; color
 }
 @media (max-width: 600px) {
   .kpi-row { grid-template-columns: 1fr 1fr; }
+  .filter-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .filter-tabs::-webkit-scrollbar { display: none; }
+  .filter-tab { flex-shrink: 0; }
   .row-kwh { display: none; }
-  .row-provider { max-width: 140px; }
+  .row-provider { max-width: 160px; }
+  .invoice-row__head { padding: 0.75rem; }
 }
 </style>

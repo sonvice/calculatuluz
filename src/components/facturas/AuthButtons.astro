@@ -16,11 +16,47 @@
     </button>
   </div>
   <div id="auth-user" class="ab-user" style="display:none">
-    <span id="auth-user-email" class="ab-user-email"></span>
-    <button id="btn-logout" class="ab-btn ab-btn--outline" type="button">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Salir
-    </button>
+    <!-- Dropdown trigger -->
+    <div class="ab-dropdown-wrap">
+      <button id="btn-user-dropdown" class="ab-btn ab-btn--outline ab-dropdown-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+        <span id="auth-plan-badge" class="ab-plan-badge" style="display:none"></span>
+        <span id="auth-user-email" class="ab-user-email"></span>
+        <svg class="ab-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+
+      <!-- Dropdown menu -->
+      <div id="auth-dropdown" class="ab-dropdown" role="menu" aria-hidden="true">
+        <!-- Plan info row -->
+        <div class="ab-dropdown-plan">
+          <span id="dd-plan-badge" class="ab-plan-badge ab-plan-badge--lg"></span>
+          <span id="dd-scan-count" class="ab-dropdown-scans">— escaneos este mes</span>
+        </div>
+
+        <div class="ab-dropdown-divider"></div>
+
+        <!-- Gestionar suscripción -->
+        <button id="btn-portal" class="ab-dropdown-item" type="button" role="menuitem">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          <span id="btn-portal-label">Gestionar suscripción</span>
+          <span id="btn-portal-spinner" class="ab-spinner ab-spinner--sm" style="display:none"></span>
+        </button>
+
+        <!-- Subir a Pro (solo plan básico) -->
+        <button id="btn-upgrade" class="ab-dropdown-item ab-dropdown-item--upgrade" type="button" role="menuitem" style="display:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span id="btn-upgrade-label">Subir a Pro — 9,99€/mes</span>
+          <span id="btn-upgrade-spinner" class="ab-spinner ab-spinner--sm" style="display:none"></span>
+        </button>
+
+        <div class="ab-dropdown-divider"></div>
+
+        <!-- Logout -->
+        <button id="btn-logout" class="ab-dropdown-item ab-dropdown-item--danger" type="button" role="menuitem">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -89,7 +125,7 @@
 
 <script>
   import { supabase } from '../../lib/supabaseClient'
-  import { currentUser, userProfile, authError, refreshProfile } from '../../stores/authStore'
+  import { currentUser, userProfile, authError, refreshProfile, SCAN_LIMITS } from '../../stores/authStore'
   import { isDisposableEmail, isValidEmailFormat } from '../../lib/disposableEmailDomains'
 
   // ── Elementos del DOM ─────────────────────────────
@@ -113,11 +149,25 @@
   const eyeIcon     = document.getElementById('eye-icon')!
   const eyeOffIcon  = document.getElementById('eye-off-icon')!
 
+  // ── Elementos del dropdown ─────────────────────────
+  const dropdownTrigger = document.getElementById('btn-user-dropdown') as HTMLButtonElement
+  const dropdown        = document.getElementById('auth-dropdown')!
+  const authPlanBadge   = document.getElementById('auth-plan-badge')!
+  const ddPlanBadge     = document.getElementById('dd-plan-badge')!
+  const ddScanCount     = document.getElementById('dd-scan-count')!
+  const btnUpgrade      = document.getElementById('btn-upgrade') as HTMLButtonElement
+  const btnUpgradeLabel = document.getElementById('btn-upgrade-label')!
+  const btnUpgradeSpinner = document.getElementById('btn-upgrade-spinner')!
+  const btnPortal       = document.getElementById('btn-portal') as HTMLButtonElement
+  const btnPortalLabel  = document.getElementById('btn-portal-label')!
+  const btnPortalSpinner = document.getElementById('btn-portal-spinner')!
+
   // Mover modal al body para evitar problemas de z-index/overflow
   document.body.appendChild(modal)
 
   let mode = 'login'      // 'login' | 'register'
   let openedAt = 0
+  let dropdownOpen = false
 
   // ── Funciones de UI ───────────────────────────────
 
@@ -191,21 +241,107 @@
     return msg || 'Error desconocido. Inténtalo de nuevo.'
   }
 
+  // ── Dropdown helpers ──────────────────────────────
+
+  function openDropdown() {
+    dropdownOpen = true
+    dropdown.classList.add('ab-dropdown--open')
+    dropdown.setAttribute('aria-hidden', 'false')
+    dropdownTrigger.setAttribute('aria-expanded', 'true')
+    dropdownTrigger.classList.add('ab-dropdown-trigger--active')
+    // Ensure dropdown doesn't overflow viewport on mobile
+    const rect = dropdownTrigger.getBoundingClientRect()
+    const spaceRight = window.innerWidth - rect.right
+    if (spaceRight < 220) {
+      dropdown.classList.add('ab-dropdown--right')
+    } else {
+      dropdown.classList.remove('ab-dropdown--right')
+    }
+  }
+
+  function closeDropdown() {
+    dropdownOpen = false
+    dropdown.classList.remove('ab-dropdown--open')
+    dropdown.setAttribute('aria-hidden', 'true')
+    dropdownTrigger.setAttribute('aria-expanded', 'false')
+    dropdownTrigger.classList.remove('ab-dropdown-trigger--active')
+  }
+
+  function toggleDropdown() {
+    if (dropdownOpen) closeDropdown()
+    else openDropdown()
+  }
+
+  // ── Plan badge text & scan counts ─────────────────
+
+  function getPlanLabel(tier: string | null): string {
+    if (tier === 'pro') return 'PLAN PRO'
+    if (tier === 'basico') return 'PLAN BÁSICO'
+    return ''
+  }
+
+  function getPlanClass(tier: string | null): string {
+    if (tier === 'pro') return 'ab-plan-badge--pro'
+    if (tier === 'basico') return 'ab-plan-badge--basico'
+    return ''
+  }
+
+  function updateDropdownProfile(profile: any) {
+    const tier = profile?.subscription_tier ?? null
+    const planLabel = getPlanLabel(tier)
+    const planClass = getPlanClass(tier)
+
+    // Trigger badge
+    if (planLabel) {
+      authPlanBadge.textContent = planLabel
+      authPlanBadge.className = 'ab-plan-badge ' + planClass
+      authPlanBadge.style.display = 'inline-flex'
+    } else {
+      authPlanBadge.style.display = 'none'
+    }
+
+    // Dropdown plan badge
+    ddPlanBadge.textContent = planLabel || '—'
+    ddPlanBadge.className = 'ab-plan-badge ab-plan-badge--lg ' + planClass
+
+    // Scan count text
+    if (profile && tier) {
+      const limit = (SCAN_LIMITS as any)[tier] ?? 0
+      const used = profile.monthly_scans_used ?? 0
+      ddScanCount.textContent = `${used} / ${limit} escaneos este mes`
+    } else if (profile) {
+      ddScanCount.textContent = '— escaneos este mes'
+    } else {
+      ddScanCount.textContent = '— escaneos este mes'
+    }
+
+    // Show "Subir a Pro" only for basico plan
+    btnUpgrade.style.display = (tier === 'basico') ? 'flex' : 'none'
+  }
+
   // ── Actualizar UI según sesión ────────────────────
 
   function updateAuthUI(user: any) {
     if (user) {
       authGuest.style.display = 'none'
       authUser.style.display  = 'flex'
-      userEmailEl.textContent = user.email || ''
+      // Truncate email in trigger
+      const email = user.email || ''
+      userEmailEl.textContent = email
     } else {
       authGuest.style.display = 'flex'
       authUser.style.display  = 'none'
+      closeDropdown()
     }
   }
 
   // Suscribirse al nanostore para mantener UI en sync con Vue islands
   currentUser.subscribe(updateAuthUI)
+
+  // Suscribirse al perfil para actualizar dropdown reactivamente
+  userProfile.subscribe((profile) => {
+    updateDropdownProfile(profile)
+  })
 
   // Cargar sesión inicial
   supabase.auth.getSession().then(({ data: { session } }) => {
@@ -226,9 +362,26 @@
     if (e.target === modal) closeModal()
   })
 
-  // Escape para cerrar
+  // Cerrar dropdown al hacer click fuera
+  document.addEventListener('click', (e) => {
+    const wrap = document.querySelector('.ab-dropdown-wrap')
+    if (dropdownOpen && wrap && !wrap.contains(e.target as Node)) {
+      closeDropdown()
+    }
+  })
+
+  // Escape para cerrar modal y dropdown
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.style.display !== 'none') closeModal()
+    if (e.key === 'Escape') {
+      if (modal.style.display !== 'none') closeModal()
+      if (dropdownOpen) closeDropdown()
+    }
+  })
+
+  // Toggle dropdown
+  dropdownTrigger.addEventListener('click', (e) => {
+    e.stopPropagation()
+    toggleDropdown()
   })
 
   // Toggle mostrar/ocultar contraseña
@@ -250,9 +403,66 @@
 
   // Logout
   document.getElementById('btn-logout')!.addEventListener('click', async () => {
+    closeDropdown()
     try { await supabase.auth.signOut() } catch {}
     currentUser.set(null)
     userProfile.set(null)
+  })
+
+  // Gestionar suscripción → customer portal
+  btnPortal.addEventListener('click', async () => {
+    btnPortal.disabled = true
+    btnPortalLabel.style.display = 'none'
+    btnPortalSpinner.style.display = 'inline-block'
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      const res = await fetch('/api/customer-portal', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      })
+      if (res.ok) {
+        const { url } = await res.json()
+        if (url) window.location.href = url
+      }
+    } catch (err) {
+      console.error('customer-portal error:', err)
+    } finally {
+      btnPortal.disabled = false
+      btnPortalLabel.style.display = 'inline'
+      btnPortalSpinner.style.display = 'none'
+    }
+  })
+
+  // Subir a Pro → upgrade plan
+  btnUpgrade.addEventListener('click', async () => {
+    btnUpgrade.disabled = true
+    btnUpgradeLabel.style.display = 'none'
+    btnUpgradeSpinner.style.display = 'inline-block'
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      const res = await fetch('/api/upgrade-plan', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session.access_token}` },
+      })
+      if (res.ok) {
+        const json = await res.json()
+        // If API returns a checkout/redirect URL, follow it
+        if (json?.url) {
+          window.location.href = json.url
+          return
+        }
+        // Otherwise refresh profile to reflect new tier
+        await refreshProfile()
+      }
+    } catch (err) {
+      console.error('upgrade-plan error:', err)
+    } finally {
+      btnUpgrade.disabled = false
+      btnUpgradeLabel.style.display = 'inline'
+      btnUpgradeSpinner.style.display = 'none'
+    }
   })
 
   // Escuchar evento desde InvoiceScanner u otros componentes Vue
@@ -378,10 +588,169 @@
 .ab-user-email {
   font-size: 0.85rem;
   color: var(--primary-200);
-  max-width: 160px;
+  max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ── Plan badge ───────────────────────────────── */
+.ab-plan-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ab-plan-badge--pro {
+  background: linear-gradient(135deg, var(--amber), var(--orange));
+  color: var(--primary-900);
+}
+
+.ab-plan-badge--basico {
+  background: var(--primary-700);
+  color: var(--primary-200);
+  border: 1px solid var(--primary-600);
+}
+
+.ab-plan-badge--lg {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+}
+
+/* ── Dropdown wrap ────────────────────────────── */
+.ab-dropdown-wrap {
+  position: relative;
+}
+
+.ab-dropdown-trigger {
+  padding: 0.45rem 0.75rem;
+}
+
+.ab-dropdown-trigger--active {
+  background: var(--primary-800);
+  border-color: var(--primary-500);
+}
+
+.ab-chevron {
+  transition: transform 0.2s;
+  flex-shrink: 0;
+  color: var(--primary-400);
+}
+
+.ab-dropdown-trigger--active .ab-chevron {
+  transform: rotate(180deg);
+}
+
+/* ── Dropdown menu ────────────────────────────── */
+.ab-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 240px;
+  background: var(--primary-900);
+  border: 1px solid var(--primary-700);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+  z-index: 200;
+  overflow: hidden;
+  /* Hidden state */
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.ab-dropdown--open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Right-align on narrow viewports */
+.ab-dropdown--right {
+  left: auto;
+  right: 0;
+}
+
+/* ── Dropdown plan row ────────────────────────── */
+.ab-dropdown-plan {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+}
+
+.ab-dropdown-scans {
+  font-size: 0.8rem;
+  color: var(--primary-300);
+}
+
+/* ── Dropdown divider ─────────────────────────── */
+.ab-dropdown-divider {
+  height: 1px;
+  background: var(--primary-800);
+  margin: 0;
+}
+
+/* ── Dropdown items ───────────────────────────── */
+.ab-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: none;
+  border: none;
+  color: var(--primary-100);
+  font-size: 0.875rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ab-dropdown-item:hover {
+  background: var(--primary-800);
+  color: var(--neutral-50);
+}
+
+.ab-dropdown-item:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ab-dropdown-item--upgrade {
+  color: var(--amber);
+}
+
+.ab-dropdown-item--upgrade:hover {
+  background: rgba(245,158,11,0.12);
+  color: var(--amber);
+}
+
+.ab-dropdown-item--danger {
+  color: #fca5a5;
+}
+
+.ab-dropdown-item--danger:hover {
+  background: rgba(239,68,68,0.12);
+  color: #fecaca;
+}
+
+/* Spinner for items */
+.ab-spinner--sm {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+  margin-left: auto;
 }
 
 /* ── Modal overlay ────────────────────────────── */
@@ -626,6 +995,15 @@
   .ab-btn {
     padding: 0.45rem 0.7rem;
     font-size: 0.8rem;
+  }
+  .ab-dropdown {
+    /* On mobile, always align to right edge of trigger to avoid overflow */
+    left: auto;
+    right: 0;
+    min-width: 220px;
+  }
+  .ab-user-email {
+    max-width: 90px;
   }
 }
 </style>
