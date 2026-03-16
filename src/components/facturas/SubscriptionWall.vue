@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useStore } from '@nanostores/vue'
 import { userProfile, isSubscribed, canScanFree, monthlyScansLeft, monthlyLimit, SCAN_LIMITS, currentSession } from '../../stores/authStore'
 import { Lock, CheckCircle, Zap, Star, CreditCard, Shield, Sparkles, BarChart3, Loader } from 'lucide-vue-next'
+import { supabase } from '../../lib/supabaseClient'
 
 const $profile = useStore(userProfile)
 const $isSubscribed = useStore(isSubscribed)
@@ -26,11 +27,13 @@ async function handleSubscribe(tier) {
   subscribing.value = tier
   checkoutError.value = ''
   try {
+    const { data: { session: freshSession } } = await supabase.auth.getSession()
+    if (!freshSession?.access_token) { checkoutError.value = 'Sesión expirada. Vuelve a iniciar sesión.'; return }
     const res = await fetch('/api/create-checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${$session.value.access_token}`,
+        'Authorization': `Bearer ${freshSession.access_token}`,
       },
       body: JSON.stringify({ tier }),
     })

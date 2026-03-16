@@ -2,22 +2,17 @@ import type { APIRoute } from 'astro'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
-const PLANS = {
-  basico: {
-    priceId: import.meta.env.STRIPE_PRICE_BASICO || process.env.STRIPE_PRICE_BASICO,
-    name: 'Plan Básico',
-  },
-  pro: {
-    priceId: import.meta.env.STRIPE_PRICE_PRO || process.env.STRIPE_PRICE_PRO,
-    name: 'Plan Pro',
-  },
-} as const
-
 export const POST: APIRoute = async ({ request }) => {
-  const stripeKey = import.meta.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY
-  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL
-  const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
-  const baseUrl = import.meta.env.PUBLIC_BASE_URL || process.env.PUBLIC_BASE_URL || 'http://localhost:4321'
+  // Leer env vars dentro del handler para garantizar valores de runtime (no baked en build)
+  const stripeKey        = import.meta.env.STRIPE_SECRET_KEY        ?? process.env.STRIPE_SECRET_KEY
+  const supabaseUrl      = import.meta.env.PUBLIC_SUPABASE_URL      ?? process.env.PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
+  const baseUrl          = import.meta.env.PUBLIC_BASE_URL           ?? process.env.PUBLIC_BASE_URL ?? 'http://localhost:4321'
+
+  const PLANS = {
+    basico: { priceId: import.meta.env.STRIPE_PRICE_BASICO ?? process.env.STRIPE_PRICE_BASICO, name: 'Plan Básico' },
+    pro:    { priceId: import.meta.env.STRIPE_PRICE_PRO    ?? process.env.STRIPE_PRICE_PRO,    name: 'Plan Pro' },
+  } as const
 
   if (!stripeKey) {
     return new Response(JSON.stringify({ error: 'Stripe no configurado' }), {
@@ -98,6 +93,7 @@ export const POST: APIRoute = async ({ request }) => {
       allow_promotion_codes: true,
     })
 
+    console.log(`[create-checkout] OK tier=${tier} session=${session.id}`)
     return new Response(JSON.stringify({ url: session.url }), {
       status: 200, headers: { 'Content-Type': 'application/json' }
     })

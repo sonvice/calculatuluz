@@ -38,11 +38,13 @@ async function handleSubscribe(tier) {
   if (!$session.value) { openAuth(); return }
   subscribing.value = tier
   try {
+    const { data: { session: freshSession } } = await supabase.auth.getSession()
+    if (!freshSession?.access_token) { openAuth(); return }
     const res = await fetch('/api/create-checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${$session.value.access_token}`,
+        'Authorization': `Bearer ${freshSession.access_token}`,
       },
       body: JSON.stringify({ tier }),
     })
