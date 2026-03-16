@@ -5,6 +5,24 @@ import {
   currentUser, authLoading, authError,
   signIn, signUp, signOut, initAuth
 } from '../../stores/authStore'
+
+function translateAuthError(msg) {
+  if (!msg) return msg
+  const m = msg.toLowerCase()
+  if (m.includes('invalid login credentials') || m.includes('invalid email or password'))
+    return 'Email o contraseña incorrectos.'
+  if (m.includes('email not confirmed'))
+    return 'Confirma tu email antes de iniciar sesión. Revisa tu bandeja de entrada.'
+  if (m.includes('user already registered') || m.includes('already been registered'))
+    return 'Ya existe una cuenta con ese email. Inicia sesión en su lugar.'
+  if (m.includes('password should be at least'))
+    return 'La contraseña debe tener al menos 8 caracteres.'
+  if (m.includes('rate limit') || m.includes('too many requests'))
+    return 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.'
+  if (m.includes('network') || m.includes('fetch'))
+    return 'Error de conexión. Comprueba tu internet e inténtalo de nuevo.'
+  return msg
+}
 import { LogIn, UserPlus, LogOut, Mail, Lock, User, X, Eye, EyeOff } from 'lucide-vue-next'
 import { isDisposableEmail, isValidEmailFormat } from '../../lib/disposableEmailDomains'
 
@@ -45,6 +63,7 @@ function openModal(m = 'login') {
   honeypot.value = ''
   openedAt.value = Date.now()
   form.value = { email: '', password: '', fullName: '' }
+  authError.set(null)
 }
 
 function closeModal() {
@@ -60,11 +79,13 @@ async function handleSubmit() {
   // ── Anti-bot: honeypot relleno = bot
   if (honeypot.value) return
 
-  // ── Anti-bot: envío en menos de 1,5 s = bot
-  if (Date.now() - openedAt.value < 1500) return
-
-  // ── Registro: bloquear emails desechables
   if (mode.value === 'register') {
+    // ── Anti-bot solo en registro: envío en menos de 1,5 s = bot
+    if (Date.now() - openedAt.value < 1500) {
+      validationError.value = 'Por favor, inténtalo de nuevo.'
+      return
+    }
+    // ── Bloquear emails desechables
     if (isDisposableEmail(form.value.email)) {
       validationError.value = 'No se permiten emails temporales. Usa tu email real.'
       return
@@ -141,7 +162,7 @@ defineExpose({ openModal })
         </div>
 
         <!-- Body -->
-        <form class="modal-body" @submit.prevent="handleSubmit" autocomplete="off">
+        <form class="modal-body" @submit.prevent="handleSubmit">
           <!-- Honeypot: oculto para humanos, visible para bots -->
           <div class="hp-trap" aria-hidden="true">
             <input v-model="honeypot" type="text" name="website" tabindex="-1" autocomplete="off" />
@@ -154,7 +175,7 @@ defineExpose({ openModal })
 
           <!-- Error de auth -->
           <div v-if="$error" class="alert alert--error" role="alert">
-            {{ $error }}
+            {{ translateAuthError($error) }}
           </div>
 
           <!-- Success -->
