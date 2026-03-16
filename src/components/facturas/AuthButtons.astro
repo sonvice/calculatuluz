@@ -25,7 +25,7 @@
       </button>
 
       <!-- Dropdown menu -->
-      <div id="auth-dropdown" class="ab-dropdown" role="menu" aria-hidden="true">
+      <div id="auth-dropdown" class="ab-dropdown" role="menu" aria-hidden="true" inert>
         <!-- Plan info row -->
         <div class="ab-dropdown-plan">
           <span id="dd-plan-badge" class="ab-plan-badge ab-plan-badge--lg"></span>
@@ -125,7 +125,7 @@
 
 <script>
   import { supabase } from '../../lib/supabaseClient'
-  import { currentUser, userProfile, authError, refreshProfile, SCAN_LIMITS } from '../../stores/authStore'
+  import { currentUser, userProfile, refreshProfile, SCAN_LIMITS } from '../../stores/authStore'
   import { isDisposableEmail, isValidEmailFormat } from '../../lib/disposableEmailDomains'
 
   // ── Elementos del DOM ─────────────────────────────
@@ -246,6 +246,7 @@
   function openDropdown() {
     dropdownOpen = true
     dropdown.classList.add('ab-dropdown--open')
+    dropdown.removeAttribute('inert')
     dropdown.setAttribute('aria-hidden', 'false')
     dropdownTrigger.setAttribute('aria-expanded', 'true')
     dropdownTrigger.classList.add('ab-dropdown-trigger--active')
@@ -262,6 +263,7 @@
   function closeDropdown() {
     dropdownOpen = false
     dropdown.classList.remove('ab-dropdown--open')
+    dropdown.setAttribute('inert', '')
     dropdown.setAttribute('aria-hidden', 'true')
     dropdownTrigger.setAttribute('aria-expanded', 'false')
     dropdownTrigger.classList.remove('ab-dropdown-trigger--active')
@@ -404,7 +406,9 @@
   // Logout
   document.getElementById('btn-logout')!.addEventListener('click', async () => {
     closeDropdown()
-    try { await supabase.auth.signOut() } catch {}
+    // scope: 'local' limpia solo el estado local sin petición al servidor,
+    // evita 403 cuando el token ya está expirado
+    try { await supabase.auth.signOut({ scope: 'local' }) } catch {}
     currentUser.set(null)
     userProfile.set(null)
   })

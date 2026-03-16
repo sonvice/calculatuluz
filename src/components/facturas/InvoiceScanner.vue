@@ -328,21 +328,21 @@ onMounted(async () => {
   // Auto-sync: si el usuario tiene customer de Stripe pero Supabase dice no suscrito,
   // verificar el estado real directamente en Stripe (cubre webhooks que no llegaron)
   const profile = $profile.value
-  const session = $session.value
-  if (session?.access_token && profile && !profile.is_subscribed && !profile.is_unlimited) {
-    // Solo lanzar sync si ya usó el escaneo gratis (= había intención de pagar)
-    if (profile.free_scans_used >= 1) {
-      try {
+  if (profile && !profile.is_subscribed && !profile.is_unlimited && profile.free_scans_used >= 1) {
+    try {
+      // Usar sesión fresca para evitar tokens expirados del store
+      const { data: { session: freshSession } } = await supabase.auth.getSession()
+      if (freshSession?.access_token) {
         const res = await fetch('/api/sync-subscription', {
           method: 'POST',
-          headers: { Authorization: `Bearer ${session.access_token}` },
+          headers: { Authorization: `Bearer ${freshSession.access_token}` },
         })
-        const data = await res.json()
-        if (data.synced && data.is_subscribed) {
-          await refreshProfile()
+        if (res.ok) {
+          const data = await res.json()
+          if (data.synced && data.is_subscribed) await refreshProfile()
         }
-      } catch { /* silencioso */ }
-    }
+      }
+    } catch { /* silencioso */ }
   }
 })
 </script>
