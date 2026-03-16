@@ -14,8 +14,7 @@ import {
   Lightbulb, X, Lock, LogIn, Star, CreditCard,
   Shield, RefreshCw, Sparkles, BarChart3,
   Pencil, Save, RotateCcw, LayoutDashboard,
-  User, Hash, Network, Gauge, Receipt, Percent,
-  Thermometer, Droplets, ClipboardList
+  User, Hash, Network
 } from 'lucide-vue-next'
 import TariffAdvisor from './TariffAdvisor.vue'
 
@@ -35,10 +34,12 @@ const $monthlyLimit = useStore(monthlyLimit)
 const subscribing = ref('')
 
 async function handleSubscribe(tier) {
+  console.log('[handleSubscribe] tier:', tier, 'session:', !!$session.value)
   if (!$session.value) { openAuth(); return }
   subscribing.value = tier
   try {
     const { data: { session: freshSession } } = await supabase.auth.getSession()
+    console.log('[handleSubscribe] freshSession:', !!freshSession?.access_token)
     if (!freshSession?.access_token) { openAuth(); return }
     const res = await fetch('/api/create-checkout', {
       method: 'POST',

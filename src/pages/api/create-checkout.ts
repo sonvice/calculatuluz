@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
 export const POST: APIRoute = async ({ request }) => {
+  console.log('[create-checkout] POST recibido, origin:', request.headers.get('origin'))
   // Leer env vars dentro del handler para garantizar valores de runtime (no baked en build)
   const stripeKey        = import.meta.env.STRIPE_SECRET_KEY        ?? process.env.STRIPE_SECRET_KEY
   const supabaseUrl      = import.meta.env.PUBLIC_SUPABASE_URL      ?? process.env.PUBLIC_SUPABASE_URL
