@@ -1,65 +1,48 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useStore } from '@nanostores/vue'
-import {
-  currentUser, authError,
-  signIn, signUp, signOut, initAuth
-} from '../../stores/authStore'
-
-function translateAuthError(msg) {
-  if (!msg) return msg
-  const m = msg.toLowerCase()
-  if (m.includes('invalid login credentials') || m.includes('invalid email or password'))
-    return 'Email o contraseña incorrectos.'
-  if (m.includes('email not confirmed'))
-    return 'Confirma tu email antes de iniciar sesión. Revisa tu bandeja de entrada.'
-  if (m.includes('user already registered') || m.includes('already been registered'))
-    return 'Ya existe una cuenta con ese email. Inicia sesión en su lugar.'
-  if (m.includes('password should be at least'))
-    return 'La contraseña debe tener al menos 8 caracteres.'
-  if (m.includes('rate limit') || m.includes('too many requests'))
-    return 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.'
-  if (m.includes('network') || m.includes('fetch'))
-    return 'Error de conexión. Comprueba tu internet e inténtalo de nuevo.'
-  return msg
-}
+import { currentUser, authError, signIn, signUp, signOut, initAuth } from '../../stores/authStore'
 import { LogIn, UserPlus, LogOut, Mail, Lock, User, X, Eye, EyeOff } from 'lucide-vue-next'
 import { isDisposableEmail, isValidEmailFormat } from '../../lib/disposableEmailDomains'
 
 const $user = useStore(currentUser)
 const $error = useStore(authError)
 
-const showModal = ref(false)
-const mode = ref('login') // 'login' | 'register'
+const showModal  = ref(false)
+const mode       = ref('login')
 const showPassword = ref(false)
 const successMessage = ref('')
-const validationError = ref('')
-const submitting = ref(false)
+const errorMessage   = ref('')
+const submitting     = ref(false)
+const honeypot       = ref('')
+const openedAt       = ref(0)
 
-// Honeypot: campo oculto que solo los bots rellenan
-const honeypot = ref('')
-// Timestamp de cuando se abrió el modal (bots son demasiado rápidos)
-const openedAt = ref(0)
+const form = ref({ email: '', password: '', fullName: '' })
 
-const form = ref({
-  email: '',
-  password: '',
-  fullName: ''
-})
-
-const formValid = computed(() => {
-  if (!form.value.email || !form.value.password) return false
-  if (mode.value === 'register' && !form.value.fullName) return false
-  if (form.value.password.length < 8) return false
-  if (!isValidEmailFormat(form.value.email)) return false
-  return true
-})
+// Traduce errores de Supabase al español
+function translateError(msg) {
+  if (!msg) return 'Error desconocido. Inténtalo de nuevo.'
+  const m = msg.toLowerCase()
+  if (m.includes('invalid login credentials') || m.includes('invalid email or password'))
+    return 'Email o contraseña incorrectos.'
+  if (m.includes('email not confirmed'))
+    return 'Debes confirmar tu email antes de entrar. Revisa tu bandeja de entrada.'
+  if (m.includes('user already registered') || m.includes('already been registered'))
+    return 'Ya existe una cuenta con ese email. Inicia sesión.'
+  if (m.includes('password should be at least'))
+    return 'La contraseña debe tener al menos 8 caracteres.'
+  if (m.includes('rate limit') || m.includes('too many requests'))
+    return 'Demasiados intentos. Espera unos minutos.'
+  if (m.includes('network') || m.includes('fetch') || m.includes('failed'))
+    return 'Error de conexión. Comprueba tu internet e inténtalo de nuevo.'
+  return msg
+}
 
 function openModal(m = 'login') {
   mode.value = m
   showModal.value = true
   successMessage.value = ''
-  validationError.value = ''
+  errorMessage.value = ''
   honeypot.value = ''
   openedAt.value = Date.now()
   form.value = { email: '', password: '', fullName: '' }
@@ -69,29 +52,54 @@ function openModal(m = 'login') {
 function closeModal() {
   showModal.value = false
   successMessage.value = ''
+  errorMessage.value = ''
+}
+
+// Lee valores del DOM directamente para capturar autocompletado de móvil
+function syncFormFromDOM() {
+  const emailEl    = document.getElementById('auth-email')
+  const passEl     = document.getElementById('auth-password')
+  const nameEl     = document.getElementById('auth-name')
+  if (emailEl?.value)   form.value.email    = emailEl.value
+  if (passEl?.value)    form.value.password = passEl.value
+  if (nameEl?.value)    form.value.fullName = nameEl.value
+}
+
+function validate() {
+  const { email, password, fullName } = form.value
+  if (!email.trim())    return 'Introduce tu email.'
+  if (!isValidEmailFormat(email)) return 'El email no tiene un formato válido.'
+  if (!password)        return 'Introduce tu contraseña.'
+  if (password.length < 8) return 'La contraseña debe tener al menos 8 caracteres.'
+  if (mode.value === 'register' && !fullName.trim()) return 'Introduce tu nombre.'
+  return null
 }
 
 async function handleSubmit() {
-  successMessage.value = ''
-  validationError.value = ''
+  // 1. Sincronizar valores del DOM (crucial para autocompletado en móvil)
+  syncFormFromDOM()
 
-  // ── Anti-bot: honeypot relleno = bot
+  successMessage.value = ''
+  errorMessage.value   = ''
+  authError.set(null)
+
+  // Anti-bot honeypot
   if (honeypot.value) return
 
-  if (!formValid.value) {
-    validationError.value = 'Completa todos los campos correctamente.'
+  // Validación con feedback
+  const validErr = validate()
+  if (validErr) {
+    errorMessage.value = validErr
     return
   }
 
   if (mode.value === 'register') {
-    // ── Anti-bot solo en registro: envío en menos de 1,5 s = bot
     if (Date.now() - openedAt.value < 1500) {
-      validationError.value = 'Por favor, inténtalo de nuevo.'
+      errorMessage.value = 'Por favor, inténtalo de nuevo.'
       return
     }
-    // ── Bloquear emails desechables
     if (isDisposableEmail(form.value.email)) {
-      validationError.value = 'No se permiten emails temporales. Usa tu email real.'
+      errorMessage.value = 'No se permiten emails temporales. Usa tu email real.'
       return
     }
   }
@@ -100,17 +108,26 @@ async function handleSubmit() {
   try {
     if (mode.value === 'login') {
       const result = await signIn(form.value.email, form.value.password)
-      if (result) closeModal()
+      if (result) {
+        closeModal()
+      } else {
+        // signIn devuelve null cuando hay error → el error está en authError store
+        errorMessage.value = translateError($error.value)
+      }
     } else {
       const result = await signUp(form.value.email, form.value.password, form.value.fullName)
       if (result) {
         if (result.user && !result.session) {
-          successMessage.value = 'Revisa tu email para confirmar tu cuenta'
+          successMessage.value = 'Revisa tu email para confirmar tu cuenta.'
         } else {
           closeModal()
         }
+      } else {
+        errorMessage.value = translateError($error.value)
       }
     }
+  } catch (e) {
+    errorMessage.value = 'Error de conexión. Comprueba tu internet e inténtalo de nuevo.'
   } finally {
     submitting.value = false
   }
@@ -122,7 +139,6 @@ async function handleLogout() {
 
 onMounted(() => {
   initAuth()
-  // Escuchar eventos cross-island (desde InvoiceScanner u otros componentes)
   document.addEventListener('open-auth-modal', (e) => {
     openModal(e.detail?.mode || 'login')
   })
@@ -133,7 +149,7 @@ defineExpose({ openModal })
 
 <template>
 <div class="auth-root">
-  <!-- User button -->
+  <!-- Botones de sesión -->
   <div class="auth-buttons">
     <template v-if="$user">
       <div class="user-info">
@@ -147,7 +163,7 @@ defineExpose({ openModal })
     <template v-else>
       <button class="btn-auth btn-auth--primary" @click="openModal('login')">
         <LogIn :size="16" />
-        Iniciar sesion
+        Iniciar sesión
       </button>
       <button class="btn-auth btn-auth--outline" @click="openModal('register')">
         <UserPlus :size="16" />
@@ -156,41 +172,37 @@ defineExpose({ openModal })
     </template>
   </div>
 
-  <!-- Modal Overlay -->
+  <!-- Modal -->
   <Teleport to="body">
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-container">
+      <div class="modal-container" role="dialog" aria-modal="true" :aria-label="mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'">
+
         <!-- Header -->
         <div class="modal-header">
-          <h2>{{ mode === 'login' ? 'Iniciar sesion' : 'Crear cuenta' }}</h2>
+          <h2>{{ mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta' }}</h2>
           <button class="modal-close" @click="closeModal" aria-label="Cerrar">
             <X :size="20" />
           </button>
         </div>
 
         <!-- Body -->
-        <form class="modal-body" @submit.prevent="handleSubmit">
-          <!-- Honeypot: oculto para humanos, visible para bots -->
+        <form class="modal-body" @submit.prevent="handleSubmit" novalidate>
+          <!-- Honeypot anti-bot -->
           <div class="hp-trap" aria-hidden="true">
             <input v-model="honeypot" type="text" name="website" tabindex="-1" autocomplete="off" />
           </div>
 
-          <!-- Error de validación -->
-          <div v-if="validationError" class="alert alert--error" role="alert">
-            {{ validationError }}
+          <!-- Error -->
+          <div v-if="errorMessage || $error" class="alert alert--error" role="alert">
+            {{ errorMessage || translateError($error) }}
           </div>
 
-          <!-- Error de auth -->
-          <div v-if="$error" class="alert alert--error" role="alert">
-            {{ translateAuthError($error) }}
-          </div>
-
-          <!-- Success -->
+          <!-- Éxito -->
           <div v-if="successMessage" class="alert alert--success" role="status">
             {{ successMessage }}
           </div>
 
-          <!-- Name (solo registro) -->
+          <!-- Nombre (solo registro) -->
           <div v-if="mode === 'register'" class="form-group">
             <label for="auth-name">Nombre completo</label>
             <div class="input-wrapper">
@@ -198,10 +210,11 @@ defineExpose({ openModal })
               <input
                 id="auth-name"
                 v-model="form.fullName"
+                @change="form.fullName = $event.target.value"
                 type="text"
                 placeholder="Tu nombre"
-                required
                 autocomplete="name"
+                inputmode="text"
               />
             </div>
           </div>
@@ -217,13 +230,13 @@ defineExpose({ openModal })
                 @change="form.email = $event.target.value"
                 type="email"
                 placeholder="tu@email.com"
-                required
                 autocomplete="email"
+                inputmode="email"
               />
             </div>
           </div>
 
-          <!-- Password -->
+          <!-- Contraseña -->
           <div class="form-group">
             <label for="auth-password">Contraseña</label>
             <div class="input-wrapper">
@@ -234,15 +247,13 @@ defineExpose({ openModal })
                 @change="form.password = $event.target.value"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="Mínimo 8 caracteres"
-                required
-                minlength="8"
                 autocomplete="current-password"
               />
               <button
                 type="button"
                 class="password-toggle"
                 @click="showPassword = !showPassword"
-                :aria-label="showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+                :aria-label="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
               >
                 <EyeOff v-if="showPassword" :size="18" />
                 <Eye v-else :size="18" />
@@ -251,30 +262,22 @@ defineExpose({ openModal })
           </div>
 
           <!-- Submit -->
-          <button
-            type="submit"
-            class="btn-submit"
-            :disabled="submitting"
-          >
+          <button type="submit" class="btn-submit" :disabled="submitting">
             <span v-if="submitting" class="spinner"></span>
             <template v-else>
-              {{ mode === 'login' ? 'Iniciar sesion' : 'Crear cuenta' }}
+              {{ mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta' }}
             </template>
           </button>
 
-          <!-- Toggle mode -->
+          <!-- Cambiar modo -->
           <p class="toggle-mode">
             <template v-if="mode === 'login'">
               ¿No tienes cuenta?
-              <button type="button" @click="mode = 'register'; successMessage = ''">
-                Registrate
-              </button>
+              <button type="button" @click="mode = 'register'; errorMessage = ''">Regístrate</button>
             </template>
             <template v-else>
               ¿Ya tienes cuenta?
-              <button type="button" @click="mode = 'login'; successMessage = ''">
-                Inicia sesion
-              </button>
+              <button type="button" @click="mode = 'login'; errorMessage = ''">Inicia sesión</button>
             </template>
           </p>
         </form>
@@ -285,10 +288,8 @@ defineExpose({ openModal })
 </template>
 
 <style scoped>
-/* Wrapper transparente — necesario para nodo raíz único sin romper layout */
 .auth-root { display: contents; }
 
-/* Honeypot: completamente invisible */
 .hp-trap {
   position: absolute;
   left: -9999px;
@@ -299,7 +300,6 @@ defineExpose({ openModal })
   pointer-events: none;
 }
 
-/* Auth Buttons */
 .auth-buttons {
   display: flex;
   gap: 0.5rem;
@@ -336,25 +336,10 @@ defineExpose({ openModal })
   font-family: inherit;
 }
 
-.btn-auth--primary {
-  background: var(--primary-500);
-  color: var(--neutral-50);
-}
-
-.btn-auth--primary:hover {
-  background: var(--primary-400);
-}
-
-.btn-auth--outline {
-  background: transparent;
-  color: var(--primary-100);
-  border: 1px solid var(--primary-600);
-}
-
-.btn-auth--outline:hover {
-  background: var(--primary-800);
-  border-color: var(--primary-500);
-}
+.btn-auth--primary { background: var(--primary-500); color: var(--neutral-50); }
+.btn-auth--primary:hover { background: var(--primary-400); }
+.btn-auth--outline { background: transparent; color: var(--primary-100); border: 1px solid var(--primary-600); }
+.btn-auth--outline:hover { background: var(--primary-800); border-color: var(--primary-500); }
 
 /* Modal */
 .modal-overlay {
@@ -368,7 +353,7 @@ defineExpose({ openModal })
   padding: 1rem;
 }
 
-/* Blur en pseudo-elemento para no bloquear touch events en Android/MIUI */
+/* Blur via pseudo-elemento — no bloquea touch en Android/MIUI */
 .modal-overlay::before {
   content: '';
   position: fixed;
@@ -390,14 +375,8 @@ defineExpose({ openModal })
 }
 
 @keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .modal-header {
@@ -420,17 +399,18 @@ defineExpose({ openModal })
   border: none;
   color: var(--primary-300);
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.4rem;
   border-radius: 6px;
   transition: all 0.15s;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.modal-close:hover {
-  background: var(--primary-800);
-  color: var(--neutral-50);
-}
+.modal-close:hover { background: var(--primary-800); color: var(--neutral-50); }
 
-/* Form */
 .modal-body {
   padding: 1.5rem;
   display: flex;
@@ -465,14 +445,15 @@ defineExpose({ openModal })
 
 .input-wrapper input {
   width: 100%;
-  padding: 0.65rem 0.75rem 0.65rem 2.5rem;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
   background: var(--primary-800);
   border: 1px solid var(--primary-700);
   border-radius: 8px;
   color: var(--neutral-50);
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-family: inherit;
   transition: border-color 0.15s;
+  min-height: 48px;
 }
 
 .input-wrapper input:focus {
@@ -481,28 +462,28 @@ defineExpose({ openModal })
   box-shadow: 0 0 0 3px rgba(99, 149, 238, 0.15);
 }
 
-.input-wrapper input::placeholder {
-  color: var(--primary-500);
-}
+.input-wrapper input::placeholder { color: var(--primary-500); }
 
 .password-toggle {
   position: absolute;
-  right: 0.75rem;
+  right: 0.5rem;
   background: none;
   border: none;
   color: var(--primary-400);
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.5rem;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.password-toggle:hover {
-  color: var(--primary-200);
-}
+.password-toggle:hover { color: var(--primary-200); }
 
-/* Submit */
 .btn-submit {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.85rem;
   background: var(--primary-500);
   color: var(--neutral-50);
   border: none;
@@ -513,6 +494,10 @@ defineExpose({ openModal })
   transition: all 0.2s;
   font-family: inherit;
   margin-top: 0.25rem;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-submit:hover:not(:disabled) {
@@ -520,10 +505,7 @@ defineExpose({ openModal })
   transform: translateY(-1px);
 }
 
-.btn-submit:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .spinner {
   display: inline-block;
@@ -535,20 +517,18 @@ defineExpose({ openModal })
   animation: spin 0.6s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* Alerts */
 .alert {
   padding: 0.75rem 1rem;
   border-radius: 8px;
   font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .alert--error {
   background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.4);
   color: #fca5a5;
 }
 
@@ -558,7 +538,6 @@ defineExpose({ openModal })
   color: #86efac;
 }
 
-/* Toggle mode */
 .toggle-mode {
   text-align: center;
   font-size: 0.85rem;
@@ -575,32 +554,28 @@ defineExpose({ openModal })
   text-decoration: underline;
   font-family: inherit;
   font-size: inherit;
+  padding: 0.25rem;
 }
 
-.toggle-mode button:hover {
-  color: var(--neutral-50);
-}
+.toggle-mode button:hover { color: var(--neutral-50); }
 
 @media (max-width: 480px) {
   .modal-overlay {
-    align-items: flex-start;
-    padding-top: 1.5rem;
-    overflow-y: auto;
+    align-items: flex-end;
+    padding: 0;
   }
 
   .modal-container {
     max-width: 100%;
-    margin: 0 0.5rem 1rem;
-    max-height: calc(100dvh - 2rem);
+    border-radius: 16px 16px 0 0;
+    max-height: 92dvh;
     overflow-y: auto;
   }
 
-  .auth-buttons {
-    gap: 0.35rem;
-  }
+  .auth-buttons { gap: 0.35rem; }
 
   .btn-auth {
-    padding: 0.4rem 0.7rem;
+    padding: 0.45rem 0.75rem;
     font-size: 0.8rem;
   }
 }
