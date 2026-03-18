@@ -40,6 +40,16 @@ const faqScanner = [
   }
 ];
 
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqScanner.map(({ question, answer }) => ({
+    "@type": "Question",
+    "name": question,
+    "acceptedAnswer": { "@type": "Answer", "text": answer }
+  }))
+};
+
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
@@ -91,12 +101,13 @@ const structuredData = {
 ---
 
 <Layout
-  title="Analiza tu Factura de Luz y Gas con IA | Escáner Gratis – CalculaTuLuz"
-  description="Sube tu factura de luz o gas (imagen o PDF) y nuestra IA extrae automáticamente consumo en kWh, importes, periodos P1/P2/P3 y te da consejos para ahorrar. 1 análisis gratis, sin tarjeta."
+  title="Analiza tu Factura de Luz y Gas con IA Gratis 2026 | CalculaTuLuz"
+  description="Sube tu factura de luz o gas (JPG, PNG o PDF) y la IA extrae consumo en kWh, importes, periodos P1/P2/P3, tarifa PVPC o mercado libre y consejos de ahorro personalizados. 1 análisis gratis, sin tarjeta."
   conical={canonical}
 >
   <slot name="head-schema" slot="head-schema">
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   </slot>
 
   <div class="text-primary-100 mt-space-l scanner-page">
@@ -135,6 +146,14 @@ const structuredData = {
       </div>
     </section>
 
+    <!-- SEO intro visible to crawlers -->
+    <p class="seo-intro">
+      El <strong>escáner de facturas con IA</strong> de CalculaTuLuz analiza automáticamente tu <strong>factura de luz</strong> o <strong>factura de gas</strong>:
+      extrae el consumo en kWh, periodos tarifarios P1/P2/P3, potencia contratada, tarifa PVPC o mercado libre,
+      importes y te genera <strong>consejos personalizados para reducir tu factura eléctrica</strong>.
+      Compatible con Endesa, Iberdrola, Naturgy, EDP, Repsol y todas las comercializadoras españolas.
+    </p>
+
     <!-- ── MAIN TABS ───────────────────────────────── -->
     <div class="main-tabs mt-space-l" id="app-tabs">
       <div class="main-tabs__nav">
@@ -167,7 +186,7 @@ const structuredData = {
     <hr class="sep my-space-2xl" />
 
     <section>
-      <h2 class="text-neutral-50">¿Cómo funciona?</h2>
+      <h2 class="text-neutral-50">¿Cómo funciona el escáner de facturas de luz con IA?</h2>
       <div class="steps-grid mt-space-l">
         <div class="step-card">
           <div class="step-num">1</div>
@@ -194,7 +213,7 @@ const structuredData = {
 
     <!-- ── QUÉ EXTRAE ──────────────────────────────── -->
     <section class="mt-space-xl">
-      <h2 class="text-neutral-50">¿Qué datos extrae la IA?</h2>
+      <h2 class="text-neutral-50">¿Qué datos extrae la IA de tu factura de luz o gas?</h2>
       <div class="features-grid mt-space-l">
         <div class="feature-item">
           <span class="feature-icon" aria-hidden="true">
@@ -245,6 +264,50 @@ const structuredData = {
     <div class="mt-space-xl">
       <Faq data={faqScanner} />
     </div>
+
+    <!-- ── ARTÍCULOS RELACIONADOS ─────────────────── -->
+    <section class="mt-space-xl related-articles">
+      <h2 class="text-neutral-50">Guías para reducir tu factura de la luz</h2>
+      <p class="related-intro">Analizar tu factura es el primer paso. Estos artículos te ayudan a actuar sobre los datos que la IA extrae:</p>
+      <div class="related-grid mt-space-m">
+        <a href="/tipsyguias/consejos-para-ahorrar-en-la-factura-de-la-luz-segun-tu-tarifa-guia-completa-2026" class="related-card">
+          <span class="related-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+          </span>
+          <div>
+            <strong>Cómo ahorrar en la factura según tu tarifa</strong>
+            <p>Guía completa PVPC, 2.0TD y mercado libre — hasta 500€/año de ahorro.</p>
+          </div>
+        </a>
+        <a href="/tipsyguias/como-calcular-consumo-electrodomestico" class="related-card">
+          <span class="related-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </span>
+          <div>
+            <strong>Calcula el consumo de tus electrodomésticos</strong>
+            <p>Descubre qué aparatos disparan tu kWh y cómo optimizar la potencia contratada.</p>
+          </div>
+        </a>
+        <a href="/tipsyguias/ahorra-electricidad" class="related-card">
+          <span class="related-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </span>
+          <div>
+            <strong>Electrodomésticos que menos consumen</strong>
+            <p>Los aparatos más eficientes del hogar y consejos prácticos de ahorro.</p>
+          </div>
+        </a>
+        <a href="/precio-luz-hoy" class="related-card">
+          <span class="related-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          </span>
+          <div>
+            <strong>Precio de la luz hoy en España</strong>
+            <p>Consulta el precio PVPC hora a hora y planifica tu consumo.</p>
+          </div>
+        </a>
+      </div>
+    </section>
 
     <!-- ── NEWSLETTER ──────────────────────────────── -->
     <div class="mt-space-xl text-neutral-50 bg-primary-900 p-space-l rounded-md bg-texture">
@@ -407,6 +470,47 @@ window.switchToDashboard = () => switchTab('dashboard');
 .feature-item strong { font-size: 0.95rem; color: var(--neutral-50); }
 .feature-item p { font-size: 0.85rem; color: var(--primary-200); margin: 0; line-height: 1.4; }
 
+/* ── SEO intro ─────────────────────────────────── */
+.seo-intro {
+  font-size: 0.9rem;
+  color: var(--primary-300);
+  line-height: 1.6;
+  margin-top: 0.75rem;
+  max-width: 72ch;
+}
+
+/* ── Related articles ──────────────────────────── */
+.related-intro { font-size: 0.9rem; color: var(--primary-300); margin: 0; }
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+.related-card {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  background: var(--primary-900);
+  border: 1px solid var(--primary-700);
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .15s, background .15s;
+}
+.related-card:hover {
+  border-color: var(--primary-500);
+  background: var(--primary-800);
+}
+.related-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  background: var(--primary-700);
+  border-radius: 8px;
+  color: var(--primary-300);
+  flex-shrink: 0;
+}
+.related-card strong { display: block; font-size: 0.9rem; color: var(--neutral-50); margin-bottom: 0.2rem; }
+.related-card p { font-size: 0.8rem; color: var(--primary-300); margin: 0; line-height: 1.4; }
+
 /* ── Misc ──────────────────────────────────────── */
 .sep { border-color: var(--primary-800); }
 .newsletter-wrap { max-width: 48rem; }
@@ -419,6 +523,7 @@ window.switchToDashboard = () => switchTab('dashboard');
   .hero { flex-direction: column; }
   .hero__auth { width: 100%; }
   .features-grid { grid-template-columns: 1fr 1fr; }
+  .related-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
   .steps-grid { grid-template-columns: 1fr; }
