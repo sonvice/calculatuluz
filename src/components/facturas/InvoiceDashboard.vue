@@ -1199,8 +1199,20 @@ code.d-id-val { font-family: 'Courier New', monospace; font-size: 0.72rem; color
   .charts-grid { grid-template-columns: 1fr; }
   .chart-card--wide { min-width: 0; }
 }
+
 @media (max-width: 600px) {
-  .kpi-row { grid-template-columns: 1fr 1fr; }
+  /* KPIs: 2 columnas fijas, sin minmax que pueda desbordar */
+  .kpi-row { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .kpi-card { padding: 0.75rem; gap: 0.55rem; }
+  .kpi-value { font-size: 1.05rem; }
+  .kpi-label { font-size: 0.65rem; }
+
+  /* View header: envuelve en móvil */
+  .view-header { flex-wrap: wrap; gap: 0.5rem; }
+  .view-tabs { flex: 1; }
+  .view-tab { flex: 1; justify-content: center; padding: 0.45rem 0.5rem; font-size: 0.8rem; }
+
+  /* Filter tabs: scroll horizontal sin desbordamiento */
   .filter-tabs {
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -1210,8 +1222,31 @@ code.d-id-val { font-family: 'Courier New', monospace; font-size: 0.72rem; color
   }
   .filter-tabs::-webkit-scrollbar { display: none; }
   .filter-tab { flex-shrink: 0; }
+
+  /* Fila de factura */
   .row-kwh { display: none; }
-  .row-provider { max-width: 160px; }
-  .invoice-row__head { padding: 0.75rem; }
+  .row-provider { max-width: 130px; }
+  .invoice-row__head { padding: 0.7rem 0.75rem; gap: 0.5rem; }
+  .row-amount { font-size: 0.9rem; }
+}
+
+@media (max-width: 480px) {
+  /* KPIs en móvil pequeño */
+  .kpi-card { padding: 0.65rem 0.6rem; border-radius: 10px; }
+  .kpi-icon { width: 30px; height: 30px; border-radius: 7px; }
+  .kpi-value { font-size: 1rem; }
+
+  /* Detalle expandido: min-width en d-kpi reducido */
+  .d-kpi { min-width: calc(50% - 0.25rem); padding: 0.4rem 0.6rem; }
+  .d-kpi__val { font-size: 0.85rem; }
+  .d-kpi__val--sm { font-size: 0.72rem; }
+
+  /* Acciones del detalle */
+  .detail-actions { gap: 0.4rem; }
+  .btn-del, .btn-download { font-size: 0.75rem; padding: 0.3rem 0.55rem; }
+
+  /* Delete confirm en móvil */
+  .delete-confirm { padding: 0.6rem 0.75rem; gap: 0.4rem; }
+  .delete-confirm__btns { margin-left: 0; width: 100%; justify-content: flex-end; }
 }
 </style>
