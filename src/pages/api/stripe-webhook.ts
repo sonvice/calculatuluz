@@ -4,15 +4,28 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
 export const POST: APIRoute = async ({ request }) => {
-  const stripeKey = import.meta.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY
-  const webhookSecret = import.meta.env.STRIPE_WEBHOOK_SECRET || process.env.STRIPE_WEBHOOK_SECRET
-  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || process.env.PUBLIC_SUPABASE_URL
-  const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
-  const resendKey = import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY
-  const adminEmail = import.meta.env.ADMIN_EMAIL || process.env.ADMIN_EMAIL
+  const stripeKey        = import.meta.env.STRIPE_SECRET_KEY        ?? process.env.STRIPE_SECRET_KEY
+  const webhookSecret    = import.meta.env.STRIPE_WEBHOOK_SECRET    ?? process.env.STRIPE_WEBHOOK_SECRET
+  const supabaseUrl      = import.meta.env.PUBLIC_SUPABASE_URL      ?? process.env.PUBLIC_SUPABASE_URL
+  const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY
+  const resendKey        = import.meta.env.RESEND_API_KEY           ?? process.env.RESEND_API_KEY
+  const adminEmail       = import.meta.env.ADMIN_EMAIL              ?? process.env.ADMIN_EMAIL
+
+  console.log('[stripe-webhook] POST recibido — stripeKey:', !!stripeKey, '| webhookSecret:', !!webhookSecret, '| supabaseUrl:', !!supabaseUrl)
 
   if (!stripeKey || !webhookSecret) {
-    return new Response('Stripe no configurado', { status: 500 })
+    console.error('[stripe-webhook] Faltan vars: STRIPE_SECRET_KEY o STRIPE_WEBHOOK_SECRET')
+    // Devolvemos 200 para que Stripe no reintente — el problema es de config, no de la request
+    return new Response(JSON.stringify({ error: 'Stripe no configurado' }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    })
+  }
+
+  if (!supabaseUrl) {
+    console.error('[stripe-webhook] Falta PUBLIC_SUPABASE_URL')
+    return new Response(JSON.stringify({ error: 'Supabase no configurado' }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    })
   }
 
   const stripe = new Stripe(stripeKey)
@@ -25,94 +38,132 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
   } catch (err: any) {
-    console.error('Webhook signature error:', err.message)
+    console.error('[stripe-webhook] Signature error:', err.message)
     return new Response(`Webhook error: ${err.message}`, { status: 400 })
   }
 
+  console.log('[stripe-webhook] event:', event.type)
+
   const supabaseUserId = (event.data.object as any)?.metadata?.supabase_user_id
 
-  switch (event.type) {
-    // Suscripción activada o renovada
-    case 'customer.subscription.created':
-    case 'customer.subscription.updated': {
-      const sub = event.data.object as Stripe.Subscription
-      const userId = sub.metadata?.supabase_user_id || supabaseUserId
-      const tier = sub.metadata?.tier || 'basico'
-      const isActive = sub.status === 'active' || sub.status === 'trialing'
-
-      if (userId) {
-        await supabase
-          .from('user_profiles')
-          .update({
-            is_subscribed: isActive,
-            subscription_tier: isActive ? tier : null,
-            subscription_end: isActive
-              ? new Date(sub.current_period_end * 1000).toISOString()
-              : null,
-            stripe_subscription_id: sub.id,
-            // Resetear contador mensual al activar
-            ...(isActive ? { monthly_scans_used: 0, monthly_scans_reset_at: new Date().toISOString() } : {}),
-          })
-          .eq('id', userId)
+  try {
+    switch (event.type) {
+      // Checkout completado — fuente de verdad más fiable para nuevas suscripciones
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session
+        const userId = session.metadata?.supabase_user_id
+        const tier   = session.metadata?.tier || 'basico'
+        if (userId && session.subscription) {
+          await supabase
+            .from('user_profiles')
+            .update({
+              is_subscribed: true,
+              subscription_tier: tier,
+              stripe_subscription_id: session.subscription as string,
+              monthly_scans_used: 0,
+              monthly_scans_reset_at: new Date().toISOString(),
+            })
+            .eq('id', userId)
+          console.log('[stripe-webhook] checkout.session.completed → user:', userId, 'tier:', tier)
+        }
+        break
       }
 
-      // Notificar al admin cuando se activa una nueva suscripción
-      if (isActive && event.type === 'customer.subscription.created' && resendKey && adminEmail) {
-        const { data: profile } = await supabase
-          .from('user_profiles')
-          .select('id')
-          .eq('id', userId)
-          .single()
-        const customer = await stripe.customers.retrieve(sub.customer as string) as Stripe.Customer
-        const userEmail = customer.email || 'desconocido'
-        const price = (sub.items.data[0]?.price?.unit_amount || 0) / 100
-        const resend = new Resend(resendKey)
-        await resend.emails.send({
-          from: 'Calculatuluz <noreply@calculatuluz.es>',
-          to: adminEmail,
-          subject: `💰 Nueva suscripción — Plan ${tier === 'pro' ? 'Pro' : 'Básico'} (${price}€/mes)`,
-          html: `
-            <h2>Nueva suscripción en Calculatuluz</h2>
-            <p><strong>Plan:</strong> ${tier === 'pro' ? 'Pro (9,99€/mes)' : 'Básico (4,99€/mes)'}</p>
-            <p><strong>Email:</strong> ${userEmail}</p>
-            <p><strong>Stripe ID:</strong> ${sub.id}</p>
-            <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES')}</p>
-          `,
-        }).catch(() => {}) // No bloquear el webhook si falla el email
+      // Suscripción activada o renovada
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        const sub = event.data.object as Stripe.Subscription
+        const userId = sub.metadata?.supabase_user_id || supabaseUserId
+        const tier = sub.metadata?.tier || 'basico'
+        const isActive = sub.status === 'active' || sub.status === 'trialing'
+
+        if (userId) {
+          // En Stripe SDK v20, current_period_end se movió de Subscription a SubscriptionItem
+          const periodEnd = sub.items?.data[0]?.current_period_end
+            ?? (sub as any).current_period_end // fallback por si acaso
+
+          await supabase
+            .from('user_profiles')
+            .update({
+              is_subscribed: isActive,
+              subscription_tier: isActive ? tier : null,
+              subscription_end: isActive && periodEnd
+                ? new Date(periodEnd * 1000).toISOString()
+                : null,
+              stripe_subscription_id: sub.id,
+              ...(isActive ? { monthly_scans_used: 0, monthly_scans_reset_at: new Date().toISOString() } : {}),
+            })
+            .eq('id', userId)
+          console.log('[stripe-webhook]', event.type, '→ user:', userId, 'tier:', tier, 'active:', isActive)
+        }
+
+        // Email al admin solo en creación
+        if (isActive && event.type === 'customer.subscription.created' && resendKey && adminEmail) {
+          try {
+            const customer = await stripe.customers.retrieve(sub.customer as string) as Stripe.Customer
+            const userEmail = customer.email || 'desconocido'
+            const price = (sub.items.data[0]?.price?.unit_amount || 0) / 100
+            const resend = new Resend(resendKey)
+            await resend.emails.send({
+              from: 'Calculatuluz <noreply@calculatuluz.es>',
+              to: adminEmail,
+              subject: `Nueva suscripción — Plan ${tier === 'pro' ? 'Pro' : 'Básico'} (${price}€/mes)`,
+              html: `
+                <h2>Nueva suscripción en Calculatuluz</h2>
+                <p><strong>Plan:</strong> ${tier === 'pro' ? 'Pro (9,99€/mes)' : 'Básico (4,99€/mes)'}</p>
+                <p><strong>Email:</strong> ${userEmail}</p>
+                <p><strong>Stripe ID:</strong> ${sub.id}</p>
+                <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES')}</p>
+              `,
+            })
+          } catch (emailErr: any) {
+            console.error('[stripe-webhook] Email admin error:', emailErr?.message)
+            // No bloquear el webhook si falla el email
+          }
+        }
+        break
       }
-      break
+
+      // Suscripción cancelada o expirada
+      case 'customer.subscription.deleted': {
+        const sub = event.data.object as Stripe.Subscription
+        const userId = sub.metadata?.supabase_user_id || supabaseUserId
+
+        if (userId) {
+          await supabase
+            .from('user_profiles')
+            .update({
+              is_subscribed: false,
+              subscription_tier: null,
+              subscription_end: new Date().toISOString(),
+            })
+            .eq('id', userId)
+          console.log('[stripe-webhook] subscription.deleted → user:', userId)
+        }
+        break
+      }
+
+      // Pago fallido
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice
+        const userId = (invoice as any).subscription_details?.metadata?.supabase_user_id
+          || (invoice as any).metadata?.supabase_user_id
+        if (userId) {
+          await supabase
+            .from('user_profiles')
+            .update({ is_subscribed: false })
+            .eq('id', userId)
+          console.log('[stripe-webhook] payment_failed → user:', userId)
+        }
+        break
+      }
+
+      default:
+        console.log('[stripe-webhook] evento ignorado:', event.type)
     }
-
-    // Suscripción cancelada o expirada
-    case 'customer.subscription.deleted': {
-      const sub = event.data.object as Stripe.Subscription
-      const userId = sub.metadata?.supabase_user_id || supabaseUserId
-
-      if (userId) {
-        await supabase
-          .from('user_profiles')
-          .update({
-            is_subscribed: false,
-            subscription_tier: null,
-            subscription_end: new Date().toISOString(),
-          })
-          .eq('id', userId)
-      }
-      break
-    }
-
-    // Pago fallido
-    case 'invoice.payment_failed': {
-      const invoice = event.data.object as Stripe.Invoice
-      const userId = (invoice.subscription_details?.metadata as any)?.supabase_user_id
-      if (userId) {
-        await supabase
-          .from('user_profiles')
-          .update({ is_subscribed: false })
-          .eq('id', userId)
-      }
-      break
-    }
+  } catch (err: any) {
+    // Nunca devolver 500 — Stripe reintentaría indefinidamente
+    console.error('[stripe-webhook] Error procesando evento:', event.type, err?.message)
   }
 
   return new Response(JSON.stringify({ received: true }), {

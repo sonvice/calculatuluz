@@ -74,7 +74,10 @@ export const POST: APIRoute = async ({ request }) => {
     // Actualizar Supabase directamente (el webhook también lo hará, pero esto es instantáneo)
     await supabase.from('user_profiles').update({
       subscription_tier: 'pro',
-      subscription_end: new Date(updated.current_period_end * 1000).toISOString(),
+      subscription_end: (() => {
+        const end = updated.items?.data[0]?.current_period_end ?? (updated as any).current_period_end
+        return end ? new Date(end * 1000).toISOString() : null
+      })(),
     }).eq('id', user.id)
 
     return new Response(JSON.stringify({ success: true, tier: 'pro' }), {
