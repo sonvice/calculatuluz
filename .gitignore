@@ -15,13 +15,42 @@ pnpm-debug.log*
 
 # environment variables
 .env
+.env.local
+.env.*.local
 .env.production
 
 # macOS-specific files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 
 # jetbrains setting folder
 .idea/
 
+# VSCode (settings personales, no compartir)
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
 # Local Netlify folder
-.netlify
+.netlify/
+
+# Vite cache
+node_modules/.vite/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# AI development tools (contexto y memoria local, no subir al repo)
+.claude/
+.agents/
+.cursor/
+
+# OS / editor
+Thumbs.db
+ehthumbs.db
+*.swp
+*.swo
+*~
