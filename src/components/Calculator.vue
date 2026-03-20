@@ -325,6 +325,7 @@ label {
 .form-calculator {
   display: grid;
   gap: var(--space-m);
+  align-items: end;
 }
 
 @media (min-width: 64em) {

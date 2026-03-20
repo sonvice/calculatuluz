@@ -138,42 +138,135 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
-/* Estilos para el contenido inyectado en SlimSelect */
-:deep(.slim-option-content) {
+/* ─── Trigger (dentro del scope de Vue) ───────────────────────────── */
+:deep(.ss-main) {
+  background-color: var(--primary-800);
+  border: 1px solid var(--primary-600);
+  border-radius: var(--rounded-md);
+  color: var(--neutral-50);
+  min-height: 48px;
+  padding: 6px 12px;
+  font-size: var(--size-0);
+  font-family: inherit;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+:deep(.ss-main:focus),
+:deep(.ss-main.ss-open) {
+  border-color: var(--primary-400);
+  box-shadow: 0 0 0 3px hsl(222, 36%, 46%, 0.3);
+  outline: none;
+}
+:deep(.ss-main.ss-dir-below) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+:deep(.ss-main.ss-dir-above) {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+:deep(.ss-arrow path) {
+  stroke: var(--neutral-400);
+  stroke-width: 20;
+  transition: stroke 0.18s ease;
+}
+:deep(.ss-main.ss-open .ss-arrow path) {
+  stroke: var(--neutral-50);
+}
+</style>
+
+<!-- slim-select appends .ss-content to <body>, not inside the wrapper — must use global selectors -->
+<style>
+/* ─── Panel ────────────────────────────────────────────────────────── */
+.ss-content {
+  background-color: hsl(218, 60%, 25%) !important;
+  border: 1px solid hsl(219, 62%, 33%) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 12px 40px rgba(0, 10, 36, 0.65) !important;
+  overflow: hidden;
+}
+.ss-content.ss-dir-below {
+  border-top: none !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+.ss-content.ss-dir-above {
+  border-bottom: none !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+/* scrollbar */
+.ss-list {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(219, 62%, 33%) transparent;
+}
+.ss-list::-webkit-scrollbar { width: 4px; }
+.ss-list::-webkit-scrollbar-track { background: transparent; }
+.ss-list::-webkit-scrollbar-thumb {
+  background-color: hsl(219, 62%, 33%);
+  border-radius: 4px;
+}
+
+/* ─── Opciones ─────────────────────────────────────────────────────── */
+.ss-content .ss-list .ss-option {
+  background-color: hsl(218, 60%, 25%) !important;
+  color: #e9e9e9 !important;
+  padding: 10px 14px !important;
+  border-left: 3px solid transparent !important;
+  transition: background-color 0.15s ease, border-left-color 0.15s ease;
+}
+.ss-content .ss-list .ss-option + .ss-option {
+  border-top: 1px solid hsl(219, 70%, 29%, 0.4);
+}
+.ss-content .ss-list .ss-option:hover:not(.ss-disabled) {
+  background-color: hsl(219, 70%, 29%) !important;
+  border-left-color: hsl(153, 84%, 38%) !important;
+  color: #f5f5f5 !important;
+}
+.ss-content .ss-list .ss-option.ss-highlighted,
+.ss-content .ss-list .ss-option:not(.ss-disabled).ss-selected {
+  background-color: hsl(219, 62%, 33%) !important;
+  border-left-color: hsl(222, 30%, 55%) !important;
+  color: #f5f5f5 !important;
+  font-weight: 600;
+}
+
+/* ─── Contenido de opción (icono + texto) ──────────────────────────── */
+.ss-content .slim-option-content {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
-
-:deep(.appliance-icon svg) {
+.ss-content .appliance-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  color: hsl(153, 84%, 38%);
+}
+.ss-content .appliance-icon svg {
   display: block;
-  /* El color lo hereda de .text-accent-500 si lo tienes definido, o pon stroke: #color */
+  width: 20px;
+  height: 20px;
 }
-
-:deep(.option-details) {
+.ss-content .option-details {
   display: flex;
   flex-direction: column;
-  line-height: 1.2;
+  gap: 2px;
+  min-width: 0;
 }
-
-:deep(.power-consumption) {
-  font-size: 0.75rem;
-  opacity: 0.7;
+.ss-content .appliance-name {
+  font-weight: 500;
+  color: #f5f5f5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-
-
-:deep(.ss-content) {
-  background-color: var(--primary-900);
-  border: 1px solid var(--primary-700);
-  color: var(--neutral-50);
-}
-
-:deep(.ss-option:hover) {
-  background-color: var(--primary-700) !important;
-}
-
-:deep(.ss-option.ss-selected) {
-  background-color: var(--primary-600) !important;
-  font-weight: bold;
+.ss-content .power-consumption {
+  font-size: 0.8rem;
+  color: #9f9f9f;
+  line-height: 1;
 }
 </style>
