@@ -15,7 +15,7 @@
     "@astrojs/react": "^5.0.1",
     "@astrojs/sitemap": "^3.7.1",
     "@astrojs/vue": "^6.0.1",
-    "@lucide/astro": "^0.511.0",
+    "@lucide/astro": "^1.0.0-rc.0",
     "@nanostores/persistent": "^1.0.0",
     "@nanostores/vue": "^1.0.0",
     "@supabase/supabase-js": "^2.49.4",
