@@ -71,7 +71,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Tomar la suscripción activa más reciente
     const sub = subscriptions.data[0]
     const tier = (sub.metadata?.tier as string) || 'basico'
-    const periodEnd = new Date(sub.current_period_end * 1000).toISOString()
+    const periodEnd = new Date((sub.items.data[0].current_period_end ?? 0) * 1000).toISOString()
 
     // Actualizar Supabase con el estado real de Stripe
     await supabase.from('user_profiles').update({
@@ -91,6 +91,17 @@ export const POST: APIRoute = async ({ request }) => {
     })
 
   } catch (err: any) {
+    // Customer borrado o pertenece a otra cuenta/modo Stripe → limpiar y tratar como sin suscripción
+    if (err?.code === 'resource_missing' && err?.param === 'customer') {
+      await supabase.from('user_profiles').update({
+        stripe_customer_id: null,
+        is_subscribed: false,
+        subscription_tier: null,
+      }).eq('id', user.id)
+      return new Response(JSON.stringify({ synced: false, reason: 'no_customer' }), {
+        status: 200, headers: { 'Content-Type': 'application/json' }
+      })
+    }
     console.error('Sync subscription error:', err)
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500, headers: { 'Content-Type': 'application/json' }
