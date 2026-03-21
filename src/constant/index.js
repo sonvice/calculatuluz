@@ -128,6 +128,44 @@ export const appliances = [
     }
   },
 
+  {
+    value: 200, label: 'Workstation IA', watts: '200W', icon: 'Cpu', slug: 'workstation-ia',
+    seo: {
+      title: 'Cuánto consume una Workstation de IA en euros',
+      metaDescription: 'Calcula el consumo real de tu estación de trabajo para inteligencia artificial (ThinkStation PGX, DGX Spark). Descubre cuánto añade a tu factura de la luz.',
+      description: 'Las workstations para IA como el Lenovo ThinkStation PGX o el NVIDIA DGX Spark utilizan chips como el GB10 Grace Blackwell con hasta 128 GB de memoria unificada. Su consumo máximo es de 240 W, aunque en uso normal se sitúa entre 100 W y 200 W.',
+      intro: 'Las estaciones de trabajo para IA local son más eficientes de lo que parecen. Frente a un servidor con múltiples GPUs que puede consumir 600-900 W, dispositivos como el ThinkStation PGX consumen un máximo de 240 W con un rendimiento de 1 PFLOPS FP4.',
+      consumoMedio: {
+        bajo: { watts: 30, descripcion: 'Reposo o carga mínima del sistema' },
+        medio: { watts: 150, descripcion: 'Inferencia activa con modelo cuantizado (Q4)' },
+        alto: { watts: 240, descripcion: 'Carga máxima: inferencia de modelos 70B+' }
+      },
+      comparativa: 'Usar una Workstation IA 8 horas al día a 200 W de media cuesta unos 12-15 €/mes. Comparado con suscripciones a APIs en la nube de 50-150 €/mes, la inversión se amortiza rápidamente.',
+      tips: [
+        'Programa las inferencias más pesadas en horas valle (00:00-08:00) con PVPC para reducir el coste hasta un 70%.',
+        'Usa modelos cuantizados Q4_K_M en lugar de FP16: mismo resultado, menor consumo y más tokens por segundo.',
+        'Descarga el modelo de memoria cuando no lo uses; el chip baja a ~20-30 W en reposo.',
+        'Un enchufe inteligente con medición te dará el consumo exacto en tiempo real.',
+        'Activa el modo de bajo consumo del sistema operativo entre sesiones de trabajo.'
+      ],
+      faqs: [
+        {
+          question: '¿Cuánto consume el Lenovo ThinkStation PGX al mes?',
+          answer: 'Con 8 horas de uso diario a una media de 200 W, el ThinkStation PGX consume unos 48 kWh al mes. Al precio medio del PVPC (0,26 €/kWh), supone aproximadamente 12-15 €/mes adicionales en tu factura.'
+        },
+        {
+          question: '¿El NVIDIA DGX Spark consume lo mismo que el ThinkStation PGX?',
+          answer: 'Sí. Ambos dispositivos usan el mismo chip GB10 Grace Blackwell y tienen el mismo adaptador de 240 W. El consumo eléctrico real es prácticamente idéntico en cualquier escenario de uso.'
+        },
+        {
+          question: '¿Merece la pena una workstation IA frente a usar la API en la nube?',
+          answer: 'Económicamente, las APIs en la nube pueden costar 50-150 €/mes para un desarrollador activo. La electricidad de una workstation local cuesta 12-15 €/mes. La amortización del hardware se produce en 2-3 años, con la ventaja añadida de la privacidad total de los datos.'
+        }
+      ],
+      relacionados: ['pc-gaming', 'ordenador-portatil']
+    }
+  },
+
   // --- SALÓN ---
   {
     value: 300, label: 'Televisor 50"', watts: '300W', icon: 'Tv', slug: 'televisor',

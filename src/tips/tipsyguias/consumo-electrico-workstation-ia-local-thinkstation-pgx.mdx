@@ -1,0 +1,230 @@
+---
+title: "Consumo de Luz de una Workstation para IA: ThinkStation PGX y DGX Spark"
+tags: ["inteligencia artificial", "consumo eléctrico", "workstation IA", "Lenovo ThinkStation PGX", "DGX Spark", "ahorro luz", "modelos locales"]
+description: "¿Cuánto consume en luz una estación de trabajo para IA local como el Lenovo ThinkStation PGX o el NVIDIA DGX Spark? Calculamos el coste real en tu factura eléctrica y cómo reducirlo."
+image: './images/consumo-electrico-workstation-ia-local/workstation-ia-consumo.webp'
+date: "2026-03-21"
+---
+
+import { Picture } from 'astro:assets';
+import image from './images/consumo-electrico-workstation-ia-local/workstation-ia-consumo.webp';
+
+import Table from '@/components/Table'
+
+export const columnsConsumo = [
+  { accessorKey: "dispositivo", header: "Dispositivo" },
+  { accessorKey: "potencia_max", header: "Potencia máx." },
+  { accessorKey: "consumo_8h", header: "kWh/día (8h)" },
+  { accessorKey: "coste_mes", header: "Coste/mes*" },
+  { accessorKey: "coste_anual", header: "Coste anual*" },
+  { accessorKey: "precio", header: "Precio dispositivo" },
+];
+
+export const dataConsumo = [
+  {
+    dispositivo: "Lenovo ThinkStation PGX (1 TB)",
+    potencia_max: "240 W",
+    consumo_8h: "1,92 kWh",
+    coste_mes: "~14,9 €",
+    coste_anual: "~179 €",
+    precio: "desde ~3.200 €",
+  },
+  {
+    dispositivo: "NVIDIA DGX Spark",
+    potencia_max: "240 W",
+    consumo_8h: "1,92 kWh",
+    coste_mes: "~14,9 €",
+    coste_anual: "~179 €",
+    precio: "4.800 €",
+  },
+  {
+    dispositivo: "PC gaming de escritorio (RTX 4090)",
+    potencia_max: "450 W",
+    consumo_8h: "3,60 kWh",
+    coste_mes: "~28 €",
+    coste_anual: "~336 €",
+    precio: "2.000-3.500 €",
+  },
+  {
+    dispositivo: "Portátil profesional (referencia)",
+    potencia_max: "65 W",
+    consumo_8h: "0,52 kWh",
+    coste_mes: "~4 €",
+    coste_anual: "~48 €",
+    precio: "1.000-2.500 €",
+  },
+];
+
+<Picture src={image} widths={[720, image.width]} sizes={`(min-width: 39.9em) 720px`} alt="Workstation para IA"/>
+
+Las estaciones de trabajo para inteligencia artificial local han dejado de ser exclusivas de los grandes laboratorios. En 2026, dispositivos como el **Lenovo ThinkStation PGX** o el **NVIDIA DGX Spark** pueden vivir en tu escritorio y ejecutar modelos de lenguaje de decenas de miles de millones de parámetros sin enviar ni un solo dato a la nube. Pero tener esa potencia en casa tiene un precio más allá del hardware: **tu factura de la luz**.
+
+En este artículo analizamos el **consumo eléctrico real de las mejores workstations para IA local**, cuánto añaden a tu recibo mensual con las tarifas actuales en España, y qué puedes hacer para minimizar ese impacto sin renunciar al rendimiento.
+
+> **Resumen rápido:** Un Lenovo ThinkStation PGX o un DGX Spark consumen hasta **240 W** bajo carga máxima. Usándolo 8 horas al día a un precio medio de 0,26 €/kWh (PVPC 2026), el coste adicional en tu factura ronda los **14-15 € al mes** y unos **179 € al año**.
+
+---
+
+## Qué es una estación de trabajo para IA local y por qué importa el consumo
+
+Una workstation para IA local es un ordenador diseñado específicamente para ejecutar modelos de lenguaje grande (LLM), modelos de difusión o pipelines de machine learning **directamente en tu hardware**, sin depender de servicios en la nube como OpenAI o Anthropic.
+
+La clave tecnológica es la **memoria unificada**: a diferencia de una GPU de gaming tradicional, donde la memoria de vídeo (VRAM) es un cuello de botella, los chips como el **NVIDIA GB10 Grace Blackwell** integran CPU y GPU en un único die con 128 GB de memoria compartida. Eso permite cargar modelos que de otra forma requerirían un servidor con múltiples GPUs.
+
+¿Por qué interesa esto desde el punto de vista del consumo eléctrico? Porque la eficiencia energética de estos chips es radicalmente distinta a las soluciones basadas en GPUs discretas. El GB10 ofrece **1 PFLOP de rendimiento FP4** con un TDP del sistema completo de tan solo 240 W, frente a los 450-600 W de una torre gaming equivalente para tareas de IA.
+
+---
+
+## Consumo eléctrico del Lenovo ThinkStation PGX
+
+El **Lenovo ThinkStation PGX** es un mini PC de factor de forma reducido equipado con el superchip NVIDIA Grace Blackwell GB10. Sus especificaciones eléctricas son:
+
+- **Adaptador de corriente:** 240 W
+- **Memoria:** 128 GB LPDDR5X unificada a 8.533 MT/s
+- **Almacenamiento:** 1 TB o 4 TB SSD NVMe M.2 PCIe Gen 4
+- **Conectividad:** Wi-Fi 7 (2×2), Bluetooth 5.3, Ethernet integrada
+
+### Consumo real: inactivo vs. inferencia activa
+
+El consumo de 240 W es el **pico máximo** con el sistema a plena carga (inferencia intensiva, disco activo, pantalla conectada). En condiciones normales:
+
+- **En reposo o navegación:** estimado entre 20-40 W
+- **Inferencia ligera** (modelo 7B quantizado): estimado entre 80-130 W
+- **Inferencia pesada** (modelo 70B+ o múltiples procesos): 180-240 W
+
+Para un escenario de uso intensivo de 8 horas diarias a 200 W de media, el cálculo es:
+
+```
+200 W × 8 h = 1,6 kWh/día
+1,6 kWh × 30 días = 48 kWh/mes
+48 kWh × 0,26 €/kWh = ~12,5 €/mes
+```
+
+En escenario máximo (240 W las 8 horas):
+
+```
+240 W × 8 h / 1.000 = 1,92 kWh/día
+1,92 × 30 = 57,6 kWh/mes
+57,6 × 0,26 = ~15 €/mes adicionales en tu factura
+```
+
+El precio del ThinkStation PGX parte desde aproximadamente **3.200 € en su versión de 1 TB** y sube hasta los 3.900-4.100 € con 4 TB de almacenamiento.
+
+---
+
+## NVIDIA DGX Spark: el supercomputador de bolsillo de NVIDIA
+
+El **NVIDIA DGX Spark** es prácticamente el gemelo técnico del ThinkStation PGX: mismo chip GB10, mismas 128 GB de memoria unificada y el mismo TDP de 240 W. La diferencia está en el software preinstalado (DGX OS) y el factor de forma aún más compacto: **150 × 150 × 50,5 mm**.
+
+Con un precio de **4.800 €**, el DGX Spark apunta a desarrolladores e investigadores que quieren garantías de compatibilidad con el ecosistema de software de NVIDIA. En términos de consumo eléctrico, es idéntico al ThinkStation PGX, por lo que los cálculos anteriores aplican igualmente.
+
+---
+
+## Comparativa de consumo: workstations IA vs. otras opciones
+
+<Table columns={columnsConsumo} data={dataConsumo} />
+
+*Precio medio de la electricidad estimado en 0,26 €/kWh (referencia PVPC medio anual 2025-2026). El coste real depende de tu tarifa y las horas de uso.*
+
+Como muestra la tabla, **una workstation IA es considerablemente más eficiente que un PC gaming** de gama alta para tareas equivalentes. El GB10 ofrece más rendimiento en IA que una RTX 4090 (gracias a su memoria unificada de 128 GB) consumiendo casi la mitad de vatios bajo carga.
+
+---
+
+## Cuánto añade a tu factura de luz en España
+
+El coste real depende de cuándo uses el dispositivo y qué tarifa tienes contratada.
+
+### Con tarifa PVPC (precio variable por horas)
+
+La tarifa PVPC en España tiene precios que oscilan entre **0,05 €/kWh** en horas valle nocturnas y **más de 0,35 €/kWh** en picos de demanda. Si programas tus tareas de inferencia intensiva durante la madrugada (00:00-08:00), el ahorro puede ser sustancial:
+
+- **Inferencia en hora punta (0,30 €/kWh):** 1,92 kWh × 0,30 = **0,58 €/día**
+- **Inferencia en hora valle (0,08 €/kWh):** 1,92 kWh × 0,08 = **0,15 €/día**
+
+La diferencia es de casi **4 veces** el coste simplemente cambiando el horario de uso. Puedes consultar el precio de la luz en tiempo real en nuestra [calculadora de precio de la luz](/), que actualiza los datos PVPC cada hora.
+
+### Con tarifa fija o de discriminación horaria
+
+Si tienes tarifa de discriminación horaria (dos periodos), el truco es el mismo: ejecuta los trabajos de IA más pesados en el periodo nocturno (normalmente de 22:00 a 12:00 en la mayoría de comercializadoras) para aprovechar el precio reducido.
+
+---
+
+## Correr Claude Code en local: ¿merece la pena el gasto eléctrico?
+
+Una de las aplicaciones más interesantes de estas workstations es ejecutar **agentes de codificación como Claude Code apuntando a un modelo local** mediante llama.cpp o LM Studio. El modelo más popular para este uso actualmente es **Qwen3 Coder Next**, un LLM entrenado específicamente para flujos de trabajo de codificación agente.
+
+La configuración es sorprendentemente directa: llama.cpp tiene soporte nativo para la API de Anthropic Messages, por lo que no necesitas ningún proxy ni capa de traducción. Configuras las variables de entorno correctas, apuntas Claude Code a tu servidor local y el agente funciona exactamente igual que con los modelos en la nube.
+
+### ¿Qué cuesta en electricidad vs. en API?
+
+Un desarrollador usando Claude Code de forma intensiva puede gastar fácilmente **50-150 €/mes en créditos de API** de Anthropic. Con una workstation local:
+
+- Coste de electricidad a 8h/día de inferencia activa: **~15 €/mes**
+- Coste del hardware amortizado a 3 años (ThinkStation PGX 3.200 €): **~89 €/mes**
+- **Total:** ~104 €/mes
+
+La matemática se equilibra a partir del segundo o tercer año, y desde el primer mes tienes la ventaja adicional de que **ningún dato de tu código sale de tu red**. Para trabajo de seguridad, pentesting o análisis de código propietario, esto no es un nice-to-have: es un requisito.
+
+---
+
+## Cómo reducir el consumo de tu workstation de IA sin perder rendimiento
+
+### 1. Cuantiza el modelo al nivel adecuado
+
+No todos los casos de uso requieren FP16 o BF16. Un modelo cuantizado a **Q4_K_M o Q5_K_M** consume significativamente menos memoria y procesa tokens más rápido (menos vatios por token generado). Para uso en Claude Code local con tareas de codificación, Q4 suele ser más que suficiente.
+
+### 2. Programa las cargas de trabajo intensivas en horas valle
+
+Si usas llama.cpp o cualquier servidor de inferencia, puedes configurar cron jobs o scripts que lancen los trabajos pesados cuando el precio de la luz es mínimo. En España, las horas más baratas del PVPC suelen ser entre las 2:00 y las 7:00.
+
+### 3. Desactiva componentes cuando no los uses
+
+El GB10 tiene una gestión de energía bastante eficiente en reposo. Asegúrate de que el sistema operativo no esté manteniendo el modelo en memoria activa cuando no lo necesitas: descarga el modelo entre sesiones y deja que el chip baje a su estado de bajo consumo (~20-40 W).
+
+### 4. Monitoriza tu consumo real con un enchufe inteligente
+
+Un **enchufe inteligente con medición de potencia** (disponibles desde 15-25 €) te dará datos precisos de consumo real de tu workstation. Conecta eso a Home Assistant o cualquier sistema de domótica y tendrás visibilidad total de lo que está gastando.
+
+---
+
+## Analiza el impacto en tu factura
+
+La mejor forma de ver si tu workstation de IA está elevando tu factura significativamente es **comparar tus recibos antes y después de comprarla**. Si tienes facturas anteriores, puedes usar nuestro analizador de facturas con IA para extraer automáticamente el consumo por períodos y detectar el incremento:
+
+👉 **[Escanea tu factura de luz gratis](/escanear-factura)** — Sube una foto o PDF de tu factura y nuestra IA extrae el consumo en kWh, los importes por período y te da recomendaciones personalizadas para reducir el gasto.
+
+También puedes usar nuestra [calculadora de consumo de electrodomésticos](/calculadora-consumo-ordenador-portatil) para estimar con precisión cuánto añade cualquier dispositivo a tu factura mensual.
+
+---
+
+## Preguntas frecuentes
+
+### ¿Cuánto consume el Lenovo ThinkStation PGX en standby?
+
+En estado de reposo (sistema encendido pero sin carga de inferencia activa), el ThinkStation PGX consume estimadamente entre **20 y 40 W**, similar a un ordenador de sobremesa convencional en reposo. El GB10 tiene estados de bajo consumo bien optimizados para cuando no hay workloads activos.
+
+### ¿Necesito un SAI (UPS) para una workstation de IA?
+
+Sí es recomendable si usas el dispositivo para trabajos críticos o de larga duración. Una interrupción de corriente a mitad de un proceso de inferencia o entrenamiento puede corromper resultados. Un SAI de **600-800 VA** es suficiente para el ThinkStation PGX, ya que su consumo máximo es de 240 W.
+
+### ¿Cuánto cuesta en luz el NVIDIA DGX Spark al mes?
+
+El DGX Spark usa el mismo chip GB10 y el mismo adaptador de 240 W que el ThinkStation PGX, por lo que el coste eléctrico es idéntico: aproximadamente **12-15 €/mes** con 8 horas de uso intensivo diario al precio medio del PVPC en España (0,26 €/kWh).
+
+### ¿Es más eficiente una workstation IA que un servidor con múltiples GPUs?
+
+Sí, para cargas de trabajo de inferencia con modelos de hasta 70B parámetros. El GB10 con 128 GB de memoria unificada consume 240 W y puede ejecutar Qwen3 Coder Next o Llama 3.3 70B completo. Un servidor equivalente con GPUs discretas (por ejemplo, 2× A100 80 GB) consumiría entre **600 y 900 W** para el mismo resultado. La eficiencia energética del GB10 es aproximadamente el doble.
+
+### ¿Puedo usar la tarifa nocturna para abaratar el uso de mi workstation IA?
+
+Absolutamente. Si tienes contratada una tarifa con discriminación horaria o el PVPC, programar tus trabajos de inferencia más intensivos entre las **00:00 y las 08:00** puede reducir el coste eléctrico hasta un **70%** respecto a las horas punta. Es una de las optimizaciones más sencillas y efectivas para reducir el impacto en tu factura.
+
+---
+
+## Conclusión
+
+Las workstations para IA local como el **Lenovo ThinkStation PGX** y el **NVIDIA DGX Spark** representan un cambio real en cómo podemos trabajar con modelos de lenguaje grandes: con privacidad, sin dependencia de APIs de terceros y con un coste a largo plazo que puede ser competitivo con las suscripciones en la nube.
+
+Desde el punto de vista eléctrico, su consumo es **sorprendentemente moderado** para la potencia que ofrecen: unos 15 €/mes a uso intensivo de 8 horas diarias. El truco está en optimizar los horarios de uso aprovechando las horas valle del PVPC y mantener el sistema en bajo consumo cuando no está procesando.
+
+Si acabas de incorporar una de estas estaciones de trabajo a tu setup, te recomendamos **[escanear tu próxima factura de la luz](/escanear-factura)** para ver con precisión el impacto real en tu consumo y detectar si tu comercializadora te está facturando correctamente según tu perfil de uso.
